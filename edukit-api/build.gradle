@@ -6,6 +6,7 @@ dependencies {
 	// 내부 모듈 의존성
 	implementation project(':edukit-core')
 	implementation project(':edukit-external')
+	implementation project(':edukit-global-utils')
 
 	// Spring
 	implementation 'org.springframework.boot:spring-boot-starter-web'
