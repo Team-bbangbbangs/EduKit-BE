@@ -1,0 +1,37 @@
+plugins {
+	id 'org.springframework.boot'
+}
+
+dependencies {
+	// 내부 모듈 의존성
+	implementation project(':edukit-core')
+	implementation project(':edukit-external')
+	implementation project(':edukit-global-utils')
+
+	// Spring
+	implementation 'org.springframework.boot:spring-boot-starter-web'
+	implementation 'org.springframework.boot:spring-boot-starter-validation'
+	annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
+	
+	// JPA (Core 모듈의 JPA Bean들을 위한 최소 설정)
+	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+
+	// Security
+	implementation 'org.springframework.boot:spring-boot-starter-security'
+	testImplementation 'org.springframework.security:spring-security-test'
+
+	// Health Check
+	implementation 'org.springframework.boot:spring-boot-starter-actuator'
+}
+
+// JAR 파일명 설정
+jar {
+	archiveBaseName = 'edukit-api'
+	archiveVersion = project.version
+	enabled = false
+}
+
+bootJar {
+	archiveBaseName = 'edukit-api'
+	archiveVersion = project.version
+} 

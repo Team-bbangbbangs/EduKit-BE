@@ -1,0 +1,28 @@
+plugins {
+	id 'org.springframework.boot'
+}
+
+dependencies {
+	// 내부 모듈 의존성
+	implementation project(':edukit-core')
+	implementation project(':edukit-external')
+	
+	// Spring Boot 기본
+	implementation 'org.springframework.boot:spring-boot-starter'
+	implementation 'org.springframework.boot:spring-boot-starter-web'
+	
+	// Health Check & Monitoring
+	implementation 'org.springframework.boot:spring-boot-starter-actuator'
+}
+
+// JAR 파일명 설정
+jar {
+	archiveBaseName = 'edukit-batch'
+	archiveVersion = project.version
+	enabled = false
+}
+
+bootJar {
+	archiveBaseName = 'edukit-batch'
+	archiveVersion = project.version
+} 

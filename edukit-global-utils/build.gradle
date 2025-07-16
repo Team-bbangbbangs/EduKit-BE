@@ -1,0 +1,9 @@
+dependencies {
+}
+
+// JAR 파일 설정 (라이브러리 모듈이므로 일반 JAR)
+jar {
+	archiveBaseName = 'edukit-global-utils'
+	archiveVersion = project.version
+	enabled = true
+} 
