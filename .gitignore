@@ -154,8 +154,9 @@ Temporary Items
 # Qclass
 /src/main/generated
 
-### yaml ###
-application-*.yml
+### Configuration Files ###
+# 환경별 설정 파일들 (application.yml은 git에 포함, application-*.yml은 제외)
+**/application-*.yml
 
 ### index.html ###
 /src/main/resources/static/
