@@ -1,7 +1,1 @@
-rootProject.name = 'edukit-be'
-
-include 'edukit-api'
-include 'edukit-batch'
-include 'edukit-core'
-include 'edukit-external'
-include 'edukit-global-utils'
+rootProject.name = 'eduserver'
