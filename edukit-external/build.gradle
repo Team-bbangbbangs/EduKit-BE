@@ -1,6 +1,9 @@
 // 외부 연동 모듈 (API 호출, 메시징 등)
 
 dependencies {
+	// 내부 모듈 의존성
+	implementation project(':edukit-common')
+	
 	// 외부 연동을 위한 의존성은 나중에 추가
 }
 

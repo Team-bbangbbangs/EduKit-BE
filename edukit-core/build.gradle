@@ -1,6 +1,9 @@
 // 핵심 비즈니스 로직 / 유스케이스 모듈
 
 dependencies {
+	// 내부 모듈 의존성
+	implementation project(':edukit-common')
+	
 	// 필요한 의존성은 나중에 추가
 }
 

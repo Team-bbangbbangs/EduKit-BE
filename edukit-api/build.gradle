@@ -8,9 +8,11 @@ dependencies {
 	// 내부 모듈 의존성 - Core 계층만 참조
 	implementation project(':edukit-core')
 	implementation project(':edukit-external')
+	implementation project(':edukit-common')
 	
-	// 빌드를 위한 최소 Spring Boot 의존성
-	implementation 'org.springframework.boot:spring-boot-starter'
+	// Spring Boot Web
+	implementation 'org.springframework.boot:spring-boot-starter-web'
+	implementation 'org.springframework.boot:spring-boot-starter-validation'
 	
 	// 필요한 의존성은 나중에 추가
 }
