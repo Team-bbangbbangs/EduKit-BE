@@ -1,10 +1,13 @@
+// 외부 연동 모듈 (API 호출, 메시징 등)
+
 dependencies {
 	// 내부 모듈 의존성
-	implementation project(':edukit-global-utils')
-
+	implementation project(':edukit-common')
+	
+	// 외부 연동을 위한 의존성은 나중에 추가
 }
 
-// JAR 파일 설정 (라이브러리 모듈이므로 일반 JAR)
+// 라이브러리 JAR 생성
 jar {
 	archiveBaseName = 'edukit-external'
 	archiveVersion = project.version

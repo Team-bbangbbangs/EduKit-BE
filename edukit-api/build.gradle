@@ -1,30 +1,23 @@
+// REST API 모듈 (실행 가능한 JAR)
+
 plugins {
 	id 'org.springframework.boot'
 }
 
 dependencies {
-	// 내부 모듈 의존성
+	// 내부 모듈 의존성 - Core 계층만 참조
 	implementation project(':edukit-core')
 	implementation project(':edukit-external')
-	implementation project(':edukit-global-utils')
-
-	// Spring
+	implementation project(':edukit-common')
+	
+	// Spring Boot Web
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	implementation 'org.springframework.boot:spring-boot-starter-validation'
-	annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
 	
-	// JPA (Core 모듈의 JPA Bean들을 위한 최소 설정)
-	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-
-	// Security
-	implementation 'org.springframework.boot:spring-boot-starter-security'
-	testImplementation 'org.springframework.security:spring-security-test'
-
-	// Health Check
-	implementation 'org.springframework.boot:spring-boot-starter-actuator'
+	// 필요한 의존성은 나중에 추가
 }
 
-// JAR 파일명 설정
+// 실행 가능한 JAR 설정
 jar {
 	archiveBaseName = 'edukit-api'
 	archiveVersion = project.version

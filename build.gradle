@@ -37,6 +37,7 @@ subprojects {
 	}
 	
 	dependencies {
+		// 모든 모듈 공통 의존성 (최소한만)
 		compileOnly 'org.projectlombok:lombok'
 		annotationProcessor 'org.projectlombok:lombok'
 		testImplementation 'org.springframework.boot:spring-boot-starter-test'
