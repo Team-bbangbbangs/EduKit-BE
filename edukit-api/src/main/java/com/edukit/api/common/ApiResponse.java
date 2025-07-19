@@ -35,4 +35,12 @@ public class ApiResponse<T> {
     public static <T> ApiResponse<T> fail(final ErrorCode errorCode) {
         return new ApiResponse<>(errorCode.getCode(), errorCode.getMessage(), errorCode.getStatus());
     }
+
+    public static <T> ApiResponse<T> fail(final int status, final String code, final String message) {
+        return new ApiResponse<>(code, message, status);
+    }
+
+    public static <T> ApiResponse<T> fail(final int status, final String code, final String message, final T data) {
+        return new ApiResponse<>(code, message, status, data);
+    }
 }
