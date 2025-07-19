@@ -1,0 +1,29 @@
+// 배치 모듈 (실행 가능한 JAR)
+
+plugins {
+	id 'org.springframework.boot'
+}
+
+dependencies {
+	// 내부 모듈 의존성
+	implementation project(':edukit-domain')
+	implementation project(':edukit-application')
+	implementation project(':edukit-infra')
+	
+	// 빌드를 위한 최소 Spring Boot 의존성
+	implementation 'org.springframework.boot:spring-boot-starter'
+	
+	// 필요한 의존성은 나중에 추가
+}
+
+// 실행 가능한 JAR 설정
+jar {
+	archiveBaseName = 'edukit-batch'
+	archiveVersion = project.version
+	enabled = false
+}
+
+bootJar {
+	archiveBaseName = 'edukit-batch'
+	archiveVersion = project.version
+} 
