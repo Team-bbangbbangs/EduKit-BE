@@ -7,11 +7,9 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 
 @Getter
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
-@RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public class ApiResponse<T> {
 
     @JsonIgnore
@@ -22,7 +20,14 @@ public class ApiResponse<T> {
     private final String message;
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
-    private T data;
+    private final T data;
+
+    private ApiResponse(int status, String code, String message) {
+        this.status = status;
+        this.code = code;
+        this.message = message;
+        this.data = null;
+    }
 
     public static <T> ApiResponse<T> success(final SuccessCode successCode) {
         return new ApiResponse<>(successCode.getStatus(), successCode.getCode(), successCode.getMessage());
