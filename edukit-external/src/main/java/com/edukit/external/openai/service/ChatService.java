@@ -1,9 +1,13 @@
-package com.edukit.external.openai;
+package com.edukit.external.openai.service;
 
+import com.edukit.external.openai.dto.response.StudentRecordAICreateResponse;
+import com.edukit.external.openai.exception.TimeOutException;
+import com.edukit.external.openai.exception.code.OpenAiErrorCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.ResourceAccessException;
 
 @Slf4j
 @Service
@@ -22,10 +26,14 @@ public class ChatService {
     }
 
     private StudentRecordAICreateResponse getMultipleChatResponses(final String prompt) {
-        return chatClient.prompt()
-                .system(SYSTEM_INSTRUCTIONS)
-                .user(prompt)
-                .call()
-                .entity(StudentRecordAICreateResponse.class);
+        try {
+            return chatClient.prompt()
+                    .system(SYSTEM_INSTRUCTIONS)
+                    .user(prompt)
+                    .call()
+                    .entity(StudentRecordAICreateResponse.class);
+        } catch (ResourceAccessException e) { // 타임 아웃
+            throw new TimeOutException(OpenAiErrorCode.OPEN_AI_TIMEOUT);
+        }
     }
 }

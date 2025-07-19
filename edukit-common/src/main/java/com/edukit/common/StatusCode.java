@@ -14,7 +14,8 @@ public enum StatusCode {
     NOT_FOUND(404),
     CONFLICT(409),
     TOO_MANY_REQUESTS(429),
-    INTERNAL_SERVER_ERROR(500);
+    INTERNAL_SERVER_ERROR(500),
+    GATEWAY_TIMEOUT(504);
 
     private final int status;
 }

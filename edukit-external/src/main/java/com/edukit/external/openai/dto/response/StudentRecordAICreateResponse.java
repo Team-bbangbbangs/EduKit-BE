@@ -1,4 +1,4 @@
-package com.edukit.external.openai;
+package com.edukit.external.openai.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
