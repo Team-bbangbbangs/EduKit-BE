@@ -4,7 +4,9 @@ import com.edukit.api.common.ApiResponse;
 import com.edukit.common.exception.BusinessException;
 import com.edukit.common.exception.ExternalApiException;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.TypeMismatchException;
 import org.springframework.http.HttpStatus;
@@ -95,13 +97,17 @@ public class GlobalExceptionHandler {
     // Generic exception handler
     @ExceptionHandler(Exception.class)
     public ApiResponse<Void> handleGenericException(Exception e) {
-        e = (Exception) getDeepCause(e);
-        log.error("Unexpected exception occurred: {}", e.getMessage(), e);
-        return ApiResponse.fail(HttpStatus.INTERNAL_SERVER_ERROR.value(), "FAIL", e.getMessage());
+        Throwable cause = getDeepCause(e);
+        log.error("Unexpected exception occurred. Original: [{}], Root cause: [{}]", e.getMessage(), cause.getMessage(), e);
+        return ApiResponse.fail(HttpStatus.INTERNAL_SERVER_ERROR.value(), "FAIL", "서버 내부 오류가 발생했습니다.");
     }
 
     private Throwable getDeepCause(Throwable e) {
+        Set<Throwable> visited = new HashSet<>();
         while (e.getCause() != null) {
+            if (!visited.add(e)) {
+                break; // 순환 참조 감지
+            }
             e = e.getCause();
         }
         return e;
