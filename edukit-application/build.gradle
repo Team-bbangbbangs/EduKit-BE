@@ -3,6 +3,7 @@
 dependencies {
 	// 내부 모듈 의존성
 	implementation project(':edukit-domain')
+	implementation project(':edukit-infra')
 	
 	// 필요한 의존성은 나중에 추가
 }

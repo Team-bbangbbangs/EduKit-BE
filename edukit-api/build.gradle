@@ -5,10 +5,8 @@ plugins {
 }
 
 dependencies {
-	// 내부 모듈 의존성
-	implementation project(':edukit-domain')
+	// 내부 모듈 의존성 - Application 계층만 참조
 	implementation project(':edukit-application')
-	implementation project(':edukit-infra')
 	
 	// 빌드를 위한 최소 Spring Boot 의존성
 	implementation 'org.springframework.boot:spring-boot-starter'
