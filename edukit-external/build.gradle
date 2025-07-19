@@ -1,10 +1,19 @@
-// 외부 연동 모듈 (API 호출, 메시징 등)
+repositories {
+	mavenCentral()
+	maven { url 'https://repo.spring.io/milestone' }
+}
+
 
 dependencies {
 	// 내부 모듈 의존성
 	implementation project(':edukit-common')
-	
-	// 외부 연동을 위한 의존성은 나중에 추가
+
+	// Spring AI
+	implementation 'org.springframework.ai:spring-ai-starter-model-openai:1.0.0-M7'
+
+	// AWS - SES
+	implementation 'org.springframework.boot:spring-boot-starter-mail'
+	implementation 'software.amazon.awssdk:ses:2.25.10'
 }
 
 // 라이브러리 JAR 생성
