@@ -1,6 +1,6 @@
-package com.edukit.common.advice;
+package com.edukit.api.common.advice;
 
-import com.edukit.common.ApiResponse;
+import com.edukit.api.common.ApiResponse;
 import org.springframework.core.MethodParameter;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;

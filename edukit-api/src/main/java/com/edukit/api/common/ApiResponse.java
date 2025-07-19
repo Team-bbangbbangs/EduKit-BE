@@ -1,4 +1,4 @@
-package com.edukit.common;
+package com.edukit.api.common;
 
 import com.edukit.common.exception.code.ErrorCode;
 import com.edukit.common.exception.code.SuccessCode;

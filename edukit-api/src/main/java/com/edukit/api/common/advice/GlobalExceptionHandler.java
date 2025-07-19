@@ -1,6 +1,6 @@
-package com.edukit.common.advice;
+package com.edukit.api.common.advice;
 
-import com.edukit.common.ApiResponse;
+import com.edukit.api.common.ApiResponse;
 import com.edukit.common.exception.BusinessException;
 import com.edukit.common.exception.ExternalApiException;
 import lombok.extern.slf4j.Slf4j;
