@@ -1,4 +1,4 @@
-// 순수 도메인 모듈 - 외부 의존성 최소화
+// 핵심 비즈니스 로직 / 유스케이스 모듈
 
 dependencies {
 	// 필요한 의존성은 나중에 추가
@@ -6,7 +6,7 @@ dependencies {
 
 // 라이브러리 JAR 생성
 jar {
-	archiveBaseName = 'edukit-domain'
+	archiveBaseName = 'edukit-core'
 	archiveVersion = project.version
 	enabled = true
 } 

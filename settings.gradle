@@ -2,6 +2,5 @@ rootProject.name = 'edukit-be'
 
 include 'edukit-batch'
 include 'edukit-api'
-include 'edukit-application'
-include 'edukit-domain'
-include 'edukit-infra'
+include 'edukit-core'
+include 'edukit-external'

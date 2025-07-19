@@ -1,0 +1,12 @@
+// 외부 연동 모듈 (API 호출, 메시징 등)
+
+dependencies {
+	// 외부 연동을 위한 의존성은 나중에 추가
+}
+
+// 라이브러리 JAR 생성
+jar {
+	archiveBaseName = 'edukit-external'
+	archiveVersion = project.version
+	enabled = true
+} 
