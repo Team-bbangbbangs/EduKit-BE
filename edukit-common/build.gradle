@@ -2,7 +2,6 @@
 
 dependencies {
 	// 공통 모듈에 필요한 의존성은 나중에 추가
-	implementation 'org.springframework.boot:spring-boot-starter'
 }
 
 // 라이브러리 JAR 생성

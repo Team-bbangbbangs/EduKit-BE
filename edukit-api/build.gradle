@@ -7,7 +7,6 @@ plugins {
 dependencies {
 	// 내부 모듈 의존성 - Core 계층만 참조
 	implementation project(':edukit-core')
-	implementation project(':edukit-external')
 	implementation project(':edukit-common')
 	
 	// Spring Boot Web
