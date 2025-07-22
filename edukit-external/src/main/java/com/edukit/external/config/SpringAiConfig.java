@@ -46,11 +46,11 @@ public class SpringAiConfig {
         try {
             ClientHttpResponse response = execution.execute(request, body);
             long duration = System.currentTimeMillis() - startTime;
-            log.info("AI Request completed in {}ms", duration);
+            log.info("AI 호출 성공! 응답 시간: {}ms", duration);
             return response;
         } catch (Exception e) {
             long duration = System.currentTimeMillis() - startTime;
-            log.error("AI Request failed after {}ms: {}", duration, e.getMessage());
+            log.error("AI 호출 실패! 호출 시간: {}ms: {}", duration, e.getMessage());
             throw e;
         }
     }
