@@ -13,7 +13,7 @@ import org.springframework.web.client.ResourceAccessException;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class AIClient {
+public class OpenAiClient {
 
     private final ChatClient chatClient;
 
