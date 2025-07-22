@@ -1,4 +1,4 @@
-package com.edukit.external.openai.service;
+package com.edukit.external.openai;
 
 import com.edukit.external.openai.dto.response.StudentRecordAICreateResponse;
 import com.edukit.external.openai.exception.TimeOutException;
@@ -6,13 +6,13 @@ import com.edukit.external.openai.exception.code.OpenAiErrorCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.client.ChatClient;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 import org.springframework.web.client.ResourceAccessException;
 
 @Slf4j
-@Service
+@Component
 @RequiredArgsConstructor
-public class ChatService {
+public class AIClient {
 
     private final ChatClient chatClient;
 
@@ -21,7 +21,7 @@ public class ChatService {
             학생의 정보를 바탕으로 생활기록부를 작성합니다.
             """;
 
-    public StudentRecordAICreateResponse getThreeChatResponses(final String prompt) {
+    public StudentRecordAICreateResponse getThreeAIResponses(final String prompt) {
         return getMultipleChatResponses(prompt);
     }
 
