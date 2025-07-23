@@ -1,8 +1,8 @@
-package com.edukit.external.openai;
+package com.edukit.external.ai;
 
-import com.edukit.external.openai.dto.response.StudentRecordAICreateResponse;
-import com.edukit.external.openai.exception.OpenAiException;
-import com.edukit.external.openai.exception.code.OpenAiErrorCode;
+import com.edukit.external.ai.dto.response.StudentRecordAICreateResponse;
+import com.edukit.external.ai.exception.OpenAiException;
+import com.edukit.external.ai.exception.OpenAiErrorCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.client.ChatClient;

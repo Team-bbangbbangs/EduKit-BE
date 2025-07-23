@@ -1,7 +1,6 @@
-package com.edukit.external.openai.exception;
+package com.edukit.external.ai.exception;
 
 import com.edukit.common.exception.ExternalApiException;
-import com.edukit.external.openai.exception.code.OpenAiErrorCode;
 
 public class OpenAiException extends ExternalApiException {
 

@@ -1,4 +1,4 @@
-package com.edukit.external.openai.exception.code;
+package com.edukit.external.ai.exception;
 
 import com.edukit.common.exception.code.ErrorCode;
 import lombok.Getter;

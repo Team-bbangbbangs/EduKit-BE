@@ -1,4 +1,4 @@
-package com.edukit.external.openai;
+package com.edukit.external.ai;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
