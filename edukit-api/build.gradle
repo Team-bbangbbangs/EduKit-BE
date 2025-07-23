@@ -7,14 +7,14 @@ plugins {
 dependencies {
 	// 내부 모듈 의존성 - Core 계층만 참조
 	implementation project(':edukit-core')
-	implementation project(':edukit-external')
 	implementation project(':edukit-common')
 	
 	// Spring Boot Web
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	implementation 'org.springframework.boot:spring-boot-starter-validation'
-	
-	// 필요한 의존성은 나중에 추가
+
+	// Health Check
+	implementation 'org.springframework.boot:spring-boot-starter-actuator'
 }
 
 // 실행 가능한 JAR 설정
