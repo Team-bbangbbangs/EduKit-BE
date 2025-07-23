@@ -1,8 +1,7 @@
 package com.edukit.external.openai;
 
 import com.edukit.external.openai.dto.response.StudentRecordAICreateResponse;
-import com.edukit.external.openai.exception.OpenAiCallException;
-import com.edukit.external.openai.exception.TimeOutException;
+import com.edukit.external.openai.exception.OpenAiException;
 import com.edukit.external.openai.exception.code.OpenAiErrorCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -34,9 +33,9 @@ public class OpenAiClient {
                     .call()
                     .entity(StudentRecordAICreateResponse.class);
         } catch (ResourceAccessException e) { // 타임 아웃
-            throw new TimeOutException(OpenAiErrorCode.OPEN_AI_TIMEOUT);
+            throw new OpenAiException(OpenAiErrorCode.OPEN_AI_TIMEOUT);
         } catch (Exception e) { // 기타 예외 처리
-            throw new OpenAiCallException(OpenAiErrorCode.OPEN_AI_INTERNAL_ERROR);
+            throw new OpenAiException(OpenAiErrorCode.OPEN_AI_INTERNAL_ERROR);
         }
     }
 }
