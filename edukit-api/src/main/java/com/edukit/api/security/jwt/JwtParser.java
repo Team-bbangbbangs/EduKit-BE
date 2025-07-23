@@ -1,8 +1,8 @@
 package com.edukit.api.security.jwt;
 
 import com.edukit.api.security.jwt.config.JwtProperties;
-import com.edukit.auth.exception.AuthErrorCode;
-import com.edukit.auth.exception.AuthException;
+import com.edukit.core.auth.exception.AuthErrorCode;
+import com.edukit.core.auth.exception.AuthException;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
