@@ -1,6 +1,5 @@
-package com.edukit.member.domain;
+package com.edukit.auth.entity;
 
-import com.edukit.common.domain.BaseTimeEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -13,13 +12,16 @@ import lombok.NoArgsConstructor;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class NicknameBannedWord extends BaseTimeEntity {
+public class ValidEmail {
 
     @Id
-    @Column(name = "nickname_banned_word_id")
+    @Column(name = "valid_email_id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(nullable = false, unique = true)
+    private String validEmail;
+
     @Column(nullable = false)
-    private String word;
+    private String educationOffice;
 }

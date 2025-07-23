@@ -1,4 +1,4 @@
-package com.edukit.member.domain;
+package com.edukit.member.entity;
 
 import com.edukit.common.domain.BaseTimeEntity;
 import com.edukit.member.enums.MemberRole;

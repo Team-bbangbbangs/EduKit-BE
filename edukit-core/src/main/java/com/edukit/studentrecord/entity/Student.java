@@ -1,7 +1,7 @@
-package com.edukit.post.domain;
+package com.edukit.studentrecord.entity;
 
 import com.edukit.common.domain.BaseTimeEntity;
-import com.edukit.member.domain.Member;
+import com.edukit.member.entity.Member;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -18,32 +18,35 @@ import lombok.NoArgsConstructor;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class PostComment extends BaseTimeEntity {
+public class Student extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "post_comment_id")
+    @Column(name = "student_id")
     private Long id;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "post_id", nullable = false)
-    private Post post;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id", nullable = false)
     private Member member;
 
-    @Column(name = "parent_comment_id", nullable = false)
-    private Long parentCommentId = 0L;
+    @Column(nullable = false)
+    private String grade;
 
     @Column(nullable = false)
-    private String content;
+    private String classNumber;
+
+    @Column(nullable = false)
+    private String studentNumber;
+
+    @Column(nullable = false)
+    private String studentName;
 
     @Builder(access = AccessLevel.PRIVATE)
-    public PostComment(Post post, Member member, Long parentCommentId, String content) {
-        this.post = post;
+    public Student(Member member, String grade, String classNumber, String studentNumber, String studentName) {
         this.member = member;
-        this.parentCommentId = parentCommentId;
-        this.content = content;
+        this.grade = grade;
+        this.classNumber = classNumber;
+        this.studentNumber = studentNumber;
+        this.studentName = studentName;
     }
 }

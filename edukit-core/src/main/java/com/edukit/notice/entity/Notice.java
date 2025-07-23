@@ -1,4 +1,4 @@
-package com.edukit.notice.domain;
+package com.edukit.notice.entity;
 
 import com.edukit.common.domain.BaseTimeEntity;
 import com.edukit.notice.enums.NoticeCategory;

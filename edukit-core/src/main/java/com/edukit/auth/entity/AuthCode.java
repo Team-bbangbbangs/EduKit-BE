@@ -1,10 +1,10 @@
-package com.edukit.auth.domain;
+package com.edukit.auth.entity;
 
 import static jakarta.persistence.GenerationType.IDENTITY;
 
 import com.edukit.auth.enums.AuthCodeStatus;
 import com.edukit.auth.enums.AuthCodeType;
-import com.edukit.member.domain.Member;
+import com.edukit.member.entity.Member;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;

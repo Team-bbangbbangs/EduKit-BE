@@ -1,4 +1,4 @@
-package com.edukit.studentrecord.domain;
+package com.edukit.studentrecord.entity;
 
 import com.edukit.common.domain.BaseTimeEntity;
 import com.edukit.studentrecord.enums.StudentRecordType;

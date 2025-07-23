@@ -1,8 +1,8 @@
-package com.edukit.post.domain;
+package com.edukit.post.entity;
 
 import com.edukit.common.domain.BaseTimeEntity;
-import com.edukit.member.domain.Member;
-import com.edukit.member.domain.Subject;
+import com.edukit.member.entity.Member;
+import com.edukit.member.entity.Subject;
 import com.edukit.post.enums.PostCategory;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

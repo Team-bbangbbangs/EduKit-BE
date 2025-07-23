@@ -1,4 +1,4 @@
-package com.edukit.post.domain;
+package com.edukit.post.entity;
 
 import com.edukit.post.enums.PostFileCategory;
 import jakarta.persistence.Column;
