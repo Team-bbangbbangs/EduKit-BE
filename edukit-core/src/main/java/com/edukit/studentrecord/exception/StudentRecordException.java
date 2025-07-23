@@ -1,0 +1,10 @@
+package com.edukit.studentrecord.exception;
+
+import com.edukit.common.exception.BusinessException;
+import com.edukit.common.exception.code.ErrorCode;
+
+public class StudentRecordException extends BusinessException {
+    public StudentRecordException(final ErrorCode errorCode) {
+        super(errorCode);
+    }
+}
