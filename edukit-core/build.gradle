@@ -1,6 +1,9 @@
 // 핵심 비즈니스 로직 / 유스케이스 모듈
 
 dependencies {
+	// Database
+	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+
 	// 내부 모듈 의존성
 	implementation project(':edukit-common')
 	
