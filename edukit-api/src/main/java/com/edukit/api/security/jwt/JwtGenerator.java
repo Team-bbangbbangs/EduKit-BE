@@ -1,13 +1,12 @@
 package com.edukit.api.security.jwt;
 
 import com.edukit.api.security.jwt.config.JwtProperties;
+import com.edukit.api.security.jwt.util.JwtKeyProvider;
 import io.jsonwebtoken.Header;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
-import io.jsonwebtoken.security.Keys;
 import java.security.Key;
 import java.time.Instant;
-import java.util.Base64;
 import java.util.Date;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -47,7 +46,6 @@ public class JwtGenerator {
     }
 
     private Key getSigningKey() {
-        byte[] keyBytes = Base64.getDecoder().decode(jwtProperties.secretKey());
-        return Keys.hmacShaKeyFor(keyBytes);
+        return JwtKeyProvider.getSigningKey(jwtProperties.secretKey());
     }
 }

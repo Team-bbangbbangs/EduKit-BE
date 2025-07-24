@@ -1,13 +1,12 @@
 package com.edukit.api.security.jwt;
 
 import com.edukit.api.security.jwt.config.JwtProperties;
+import com.edukit.api.security.jwt.util.JwtKeyProvider;
 import com.edukit.core.auth.exception.AuthErrorCode;
 import com.edukit.core.auth.exception.AuthException;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.security.Keys;
 import java.security.Key;
-import java.util.Base64;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -44,7 +43,6 @@ public class JwtParser {
     }
 
     private Key getSigningKey() {
-        byte[] keyBytes = Base64.getDecoder().decode(jwtProperties.secretKey());
-        return Keys.hmacShaKeyFor(keyBytes);
+        return JwtKeyProvider.getSigningKey(jwtProperties.secretKey());
     }
 }
