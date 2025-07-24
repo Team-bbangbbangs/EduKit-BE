@@ -6,7 +6,7 @@ import java.util.List;
 
 public class SecurityWhitelist {
 
-    private static final String[] AUTH_WHITELIST = {
+    protected static final String[] AUTH_WHITELIST = {
             "/api/v1/auth/signup",
             "/api/v1/auth/login",
             "/api/v1/auth/reissue",
@@ -17,7 +17,7 @@ public class SecurityWhitelist {
             "/actuator/prometheus"
     };
 
-    private static final String[] BUSINESS_WHITE_LIST = {
+    protected static final String[] BUSINESS_WHITE_LIST = {
             "/api/v1/notices",
             "/api/v1/notices/{noticeId:\\d+}"
     };
@@ -30,7 +30,6 @@ public class SecurityWhitelist {
         allWhitelist.addAll(Arrays.asList(BUSINESS_WHITE_LIST));
         ALL_WHITELIST = allWhitelist.toArray(new String[0]);
     }
-
 
     public static String[] getWhitelistPaths() {
         return ALL_WHITELIST;
