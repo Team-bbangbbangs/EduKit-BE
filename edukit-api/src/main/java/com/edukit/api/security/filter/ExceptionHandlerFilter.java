@@ -1,8 +1,8 @@
 package com.edukit.api.security.filter;
 
 import com.edukit.api.common.ApiResponse;
+import com.edukit.common.exception.BusinessException;
 import com.edukit.common.exception.code.ErrorCode;
-import com.edukit.core.auth.exception.AuthException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.http.HttpServletRequest;
@@ -26,7 +26,7 @@ public class ExceptionHandlerFilter extends OncePerRequestFilter {
                                     final FilterChain filterChain) throws IOException {
         try {
             filterChain.doFilter(request, response);
-        } catch (AuthException e) {
+        } catch (BusinessException e) {
             handleCustomException(response, e);
         } catch (Exception ex) {
             handleException(response, ex);
@@ -34,9 +34,9 @@ public class ExceptionHandlerFilter extends OncePerRequestFilter {
     }
 
     private void handleCustomException(final HttpServletResponse response, final Exception e) throws IOException {
-        AuthException ex = (AuthException) e;
-        ErrorCode authErrorCode = ex.getErrorCode();
-        setResponse(response, authErrorCode.getCode(), authErrorCode.getMessage());
+        BusinessException ex = (BusinessException) e;
+        ErrorCode errorCode = ex.getErrorCode();
+        setResponse(response, errorCode.getCode(), errorCode.getMessage());
     }
 
     private void handleException(final HttpServletResponse response, final Exception e) throws IOException {
