@@ -21,7 +21,7 @@ public class JwtValidator {
             Claims claims = jwtParser.parseClaims(token);
             validateClaims(claims, type);
         } catch (Exception e) {
-            throw new AuthException(AuthErrorCode.INVALID_TOKEN);
+            throw new AuthException(AuthErrorCode.INVALID_TOKEN, e);
         }
     }
 

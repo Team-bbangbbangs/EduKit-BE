@@ -26,7 +26,7 @@ public class JwtParser {
                     .parseClaimsJws(token)
                     .getBody();
         } catch (Exception e) {
-            throw new AuthException(AuthErrorCode.INVALID_TOKEN);
+            throw new AuthException(AuthErrorCode.INVALID_TOKEN, e);
         }
     }
 

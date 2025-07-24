@@ -32,10 +32,10 @@ public class OpenAiClient {
                     .user(prompt)
                     .call()
                     .entity(StudentRecordAICreateResponse.class);
-        } catch (ResourceAccessException e) { // 타임 아웃
-            throw new OpenAiException(OpenAiErrorCode.OPEN_AI_TIMEOUT);
+        } catch (ResourceAccessException ex) { // 타임 아웃
+            throw new OpenAiException(OpenAiErrorCode.OPEN_AI_TIMEOUT, ex);
         } catch (Exception e) { // 기타 예외 처리
-            throw new OpenAiException(OpenAiErrorCode.OPEN_AI_INTERNAL_ERROR);
+            throw new OpenAiException(OpenAiErrorCode.OPEN_AI_INTERNAL_ERROR, e);
         }
     }
 }

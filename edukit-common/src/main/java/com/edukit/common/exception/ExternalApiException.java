@@ -12,4 +12,9 @@ public class ExternalApiException extends RuntimeException {
         super(errorCode.getMessage());
         this.errorCode = errorCode;
     }
+
+    public ExternalApiException(final ErrorCode errorCode, final Throwable cause) {
+        super(errorCode.getMessage(), cause);
+        this.errorCode = errorCode;
+    }
 }
