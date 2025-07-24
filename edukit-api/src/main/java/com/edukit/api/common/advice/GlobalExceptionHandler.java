@@ -29,13 +29,13 @@ public class GlobalExceptionHandler {
     // Custom exceptions
     @ExceptionHandler(BusinessException.class)
     public ApiResponse<Void> handleBusinessException(final BusinessException e) {
-        log.info("Business exception occurred: {}", e.getMessage(), e);
+        log.info("Business exception occurred: {}, cause: {}", e.getMessage(), e.getCause(), e);
         return ApiResponse.fail(e.getErrorCode());
     }
 
     @ExceptionHandler(ExternalApiException.class)
     public ApiResponse<Void> handleExternalApiException(final ExternalApiException e) {
-        log.warn("External API exception occurred: {}", e.getMessage(), e);
+        log.warn("External API exception occurred: {}, cause: {}", e.getMessage(), e.getCause(), e);
         return ApiResponse.fail(e.getErrorCode());
     }
 
@@ -98,7 +98,8 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(Exception.class)
     public ApiResponse<Void> handleGenericException(Exception e) {
         Throwable cause = getDeepCause(e);
-        log.error("Unexpected exception occurred. Original: [{}], Root cause: [{}]", e.getMessage(), cause.getMessage(), e);
+        log.error("Unexpected exception occurred. Original: [{}], Root cause: [{}]", e.getMessage(), cause.getMessage(),
+                e);
         return ApiResponse.fail(FAIL, "서버 내부 오류가 발생했습니다.");
     }
 

@@ -1,6 +1,6 @@
 package com.edukit.external.config;
 
-import com.edukit.external.openai.OpenAiProperties;
+import com.edukit.external.ai.OpenAiProperties;
 import java.io.IOException;
 import java.net.http.HttpClient;
 import java.time.Duration;
