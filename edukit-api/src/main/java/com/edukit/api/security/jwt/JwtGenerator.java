@@ -29,7 +29,7 @@ public class JwtGenerator {
                 .setSubject(memberUuid)
                 .setIssuedAt(Date.from(now))
                 .setExpiration(Date.from(expiration))
-                .claim(TOKEN_TYPE_CLAIM, tokenType.name())
+                .claim(TOKEN_TYPE_CLAIM, tokenType.getType())
                 .signWith(getSigningKey(), SignatureAlgorithm.HS256)
                 .compact();
     }

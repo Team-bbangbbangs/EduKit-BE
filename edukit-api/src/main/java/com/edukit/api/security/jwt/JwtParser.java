@@ -20,11 +20,15 @@ public class JwtParser {
     private static final String BEARER = "Bearer ";
 
     public Claims parseClaims(final String token) {
-        return Jwts.parserBuilder()
-                .setSigningKey(getSigningKey())
-                .build()
-                .parseClaimsJws(token)
-                .getBody();
+        try {
+            return Jwts.parserBuilder()
+                    .setSigningKey(getSigningKey())
+                    .build()
+                    .parseClaimsJws(token)
+                    .getBody();
+        } catch (Exception e) {
+            throw new AuthException(AuthErrorCode.INVALID_TOKEN);
+        }
     }
 
     public String resolveToken(final String token) {
