@@ -22,11 +22,17 @@ public class SecurityWhitelist {
             "/api/v1/notices/{noticeId:\\d+}"
     };
 
+    private static final String[] ALL_WHITELIST;
 
-    public static String[] getWhitelistPaths() {
+    static {
         List<String> allWhitelist = new ArrayList<>();
         allWhitelist.addAll(Arrays.asList(AUTH_WHITELIST));
         allWhitelist.addAll(Arrays.asList(BUSINESS_WHITE_LIST));
-        return allWhitelist.toArray(new String[0]);
+        ALL_WHITELIST = allWhitelist.toArray(new String[0]);
+    }
+
+
+    public static String[] getWhitelistPaths() {
+        return ALL_WHITELIST;
     }
 }
