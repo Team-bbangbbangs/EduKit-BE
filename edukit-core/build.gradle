@@ -7,6 +7,9 @@ dependencies {
 
 	// Hibernate
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+
+	// Jackson
+	implementation 'com.fasterxml.jackson.core:jackson-databind'
 }
 
 // 라이브러리 JAR 생성
