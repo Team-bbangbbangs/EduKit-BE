@@ -9,7 +9,7 @@ import com.edukit.core.notice.facade.response.NoticeResponse;
 import com.edukit.core.notice.facade.response.NoticesGetResponse;
 import com.edukit.core.notice.service.NoticeService;
 import com.edukit.external.s3.dto.S3Service;
-import com.edukit.external.s3.dto.response.PresignedUrlCreateResponse;
+import com.edukit.external.s3.dto.response.UploadPresignedUrlResponse;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -71,11 +71,11 @@ public class NoticeFacade {
     }
 
     public NoticeFileUploadPresignedUrlCreateResponse createFileUploadPresignedUrl(final List<String> filenames) {
-        List<PresignedUrlCreateResponse> presignedUrls = filenames.stream()
-                .map(filename -> s3Service.createPresignedUrl(NOTICE_FILE_PATH, filename))
+        List<UploadPresignedUrlResponse> presignedUrls = filenames.stream()
+                .map(filename -> s3Service.createUploadPresignedUrl(NOTICE_FILE_PATH, filename))
                 .toList();
         List<NoticeFile> noticeFiles = noticeService.createNoticeFiles(
-                presignedUrls.stream().map(PresignedUrlCreateResponse::filePath).toList()
+                presignedUrls.stream().map(UploadPresignedUrlResponse::s3Key).toList()
         );
         return NoticeFileUploadPresignedUrlCreateResponse.of(presignedUrls, noticeFiles);
     }
