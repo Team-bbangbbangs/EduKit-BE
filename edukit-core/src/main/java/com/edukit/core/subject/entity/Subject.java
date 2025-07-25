@@ -1,4 +1,4 @@
-package com.edukit.core.member.entity;
+package com.edukit.core.subject.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
