@@ -1,6 +1,6 @@
 package com.edukit.api.security.handler;
 
-import com.edukit.api.common.EduKitResponse;
+import com.edukit.api.common.EdukitResponse;
 import com.edukit.core.auth.exception.AuthErrorCode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
@@ -31,6 +31,6 @@ public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
         response.setCharacterEncoding(StandardCharsets.UTF_8.name());
         response.getWriter().write(objectMapper.writeValueAsString(
-                EduKitResponse.fail(AuthErrorCode.UNAUTHORIZED_MEMBER.getCode(), AuthErrorCode.UNAUTHORIZED_MEMBER.getMessage())));
+                EdukitResponse.fail(AuthErrorCode.UNAUTHORIZED_MEMBER.getCode(), AuthErrorCode.UNAUTHORIZED_MEMBER.getMessage())));
     }
 }
