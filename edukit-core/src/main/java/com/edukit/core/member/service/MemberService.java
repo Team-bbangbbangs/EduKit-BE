@@ -1,13 +1,12 @@
 package com.edukit.core.member.service;
 
-import com.edukit.core.auth.exception.AuthErrorCode;
 import com.edukit.core.member.entity.Member;
-import com.edukit.core.subject.entity.Subject;
 import com.edukit.core.member.enums.MemberRole;
 import com.edukit.core.member.enums.School;
-import com.edukit.core.member.exception.MemberException;
 import com.edukit.core.member.exception.MemberErrorCode;
+import com.edukit.core.member.exception.MemberException;
 import com.edukit.core.member.repository.MemberRepository;
+import com.edukit.core.subject.entity.Subject;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -42,7 +41,8 @@ public class MemberService {
                               final String nickname, final String schoolName) {
         School school = School.fromName(schoolName);
 
-        Optional<Member> restored = restoreIfSoftDeletedMemberByEmail(email, encodedPassword, subject, school);
+        Optional<Member> restored = restoreIfSoftDeletedMemberByEmail(email, encodedPassword, subject, nickname,
+                school);
         if (restored.isPresent()) { // 재가입 회원 -> 복구 처리
             return restored.get();
         }
@@ -54,10 +54,11 @@ public class MemberService {
     }
 
     private Optional<Member> restoreIfSoftDeletedMemberByEmail(final String email, final String password,
-                                                               final Subject subject, final School school) {
+                                                               final Subject subject, final String nickname,
+                                                               final School school) {
         return memberRepository.findByEmailAndIsDeleted(email, DELETED)
                 .map(member -> {
-                    member.restore(password, subject, school);
+                    member.restore(password, subject, nickname, school);
                     return member;
                 });
     }

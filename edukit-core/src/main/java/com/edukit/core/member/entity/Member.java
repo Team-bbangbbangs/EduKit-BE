@@ -96,12 +96,14 @@ public class Member extends BaseTimeEntity {
                 .build();
     }
 
-    public void restore(final String password, final Subject subject, final School school) {
+    public void restore(final String password, final Subject subject, final String nickname, final School school) {
         this.isDeleted = false;
         this.deletedAt = null;
         this.password = password;
         this.subject = subject;
+        this.nickname = nickname;
         this.school = school;
         this.role = MemberRole.PENDING_TEACHER;
+        this.verifiedAt = null;
     }
 }
