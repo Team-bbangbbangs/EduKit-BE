@@ -1,11 +1,18 @@
 package com.edukit.core.member.service;
 
+import com.edukit.core.auth.exception.AuthErrorCode;
 import com.edukit.core.member.entity.Member;
-import com.edukit.core.member.exception.MemberErrorCode;
+import com.edukit.core.subject.entity.Subject;
+import com.edukit.core.member.enums.MemberRole;
+import com.edukit.core.member.enums.School;
 import com.edukit.core.member.exception.MemberException;
+import com.edukit.core.member.exception.MemberErrorCode;
 import com.edukit.core.member.repository.MemberRepository;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -13,8 +20,46 @@ public class MemberService {
 
     private final MemberRepository memberRepository;
 
+    private static final boolean DELETED = true;
+
+    @Transactional(readOnly = true)
     public Member getMemberByUuid(final String memberUuid) {
         return memberRepository.findByMemberUuidAndIsDeleted(memberUuid, false)
                 .orElseThrow(() -> new MemberException(MemberErrorCode.MEMBER_NOT_FOUND));
+    }
+
+    @Transactional
+    public Member createMember(final String email, final String encodedPassword, final Subject subject,
+                               final String nickname, final String school) {
+        try {
+            return saveMember(email, encodedPassword, subject, nickname, school);
+        } catch (DataIntegrityViolationException e) {
+            throw new MemberException(MemberErrorCode.MEMBER_ALREADY_REGISTERED);
+        }
+    }
+
+    private Member saveMember(final String email, final String encodedPassword, final Subject subject,
+                              final String nickname,
+                              final String schoolName) {
+        School school = School.fromName(schoolName);
+
+        Optional<Member> restored = restoreIfSoftDeletedMemberByEmail(email, encodedPassword, subject, school);
+        if (restored.isPresent()) { // 재가입 회원 -> 복구 처리
+            return restored.get();
+        }
+
+        // 새로운 회원 가입
+        Member newMember = Member.create(subject, email, encodedPassword, nickname, school, MemberRole.PENDING_TEACHER);
+        memberRepository.save(newMember);
+        return newMember;
+    }
+
+    private Optional<Member> restoreIfSoftDeletedMemberByEmail(final String email, final String password,
+                                                               final Subject subject, final School school) {
+        return memberRepository.findByEmailAndIsDeleted(email, DELETED)
+                .map(member -> {
+                    member.restore(password, subject, school);
+                    return member;
+                });
     }
 }
