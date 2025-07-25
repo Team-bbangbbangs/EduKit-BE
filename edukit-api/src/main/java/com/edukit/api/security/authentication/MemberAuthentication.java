@@ -1,4 +1,4 @@
-package com.edukit.api.security;
+package com.edukit.api.security.authentication;
 
 import java.util.Collection;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;

@@ -1,8 +1,8 @@
 package com.edukit.api.security.config;
 
-import com.edukit.api.security.CustomPasswordEncoder;
-import com.edukit.api.security.JwtAccessDeniedHandler;
-import com.edukit.api.security.JwtAuthenticationEntryPoint;
+import com.edukit.api.security.encoder.CustomPasswordEncoder;
+import com.edukit.api.security.handler.JwtAccessDeniedHandler;
+import com.edukit.api.security.handler.JwtAuthenticationEntryPoint;
 import com.edukit.api.security.filter.ExceptionHandlerFilter;
 import com.edukit.api.security.filter.JwtAuthenticationFilter;
 import lombok.RequiredArgsConstructor;

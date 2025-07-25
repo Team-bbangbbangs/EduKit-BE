@@ -1,4 +1,4 @@
-package com.edukit.api.security;
+package com.edukit.api.security.handler;
 
 import com.edukit.api.common.ApiResponse;
 import com.edukit.core.auth.exception.AuthErrorCode;

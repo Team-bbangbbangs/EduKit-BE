@@ -1,4 +1,4 @@
-package com.edukit.api.security;
+package com.edukit.api.security.encoder;
 
 import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.security.crypto.password.PasswordEncoder;

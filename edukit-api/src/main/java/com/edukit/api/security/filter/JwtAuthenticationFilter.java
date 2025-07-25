@@ -1,11 +1,11 @@
 package com.edukit.api.security.filter;
 
-import com.edukit.api.security.MemberAuthentication;
-import com.edukit.api.security.MemberDetailReader;
+import com.edukit.api.security.authentication.MemberAuthentication;
+import com.edukit.api.security.authentication.MemberDetailReader;
 import com.edukit.api.security.config.SecurityWhitelist;
-import com.edukit.api.security.jwt.JwtParser;
-import com.edukit.api.security.jwt.JwtValidator;
-import com.edukit.api.security.jwt.TokenType;
+import com.edukit.api.security.jwt.service.JwtParser;
+import com.edukit.api.security.jwt.service.JwtValidator;
+import com.edukit.api.security.jwt.type.TokenType;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

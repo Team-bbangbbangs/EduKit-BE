@@ -1,6 +1,5 @@
-package com.edukit.api.security;
+package com.edukit.api.security.authentication;
 
-import com.edukit.api.converter.MemberRoleConverter;
 import com.edukit.core.member.entity.Member;
 import com.edukit.core.member.enums.MemberRole;
 import com.edukit.core.member.service.MemberService;
@@ -10,9 +9,9 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 
-@Service
+@Component
 @RequiredArgsConstructor
 public class MemberDetailReader implements UserDetailsService {
 
