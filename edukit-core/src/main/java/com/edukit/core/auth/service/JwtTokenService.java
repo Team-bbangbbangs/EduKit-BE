@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
-public class TokenService {
+public class JwtTokenService {
 
     private final JwtGenerator jwtGenerator;
     private final JwtParser jwtParser;

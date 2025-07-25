@@ -6,7 +6,7 @@ import com.edukit.core.auth.facade.response.MemberSignUpResponse;
 import com.edukit.core.auth.jwt.dto.Token;
 import com.edukit.core.auth.service.AuthCodeService;
 import com.edukit.core.auth.service.AuthService;
-import com.edukit.core.auth.service.TokenService;
+import com.edukit.core.auth.service.JwtTokenService;
 import com.edukit.core.member.entity.Member;
 import com.edukit.core.member.service.MemberService;
 import com.edukit.core.subject.entity.Subject;
@@ -24,7 +24,7 @@ public class AuthFacade {
     private final AuthCodeService authCodeService;
     private final MemberService memberService;
     private final SubjectService subjectService;
-    private final TokenService tokenService;
+    private final JwtTokenService jwtTokenService;
     private final ApplicationEventPublisher eventPublisher;
 
     @Transactional
@@ -34,7 +34,7 @@ public class AuthFacade {
         Subject subject = subjectService.getSubjectByName(subjectName);
         Member member = memberService.createMember(email, password, subject, nickname, school);
 
-        Token token = tokenService.generateTokens(member.getMemberUuid());
+        Token token = jwtTokenService.generateTokens(member.getMemberUuid());
         // refreshToken을 Redis에 저장하는 로직 구현
 
         String authCode = authCodeService.issueVerificationCode(member, AuthCodeType.TEACHER_VERIFICATION);

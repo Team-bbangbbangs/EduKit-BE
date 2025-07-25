@@ -3,7 +3,7 @@ package com.edukit.api.security.filter;
 import com.edukit.api.security.authentication.MemberAuthentication;
 import com.edukit.api.security.authentication.MemberDetailReader;
 import com.edukit.api.security.config.SecurityWhitelist;
-import com.edukit.core.auth.service.TokenService;
+import com.edukit.core.auth.service.JwtTokenService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -24,7 +24,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
-    private final TokenService tokenService;
+    private final JwtTokenService jwtTokenService;
     private final MemberDetailReader memberDetailReader;
 
     private static final AntPathMatcher pathMatcher = new AntPathMatcher();
@@ -51,7 +51,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private String getMemberUuidFromToken(final HttpServletRequest request) {
         String requestedToken = request.getHeader(HttpHeaders.AUTHORIZATION);
-        return tokenService.parseMemberUuidFromAccessToken(requestedToken);
+        return jwtTokenService.parseMemberUuidFromAccessToken(requestedToken);
     }
 
     private void doAuthentication(final HttpServletRequest request, final String memberUuid) {
