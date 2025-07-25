@@ -18,7 +18,7 @@ public class MemberDetailReader implements UserDetailsService {
     private final MemberService memberService;
 
     @Override
-    public UserDetails loadUserByUsername(String memberUuid) {
+    public UserDetails loadUserByUsername(final String memberUuid) {
         Member member = memberService.getMemberByUuid(memberUuid);
         String memberId = String.valueOf(member.getId());
         MemberRole memberRole = member.getRole();
