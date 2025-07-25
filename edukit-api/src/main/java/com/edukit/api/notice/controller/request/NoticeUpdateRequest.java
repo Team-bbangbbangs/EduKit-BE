@@ -1,6 +1,7 @@
 package com.edukit.api.notice.controller.request;
 
 import jakarta.validation.constraints.NotNull;
+import java.util.List;
 
 public record NoticeUpdateRequest(
         @NotNull(message = "카테고리 ID는 필수입니다.")
@@ -8,6 +9,7 @@ public record NoticeUpdateRequest(
         @NotNull(message = "제목은 필수입니다.")
         String title,
         @NotNull(message = "내용은 필수입니다.")
-        String content
+        String content,
+        List<Long> noticeFileIds
 ) {
 }

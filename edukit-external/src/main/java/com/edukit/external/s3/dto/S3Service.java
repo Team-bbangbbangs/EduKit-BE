@@ -30,7 +30,7 @@ public class S3Service {
     private static final Pattern FILENAME_PATTERN = Pattern.compile("^.+\\..+$");
     private static final Duration PRESIGNED_URL_EXPIRATION = Duration.ofMinutes(5);
     private static final DateTimeFormatter TIMESTAMP_FORMAT = DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss");
-    private static final Map<String, String> CONTENT_TYPE_MAP = Map.of(
+    private static final Map<String, String> IMAGE_CONTENT_TYPE_MAP = Map.of(
             "png", "image/png",
             "jpg", "image/jpeg",
             "jpeg", "image/jpeg",
@@ -38,7 +38,7 @@ public class S3Service {
             "webp", "image/webp"
     );
 
-    public PresignedUrlCreateResponse createPresignedUrl(String path, String filename) {
+    public PresignedUrlCreateResponse createPresignedUrl(final String path, final String filename) {
         validateFilename(filename);
         String key = generateS3Key(path, filename);
         PutObjectRequest putObjectRequest = PutObjectRequest.builder()
@@ -53,36 +53,38 @@ public class S3Service {
         PresignedPutObjectRequest presignedPutObjectRequest = s3Presigner.presignPutObject(putObjectPresignRequest);
         return PresignedUrlCreateResponse.of(
                 presignedPutObjectRequest.url().toString(),
-                getImageUrl(key)
+                getFileUrl(key),
+                key
         );
     }
-    private void validateFilename(String filename) {
+
+    private void validateFilename(final String filename) {
         if (!StringUtils.hasText(filename) || !FILENAME_PATTERN.matcher(filename).matches()) {
             throw new S3Exception(S3ErrorCode.INVALID_FILE_NAME);
         }
     }
 
-    private String generateS3Key(String folder, String filename) {
+    private String generateS3Key(final String folder, final String filename) {
         String timestamp = LocalDateTime.now().format(TIMESTAMP_FORMAT);
         String uuid = UUID.randomUUID().toString().replaceAll("-", "").substring(0, 8);
         String extension = extractExtension(filename);
         return String.format("%s/%s_%s%s", folder, timestamp, uuid, extension);
     }
 
-    private String extractExtension(String filename) {
+    private String extractExtension(final String filename) {
         int idx = filename.lastIndexOf('.');
         return (idx != -1) ? filename.substring(idx) : "";
     }
 
-    private String getContentType(String filename) {
+    private String getContentType(final String filename) {
         String ext = extractExtension(filename).toLowerCase().replace(".", "");
-        if (!CONTENT_TYPE_MAP.containsKey(ext)) {
+        if (!IMAGE_CONTENT_TYPE_MAP.containsKey(ext)) {
             throw new S3Exception(S3ErrorCode.INVALID_FILE_EXTENSION);
         }
-        return CONTENT_TYPE_MAP.get(ext);
+        return IMAGE_CONTENT_TYPE_MAP.get(ext);
     }
 
-    private String getImageUrl(String key) {
+    private String getFileUrl(final String key) {
         return String.format("%s/%s", s3Properties.cdnUrl(), key);
     }
 }

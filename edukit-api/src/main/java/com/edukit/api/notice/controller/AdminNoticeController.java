@@ -6,8 +6,9 @@ import com.edukit.api.notice.controller.request.NoticeUpdateRequest;
 import com.edukit.common.exception.code.CommonSuccessCode;
 import com.edukit.core.notice.enums.NoticeCategory;
 import com.edukit.core.notice.facade.NoticeFacade;
-import com.edukit.core.notice.facade.response.NoticeImageUploadPresignedUrlCreateResponse;
+import com.edukit.core.notice.facade.response.NoticeFileUploadPresignedUrlCreateResponse;
 import jakarta.validation.Valid;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -31,7 +32,7 @@ public class AdminNoticeController {
             @RequestBody @Valid final NoticeCreateRequest request
     ) {
         NoticeCategory category = NoticeCategory.fromId(request.categoryId());
-        noticeFacade.createNotice(category, request.title(), request.content());
+        noticeFacade.createNotice(category, request.title(), request.content(), request.noticeFileIds());
         return ApiResponse.success(CommonSuccessCode.OK);
     }
 
@@ -41,7 +42,7 @@ public class AdminNoticeController {
             @PathVariable final long noticeId
     ) {
         NoticeCategory category = NoticeCategory.fromId(request.categoryId());
-        noticeFacade.updateNotice(noticeId, category, request.title(), request.content());
+        noticeFacade.updateNotice(noticeId, category, request.title(), request.content(), request.noticeFileIds());
         return ApiResponse.success(CommonSuccessCode.OK);
     }
 
@@ -54,9 +55,9 @@ public class AdminNoticeController {
     }
 
     @GetMapping("/presigned-url")
-    public ApiResponse<NoticeImageUploadPresignedUrlCreateResponse> createImageUploadPresignedUrl(
-            @RequestParam String filename
+    public ApiResponse<NoticeFileUploadPresignedUrlCreateResponse> createFileUploadPresignedUrl(
+            @RequestParam final List<String> filenames
     ) {
-        return ApiResponse.success(CommonSuccessCode.OK, noticeFacade.createImageUploadPresignedUrl(filename));
+        return ApiResponse.success(CommonSuccessCode.OK, noticeFacade.createFileUploadPresignedUrl(filenames));
     }
 }
