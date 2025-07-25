@@ -19,20 +19,9 @@ public class AuthCodeService {
 
     @Transactional
     public String issueVerificationCode(final Member member, final AuthCodeType authCodeType) {
-        expireExistingPendingCodeIfExists(member, authCodeType);
-
         String code = randomCodeGenerator.generate();
         AuthCode authorizationCode = AuthCode.create(member, code, AuthorizeStatus.PENDING, authCodeType);
         authCodeRepository.save(authorizationCode);
-
         return code;
-    }
-
-    private void expireExistingPendingCodeIfExists(final Member member, final AuthCodeType authCodeType) {
-        authCodeRepository.findByMemberAndAuthCodeTypeAndStatus(member, authCodeType, AuthorizeStatus.PENDING)
-                .ifPresent(existingCode -> {
-                    existingCode.updateStatus(AuthorizeStatus.EXPIRED);
-                    authCodeRepository.save(existingCode);
-                });
     }
 }
