@@ -11,7 +11,8 @@ public class MemberAuthentication extends UsernamePasswordAuthenticationToken {
         super(principal, credentials, authorities);
     }
 
-    public static MemberAuthentication create(final String memberUuid) {
-        return new MemberAuthentication(memberUuid, null, null);
+    public static MemberAuthentication create(final long memberId,
+                                              final Collection<? extends GrantedAuthority> authorities) {
+        return new MemberAuthentication(memberId, null, authorities);
     }
 }

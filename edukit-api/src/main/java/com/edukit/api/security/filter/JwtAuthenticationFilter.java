@@ -1,6 +1,7 @@
 package com.edukit.api.security.filter;
 
 import com.edukit.api.security.MemberAuthentication;
+import com.edukit.api.security.MemberDetailReader;
 import com.edukit.api.security.config.SecurityWhitelist;
 import com.edukit.api.security.jwt.JwtParser;
 import com.edukit.api.security.jwt.JwtValidator;
@@ -14,6 +15,7 @@ import java.util.Arrays;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.WebAuthenticationDetails;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
@@ -26,6 +28,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtParser jwtParser;
     private final JwtValidator jwtValidator;
+    private final MemberDetailReader memberDetailReader;
 
     private static final AntPathMatcher pathMatcher = new AntPathMatcher();
     private static final String[] WHITELIST = SecurityWhitelist.getWhitelistPaths();
@@ -57,8 +60,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     }
 
     private void doAuthentication(final HttpServletRequest request, final String memberUuid) {
-        MemberAuthentication authentication = MemberAuthentication.create(memberUuid);
+        UserDetails userDetails = memberDetailReader.loadUserByUsername(memberUuid);
+        long memberId = Long.parseLong(userDetails.getUsername());
+        MemberAuthentication authentication = MemberAuthentication.create(memberId, userDetails.getAuthorities());
+
         createAndSetWebAuthenticationDetails(request, authentication);
+
         SecurityContextHolder.getContext().setAuthentication(authentication);
     }
 
