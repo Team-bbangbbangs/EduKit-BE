@@ -30,7 +30,7 @@ public class NoticeFile extends BaseTimeEntity {
     private Notice notice;
 
     @Column(length = 500, nullable = false)
-    private String filePath;
+    private String filePath;    // https://dev-cdn.edukit.co.kr/notices/20250725_223935_ea5f18be.jpg
 
     @Builder(access = AccessLevel.PRIVATE)
     public NoticeFile(final String filePath) {

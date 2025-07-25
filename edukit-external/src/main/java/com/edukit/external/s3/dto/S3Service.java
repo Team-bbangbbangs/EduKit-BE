@@ -3,7 +3,7 @@ package com.edukit.external.s3.dto;
 import com.edukit.external.s3.AwsS3Properties;
 import com.edukit.external.s3.dto.exception.S3ErrorCode;
 import com.edukit.external.s3.dto.exception.S3Exception;
-import com.edukit.external.s3.dto.response.PresignedUrlCreateResponse;
+import com.edukit.external.s3.dto.response.UploadPresignedUrlResponse;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -13,7 +13,6 @@ import java.util.regex.Pattern;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
-import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import software.amazon.awssdk.services.s3.presigner.S3Presigner;
 import software.amazon.awssdk.services.s3.presigner.model.PresignedPutObjectRequest;
@@ -23,13 +22,13 @@ import software.amazon.awssdk.services.s3.presigner.model.PutObjectPresignReques
 @RequiredArgsConstructor
 public class S3Service {
 
-    private final S3Client s3Client;
     private final S3Presigner s3Presigner;
     private final AwsS3Properties s3Properties;
 
     private static final Pattern FILENAME_PATTERN = Pattern.compile("^.+\\..+$");
     private static final Duration PRESIGNED_URL_EXPIRATION = Duration.ofMinutes(5);
     private static final DateTimeFormatter TIMESTAMP_FORMAT = DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss");
+    private static final int UUID_LENGTH = 8;
     private static final Map<String, String> IMAGE_CONTENT_TYPE_MAP = Map.of(
             "png", "image/png",
             "jpg", "image/jpeg",
@@ -38,12 +37,12 @@ public class S3Service {
             "webp", "image/webp"
     );
 
-    public PresignedUrlCreateResponse createPresignedUrl(final String path, final String filename) {
+    public UploadPresignedUrlResponse createUploadPresignedUrl(final String path, final String filename) {
         validateFilename(filename);
-        String key = generateS3Key(path, filename);
+        String s3Key = generateS3Key(path, filename);
         PutObjectRequest putObjectRequest = PutObjectRequest.builder()
                 .bucket(s3Properties.bucket())
-                .key(key)
+                .key(s3Key)
                 .contentType(getContentType(filename))
                 .build();
         PutObjectPresignRequest putObjectPresignRequest = PutObjectPresignRequest.builder()
@@ -51,11 +50,7 @@ public class S3Service {
                 .putObjectRequest(putObjectRequest)
                 .build();
         PresignedPutObjectRequest presignedPutObjectRequest = s3Presigner.presignPutObject(putObjectPresignRequest);
-        return PresignedUrlCreateResponse.of(
-                presignedPutObjectRequest.url().toString(),
-                getFileUrl(key),
-                key
-        );
+        return UploadPresignedUrlResponse.of(presignedPutObjectRequest.url().toString(), getFileUrl(s3Key), s3Key);
     }
 
     private void validateFilename(final String filename) {
@@ -64,16 +59,19 @@ public class S3Service {
         }
     }
 
-    private String generateS3Key(final String folder, final String filename) {
+    private String generateS3Key(final String path, final String filename) {
         String timestamp = LocalDateTime.now().format(TIMESTAMP_FORMAT);
-        String uuid = UUID.randomUUID().toString().replaceAll("-", "").substring(0, 8);
+        String uuid = UUID.randomUUID().toString().replaceAll("-", "").substring(0, UUID_LENGTH);
         String extension = extractExtension(filename);
-        return String.format("%s/%s_%s%s", folder, timestamp, uuid, extension);
+        return String.format("%s/%s_%s%s", path, timestamp, uuid, extension);
     }
 
     private String extractExtension(final String filename) {
         int idx = filename.lastIndexOf('.');
-        return (idx != -1) ? filename.substring(idx) : "";
+        if (idx == -1) {
+            return "";
+        }
+        return filename.substring(idx);
     }
 
     private String getContentType(final String filename) {
@@ -84,7 +82,7 @@ public class S3Service {
         return IMAGE_CONTENT_TYPE_MAP.get(ext);
     }
 
-    private String getFileUrl(final String key) {
-        return String.format("%s/%s", s3Properties.cdnUrl(), key);
+    private String getFileUrl(final String s3Key) {
+        return String.format("%s/%s", s3Properties.cdnUrl(), s3Key);
     }
 }

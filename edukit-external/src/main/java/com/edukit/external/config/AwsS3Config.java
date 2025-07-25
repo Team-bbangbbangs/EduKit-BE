@@ -9,7 +9,6 @@ import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 import software.amazon.awssdk.auth.credentials.AwsCredentialsProvider;
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
 import software.amazon.awssdk.regions.Region;
-import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.presigner.S3Presigner;
 
 @Configuration
@@ -27,14 +26,6 @@ public class AwsS3Config {
                         properties.secretKey()
                 )
         );
-    }
-
-    @Bean
-    public S3Client s3Client(final AwsCredentialsProvider credentialsProvider) {
-        return S3Client.builder()
-                .region(Region.of(properties.region()))
-                .credentialsProvider(credentialsProvider)
-                .build();
     }
 
     @Bean
