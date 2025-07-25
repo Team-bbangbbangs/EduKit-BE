@@ -2,7 +2,7 @@ package com.edukit.core.auth.entity;
 
 import static jakarta.persistence.GenerationType.IDENTITY;
 
-import com.edukit.core.auth.enums.AuthCodeStatus;
+import com.edukit.core.auth.enums.AuthorizeStatus;
 import com.edukit.core.auth.enums.AuthCodeType;
 import com.edukit.core.member.entity.Member;
 import jakarta.persistence.Column;
@@ -39,7 +39,7 @@ public class AuthCode {
 
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
-    private AuthCodeStatus status;
+    private AuthorizeStatus status;
 
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
@@ -55,7 +55,7 @@ public class AuthCode {
 
     @Builder(access = AccessLevel.PRIVATE)
     private AuthCode(final Member member, final String authorizationCode, final LocalDateTime createdAt,
-                     final LocalDateTime expiredAt, final AuthCodeStatus status, final AuthCodeType type) {
+                     final LocalDateTime expiredAt, final AuthorizeStatus status, final AuthCodeType type) {
         this.member = member;
         this.authorizationCode = authorizationCode;
         this.createdAt = createdAt;
@@ -65,7 +65,7 @@ public class AuthCode {
     }
 
     public static AuthCode create(final Member member, final String authorizationCode,
-                                  final AuthCodeStatus status, final AuthCodeType type) {
+                                  final AuthorizeStatus status, final AuthCodeType type) {
         return AuthCode.builder()
                 .member(member)
                 .authorizationCode(authorizationCode)

@@ -1,6 +1,6 @@
 package com.edukit.core.auth.enums;
 
-public enum AuthCodeStatus {
+public enum AuthorizeStatus {
     COMPLETE,
     PENDING
 }

@@ -12,7 +12,8 @@ public enum AuthErrorCode implements ErrorCode {
     INVALID_TOKEN("A-40102", "유효하지 않은 토큰입니다."),
     UNAUTHORIZED_MEMBER("A-40103", "인증되지 않은 사용자입니다."),
     FORBIDDEN_MEMBER("A-40304", "접근 권한이 없는 사용자입니다."),
-    ;
+    INVALID_EMAIL("A-40005", "유효하지 않은 교사 이메일입니다. 교육청 이메일 도메인만 허용됩니다."),
+    MEMBER_ALREADY_REGISTERED("A-40906", "이미 등록된 회원입니다.");
 
     private final String code;
     private final String message;
