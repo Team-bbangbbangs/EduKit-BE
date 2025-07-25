@@ -1,6 +1,7 @@
 package com.edukit.core.auth.facade;
 
 import com.edukit.core.auth.enums.AuthCodeType;
+import com.edukit.core.auth.event.MemberSignedUpEvent;
 import com.edukit.core.auth.facade.response.MemberSignUpResponse;
 import com.edukit.core.auth.service.AuthCodeService;
 import com.edukit.core.auth.service.AuthService;
@@ -31,7 +32,7 @@ public class AuthFacade {
         Member member = memberService.createMember(email, password, subject, nickname, school);
         String authCode = authCodeService.issueVerificationCode(member, AuthCodeType.TEACHER_VERIFICATION);
 
-        // eventPublisher.publishEvent(MemberSignedUpEvent.of(member.getEmail(), member.getMemberUuid(), authCode));
+        eventPublisher.publishEvent(MemberSignedUpEvent.of(member.getEmail(), member.getMemberUuid(), authCode));
         return MemberSignUpResponse.of("accessToken", "refreshToken");
     }
 }
