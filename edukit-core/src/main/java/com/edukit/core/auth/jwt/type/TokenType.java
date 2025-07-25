@@ -1,4 +1,4 @@
-package com.edukit.core.auth.jwt;
+package com.edukit.core.auth.jwt.type;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;

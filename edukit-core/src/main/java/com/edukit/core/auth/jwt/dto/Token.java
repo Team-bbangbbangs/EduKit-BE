@@ -1,4 +1,4 @@
-package com.edukit.core.auth.service;
+package com.edukit.core.auth.jwt.dto;
 
 public record Token(
         String accessToken,

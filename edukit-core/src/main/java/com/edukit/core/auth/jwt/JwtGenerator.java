@@ -2,6 +2,7 @@ package com.edukit.core.auth.jwt;
 
 import com.edukit.core.auth.jwt.provider.JwtKeyProvider;
 import com.edukit.core.auth.jwt.setting.JwtProperties;
+import com.edukit.core.auth.jwt.type.TokenType;
 import io.jsonwebtoken.Header;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;

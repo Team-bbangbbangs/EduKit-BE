@@ -3,7 +3,8 @@ package com.edukit.core.auth.service;
 import com.edukit.core.auth.jwt.JwtGenerator;
 import com.edukit.core.auth.jwt.JwtParser;
 import com.edukit.core.auth.jwt.JwtValidator;
-import com.edukit.core.auth.jwt.TokenType;
+import com.edukit.core.auth.jwt.dto.Token;
+import com.edukit.core.auth.jwt.type.TokenType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
