@@ -31,10 +31,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final MemberDetailReader memberDetailReader;
 
     private static final AntPathMatcher pathMatcher = new AntPathMatcher();
-    private static final List<String> WHITELIST = SecurityWhitelist.getWhitelistPaths();
+    private static final List<String> WHITELIST = SecurityWhitelist.getAllWhitelistPaths();
 
     @Override
-    protected boolean shouldNotFilter(final HttpServletRequest request) throws ServletException {
+    protected boolean shouldNotFilter(final HttpServletRequest request) {
         String path = request.getRequestURI();
         String method = request.getMethod();
         if ("OPTIONS".equals(method)) {

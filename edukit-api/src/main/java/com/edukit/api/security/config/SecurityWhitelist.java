@@ -1,9 +1,6 @@
 package com.edukit.api.security.config;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class SecurityWhitelist {
@@ -33,7 +30,15 @@ public class SecurityWhitelist {
         ).toList();
     }
 
-    public static List<String> getWhitelistPaths() {
+    public static List<String> getAllWhitelistPaths() {
         return ALL_WHITELIST;
+    }
+
+    public static String[] getBusinessWhitelistArray() {
+        return BUSINESS_WHITE_LIST.toArray(new String[0]);
+    }
+
+    public static String[] getAuthWhitelistArray() {
+        return AUTH_WHITELIST.toArray(new String[0]);
     }
 }
