@@ -75,4 +75,8 @@ public class AuthCode {
                 .expiredAt(LocalDateTime.now().plusMinutes(MINUTES_TO_EXPIRE))
                 .build();
     }
+
+    public void updateStatus(final AuthorizeStatus status) {
+        this.status = status;
+    }
 }
