@@ -9,7 +9,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.List;
+import java.util.Arrays;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -28,7 +28,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final MemberDetailReader memberDetailReader;
 
     private static final AntPathMatcher pathMatcher = new AntPathMatcher();
-    private static final List<String> WHITELIST = SecurityWhitelist.getAllWhitelistPaths();
+    private static final String[] WHITELIST = SecurityWhitelist.getAllWhitelistPaths();
 
     @Override
     protected boolean shouldNotFilter(final HttpServletRequest request) {
@@ -37,7 +37,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         if ("OPTIONS".equals(method)) {
             return true;
         }
-        return WHITELIST.stream().anyMatch(whitelist -> pathMatcher.match(whitelist, path));
+        return Arrays.stream(WHITELIST)
+                .anyMatch(whitelist -> pathMatcher.match(whitelist, path));
     }
 
     @Override

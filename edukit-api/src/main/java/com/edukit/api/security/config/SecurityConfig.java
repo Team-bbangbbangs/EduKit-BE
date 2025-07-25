@@ -1,10 +1,10 @@
 package com.edukit.api.security.config;
 
-import com.edukit.api.security.util.CustomPasswordEncoder;
 import com.edukit.api.security.filter.ExceptionHandlerFilter;
 import com.edukit.api.security.filter.JwtAuthenticationFilter;
 import com.edukit.api.security.handler.JwtAccessDeniedHandler;
 import com.edukit.api.security.handler.JwtAuthenticationEntryPoint;
+import com.edukit.api.security.util.CustomPasswordEncoder;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -42,8 +42,8 @@ public class SecurityConfig {
                         .authenticationEntryPoint(jwtAuthenticationEntryPoint)
                         .accessDeniedHandler(jwtAccessDeniedHandler))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(SecurityWhitelist.getAuthWhitelistArray()).permitAll()
-                        .requestMatchers(SecurityWhitelist.getBusinessWhitelistArray()).permitAll()
+                        .requestMatchers(SecurityWhitelist.AUTH_WHITELIST).permitAll()
+                        .requestMatchers(SecurityWhitelist.BUSINESS_WHITE_LIST).permitAll()
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
                         .requestMatchers("/api/v1/student-records/**").hasAnyRole("TEACHER", "ADMIN")
