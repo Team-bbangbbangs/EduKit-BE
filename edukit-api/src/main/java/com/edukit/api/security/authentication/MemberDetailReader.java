@@ -24,6 +24,6 @@ public class MemberDetailReader implements UserDetailsService {
         MemberRole memberRole = member.getRole();
         Collection<? extends GrantedAuthority> authorities = MemberRoleConverter.toGrantedAuthorities(memberRole);
 
-        return new User(memberId, member.getPassword(), authorities);
+        return new User(memberId, null, authorities);
     }
 }
