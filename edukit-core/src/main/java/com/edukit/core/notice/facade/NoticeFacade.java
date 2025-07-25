@@ -3,9 +3,12 @@ package com.edukit.core.notice.facade;
 import com.edukit.core.notice.entity.Notice;
 import com.edukit.core.notice.enums.NoticeCategory;
 import com.edukit.core.notice.facade.response.NoticeGetResponse;
-import com.edukit.core.notice.facade.response.NoticesGetResponse;
+import com.edukit.core.notice.facade.response.NoticeImageUploadPresignedUrlCreateResponse;
 import com.edukit.core.notice.facade.response.NoticeResponse;
+import com.edukit.core.notice.facade.response.NoticesGetResponse;
 import com.edukit.core.notice.service.NoticeService;
+import com.edukit.external.s3.dto.S3Service;
+import com.edukit.external.s3.dto.response.PresignedUrlCreateResponse;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -16,6 +19,8 @@ import org.springframework.stereotype.Service;
 public class NoticeFacade {
 
     private final NoticeService noticeService;
+    private final S3Service s3Service;
+    private static final String NOTICE_IMAGE_PATH = "notices";
 
     public NoticesGetResponse getNotices(final NoticeCategory category, final int page) {
         int zeroBasedPage = page - 1;
@@ -50,5 +55,10 @@ public class NoticeFacade {
 
     public void deleteNotice(long noticeId) {
         noticeService.deleteNotice(noticeId);
+    }
+
+    public NoticeImageUploadPresignedUrlCreateResponse createImageUploadPresignedUrl(String filename) {
+        PresignedUrlCreateResponse response = s3Service.createPresignedUrl(NOTICE_IMAGE_PATH, filename);
+        return new NoticeImageUploadPresignedUrlCreateResponse(response.presignedUrl(), response.imageUrl());
     }
 }
