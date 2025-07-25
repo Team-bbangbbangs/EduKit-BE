@@ -1,8 +1,7 @@
-package com.edukit.api.security.jwt.service;
+package com.edukit.core.auth.jwt;
 
-import com.edukit.api.security.jwt.provider.JwtKeyProvider;
-import com.edukit.api.security.jwt.setting.JwtProperties;
-import com.edukit.api.security.jwt.type.TokenType;
+import com.edukit.core.auth.jwt.provider.JwtKeyProvider;
+import com.edukit.core.auth.jwt.setting.JwtProperties;
 import io.jsonwebtoken.Header;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -20,13 +19,7 @@ public class JwtGenerator {
 
     private static final String TOKEN_TYPE_CLAIM = "tokenType";
 
-    public Token generateTokens(final String memberUuid) {
-        String accessToken = generateToken(memberUuid, TokenType.ACCESS);
-        String refreshToken = generateToken(memberUuid, TokenType.REFRESH);
-        return Token.of(accessToken, refreshToken);
-    }
-
-    private String generateToken(final String memberUuid, final TokenType tokenType) {
+    public String generateToken(final String memberUuid, final TokenType tokenType) {
         Instant now = Instant.now();
         Instant expiration = generateExpirationInstant(tokenType, now);
 

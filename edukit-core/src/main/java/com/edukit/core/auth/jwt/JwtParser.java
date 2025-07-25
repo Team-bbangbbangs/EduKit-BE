@@ -1,9 +1,9 @@
-package com.edukit.api.security.jwt.service;
+package com.edukit.core.auth.jwt;
 
-import com.edukit.api.security.jwt.provider.JwtKeyProvider;
-import com.edukit.api.security.jwt.setting.JwtProperties;
 import com.edukit.core.auth.exception.AuthErrorCode;
 import com.edukit.core.auth.exception.AuthException;
+import com.edukit.core.auth.jwt.provider.JwtKeyProvider;
+import com.edukit.core.auth.jwt.setting.JwtProperties;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import java.security.Key;
@@ -35,11 +35,6 @@ public class JwtParser {
             return token.substring(BEARER.length());
         }
         throw new AuthException(AuthErrorCode.TOKEN_MISSING);
-    }
-
-    public String getMemberUuidFromToken(final String refreshToken) {
-        Claims claims = parseClaims(refreshToken);
-        return claims.getSubject();
     }
 
     private Key getSigningKey() {
