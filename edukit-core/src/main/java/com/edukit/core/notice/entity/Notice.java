@@ -55,4 +55,15 @@ public class Notice extends BaseTimeEntity {
                 .content(content)
                 .build();
     }
+
+    public void update(NoticeCategory category, String title, String content) {
+        this.category = category;
+        this.title = title;
+        this.content = content;
+    }
+
+    public void delete() {
+        this.isDeleted = true;
+        this.deletedAt = LocalDateTime.now();
+    }
 }
