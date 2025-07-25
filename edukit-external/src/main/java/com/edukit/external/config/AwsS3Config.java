@@ -30,7 +30,7 @@ public class AwsS3Config {
     }
 
     @Bean
-    public S3Client s3Client(AwsCredentialsProvider credentialsProvider) {
+    public S3Client s3Client(final AwsCredentialsProvider credentialsProvider) {
         return S3Client.builder()
                 .region(Region.of(properties.region()))
                 .credentialsProvider(credentialsProvider)
@@ -38,7 +38,7 @@ public class AwsS3Config {
     }
 
     @Bean
-    public S3Presigner s3Presigner(AwsCredentialsProvider credentialsProvider) {
+    public S3Presigner s3Presigner(final AwsCredentialsProvider credentialsProvider) {
         return S3Presigner.builder()
                 .region(Region.of(properties.region()))
                 .credentialsProvider(credentialsProvider)
