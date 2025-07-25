@@ -1,6 +1,6 @@
 package com.edukit.api.controller.auth;
 
-import com.edukit.api.common.ApiResponse;
+import com.edukit.api.common.EduKitResponse;
 import com.edukit.api.controller.auth.request.MemberSignUpRequest;
 import com.edukit.api.security.handler.RefreshTokenCookieHandler;
 import com.edukit.api.security.util.PasswordValidator;
@@ -28,7 +28,7 @@ public class AuthController {
     private final RefreshTokenCookieHandler cookieHandler;
 
     @PostMapping("/signup")
-    public ResponseEntity<ApiResponse<MemberSignUpResponse>> signUp(
+    public ResponseEntity<EduKitResponse<MemberSignUpResponse>> signUp(
             @RequestBody @Valid final MemberSignUpRequest request) {
 
         PasswordValidator.validatePasswordFormat(request.password());
@@ -40,6 +40,6 @@ public class AuthController {
 
         return ResponseEntity.ok()
                 .header(HttpHeaders.SET_COOKIE, refreshCookie.toString())
-                .body(ApiResponse.success(CommonSuccessCode.OK, response));
+                .body(EduKitResponse.success(CommonSuccessCode.OK, response));
     }
 }
