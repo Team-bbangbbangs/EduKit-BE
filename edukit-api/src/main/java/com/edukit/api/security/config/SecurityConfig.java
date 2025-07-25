@@ -1,6 +1,6 @@
 package com.edukit.api.security.config;
 
-import com.edukit.api.security.encoder.CustomPasswordEncoder;
+import com.edukit.api.security.util.CustomPasswordEncoder;
 import com.edukit.api.security.filter.ExceptionHandlerFilter;
 import com.edukit.api.security.filter.JwtAuthenticationFilter;
 import com.edukit.api.security.handler.JwtAccessDeniedHandler;

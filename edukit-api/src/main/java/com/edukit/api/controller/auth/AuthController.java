@@ -6,6 +6,7 @@ import com.edukit.api.controller.auth.response.MemberSignUpResponse;
 import com.edukit.api.security.handler.RefreshTokenCookieHandler;
 import com.edukit.api.security.jwt.service.JwtGenerator;
 import com.edukit.api.security.jwt.service.Token;
+import com.edukit.api.security.util.PasswordValidator;
 import com.edukit.common.exception.code.CommonSuccessCode;
 import com.edukit.core.auth.facade.AuthFacade;
 import com.edukit.core.auth.facade.dto.SignUpResult;
@@ -31,6 +32,7 @@ public class AuthController {
     @PostMapping("/signup")
     public ApiResponse<MemberSignUpResponse> signUp(@RequestBody @Valid final MemberSignUpRequest request,
                                                     final HttpServletResponse servletResponse) {
+        PasswordValidator.validatePasswordFormat(request.password());
         String encodedPassword = passwordEncoder.encode(request.password());
         SignUpResult result = authFacade.signUp(request.email(), encodedPassword, request.subject(), request.nickname(),
                 request.school());
