@@ -39,8 +39,7 @@ public class MemberService {
     }
 
     private Member saveMember(final String email, final String encodedPassword, final Subject subject,
-                              final String nickname,
-                              final String schoolName) {
+                              final String nickname, final String schoolName) {
         School school = School.fromName(schoolName);
 
         Optional<Member> restored = restoreIfSoftDeletedMemberByEmail(email, encodedPassword, subject, school);
