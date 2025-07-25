@@ -1,7 +1,8 @@
-package com.edukit.api.security.jwt;
+package com.edukit.api.security.jwt.service;
 
-import com.edukit.api.security.jwt.config.JwtProperties;
-import com.edukit.api.security.jwt.util.JwtKeyProvider;
+import com.edukit.api.security.jwt.provider.JwtKeyProvider;
+import com.edukit.api.security.jwt.setting.JwtProperties;
+import com.edukit.api.security.jwt.type.TokenType;
 import io.jsonwebtoken.Header;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;

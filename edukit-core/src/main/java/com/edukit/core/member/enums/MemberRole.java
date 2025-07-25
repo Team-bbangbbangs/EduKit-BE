@@ -10,5 +10,5 @@ public enum MemberRole {
     PENDING_TEACHER("ROLE_PENDING_TEACHER"),
     ADMIN("ROLE_ADMIN");
 
-    private final String name;
+    private final String role;
 }

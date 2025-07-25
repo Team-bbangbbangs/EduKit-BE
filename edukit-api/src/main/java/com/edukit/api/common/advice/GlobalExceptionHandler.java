@@ -14,7 +14,6 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
-import org.springframework.web.bind.MissingPathVariableException;
 import org.springframework.web.bind.MissingRequestCookieException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -23,8 +22,6 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
-
-    private static final String FAIL = "FAIL";
 
     // Custom exceptions
     @ExceptionHandler(BusinessException.class)
@@ -49,49 +46,43 @@ public class GlobalExceptionHandler {
             validationErrors.put(fieldError.getField(), fieldError.getDefaultMessage());
         }
 
-        return ApiResponse.fail(FAIL, "validation 오류", validationErrors);
+        return ApiResponse.fail("FAIL-400", "validation 오류", validationErrors);
     }
 
     @ExceptionHandler(MissingRequestCookieException.class)
     public ApiResponse<Void> handleMissingCookieException(final MissingRequestCookieException e) {
         log.info("Missing request cookie exception occurred: {}", e.getMessage());
-        return ApiResponse.fail(FAIL, "필수 쿠키가 누락되었습니다.");
+        return ApiResponse.fail("FAIL-401", "필수 쿠키가 누락되었습니다.");
     }
 
     @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
     public ApiResponse<Void> handleMethodNotSupportedException(final HttpRequestMethodNotSupportedException e) {
         log.warn("Method not supported exception occurred: {}", e.getMessage());
-        return ApiResponse.fail(FAIL, "지원하지 않는 HTTP 메소드입니다.");
-    }
-
-    @ExceptionHandler(MissingPathVariableException.class)
-    public ApiResponse<Void> handleMissingPathVariableException(final MissingPathVariableException e) {
-        log.warn("Missing path variable exception occurred: {}", e.getMessage());
-        return ApiResponse.fail(FAIL, "필수 경로 변수 누락입니다.");
+        return ApiResponse.fail("FAIL-405", "지원하지 않는 HTTP 메소드입니다.");
     }
 
     @ExceptionHandler(HttpMediaTypeNotSupportedException.class)
     public ApiResponse<Void> handleMediaTypeNotSupportedException(final HttpMediaTypeNotSupportedException e) {
         log.warn("Media type not supported exception occurred: {}", e.getMessage());
-        return ApiResponse.fail(FAIL, "지원하지 않는 미디어 타입입니다.");
+        return ApiResponse.fail("FAIL-415", "지원하지 않는 미디어 타입입니다.");
     }
 
     @ExceptionHandler(MissingServletRequestParameterException.class)
     public ApiResponse<Void> handleMissingParameterException(final MissingServletRequestParameterException e) {
         log.warn("Missing request parameter exception occurred: {}", e.getMessage());
-        return ApiResponse.fail(FAIL, "필수 요청 파라미터가 누락되었습니다.");
+        return ApiResponse.fail("FAIL-400", "필수 요청 파라미터가 누락되었습니다.");
     }
 
     @ExceptionHandler(TypeMismatchException.class)
     public ApiResponse<Void> handleTypeMismatchException(final TypeMismatchException e) {
         log.warn("Type mismatch exception occurred: {}", e.getMessage());
-        return ApiResponse.fail(FAIL, "요청 파라미터 타입이 일치하지 않습니다.");
+        return ApiResponse.fail("FAIL-400", "요청 파라미터 타입이 일치하지 않습니다.");
     }
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ApiResponse<Void> handleMessageNotReadableException(final HttpMessageNotReadableException e) {
         log.warn("Message not readable exception occurred: {}", e.getMessage());
-        return ApiResponse.fail(FAIL, "요청 본문이 올바르지 않습니다.");
+        return ApiResponse.fail("FAIL-400", "요청 본문이 올바르지 않습니다.");
     }
 
     // Generic exception handler
@@ -100,7 +91,7 @@ public class GlobalExceptionHandler {
         Throwable cause = getDeepCause(e);
         log.error("Unexpected exception occurred. Original: [{}], Root cause: [{}]", e.getMessage(), cause.getMessage(),
                 e);
-        return ApiResponse.fail(FAIL, "서버 내부 오류가 발생했습니다.");
+        return ApiResponse.fail("FAIL-500", "서버 내부 오류가 발생했습니다.");
     }
 
     private Throwable getDeepCause(Throwable e) {
