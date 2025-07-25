@@ -20,7 +20,13 @@ public class JwtGenerator {
 
     private static final String TOKEN_TYPE_CLAIM = "tokenType";
 
-    public String generateToken(final String memberUuid, final TokenType tokenType) {
+    public Token generateTokens(final String memberUuid) {
+        String accessToken = generateToken(memberUuid, TokenType.ACCESS);
+        String refreshToken = generateToken(memberUuid, TokenType.REFRESH);
+        return Token.of(accessToken, refreshToken);
+    }
+
+    private String generateToken(final String memberUuid, final TokenType tokenType) {
         Instant now = Instant.now();
         Instant expiration = generateExpirationInstant(tokenType, now);
 
