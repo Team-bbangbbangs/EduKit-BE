@@ -2,7 +2,7 @@ package com.edukit.core.post.entity;
 
 import com.edukit.core.common.domain.BaseTimeEntity;
 import com.edukit.core.member.entity.Member;
-import com.edukit.core.member.entity.Subject;
+import com.edukit.core.subject.entity.Subject;
 import com.edukit.core.post.enums.PostCategory;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

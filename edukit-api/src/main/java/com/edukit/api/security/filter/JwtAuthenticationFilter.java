@@ -3,15 +3,13 @@ package com.edukit.api.security.filter;
 import com.edukit.api.security.authentication.MemberAuthentication;
 import com.edukit.api.security.authentication.MemberDetailReader;
 import com.edukit.api.security.config.SecurityWhitelist;
-import com.edukit.api.security.jwt.service.JwtParser;
-import com.edukit.api.security.jwt.service.JwtValidator;
-import com.edukit.api.security.jwt.type.TokenType;
+import com.edukit.core.auth.service.JwtTokenService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.List;
+import java.util.Arrays;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -26,21 +24,20 @@ import org.springframework.web.filter.OncePerRequestFilter;
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
-    private final JwtParser jwtParser;
-    private final JwtValidator jwtValidator;
+    private final JwtTokenService jwtTokenService;
     private final MemberDetailReader memberDetailReader;
 
     private static final AntPathMatcher pathMatcher = new AntPathMatcher();
-    private static final List<String> WHITELIST = SecurityWhitelist.getWhitelistPaths();
+    private static final String[] WHITELIST = SecurityWhitelist.getAllWhitelistPaths();
 
     @Override
-    protected boolean shouldNotFilter(final HttpServletRequest request) throws ServletException {
+    protected boolean shouldNotFilter(final HttpServletRequest request) {
         String path = request.getRequestURI();
         String method = request.getMethod();
         if ("OPTIONS".equals(method)) {
             return true;
         }
-        return WHITELIST.stream()
+        return Arrays.stream(WHITELIST)
                 .anyMatch(whitelist -> pathMatcher.match(whitelist, path));
     }
 
@@ -54,9 +51,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private String getMemberUuidFromToken(final HttpServletRequest request) {
         String requestedToken = request.getHeader(HttpHeaders.AUTHORIZATION);
-        String token = jwtParser.resolveToken(requestedToken);
-        jwtValidator.validateToken(token, TokenType.ACCESS);
-        return jwtParser.parseClaims(token).getSubject();
+        return jwtTokenService.parseMemberUuidFromAccessToken(requestedToken);
     }
 
     private void doAuthentication(final HttpServletRequest request, final String memberUuid) {

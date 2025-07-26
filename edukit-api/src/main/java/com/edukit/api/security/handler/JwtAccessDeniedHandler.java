@@ -1,6 +1,6 @@
 package com.edukit.api.security.handler;
 
-import com.edukit.api.common.ApiResponse;
+import com.edukit.api.common.EdukitResponse;
 import com.edukit.core.auth.exception.AuthErrorCode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
@@ -31,6 +31,6 @@ public class JwtAccessDeniedHandler implements AccessDeniedHandler {
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
         response.setCharacterEncoding(StandardCharsets.UTF_8.name());
         response.getWriter().write(objectMapper.writeValueAsString(
-                ApiResponse.fail(AuthErrorCode.FORBIDDEN_MEMBER.getCode(), AuthErrorCode.FORBIDDEN_MEMBER.getMessage())));
+                EdukitResponse.fail(AuthErrorCode.FORBIDDEN_MEMBER.getCode(), AuthErrorCode.FORBIDDEN_MEMBER.getMessage())));
     }
 }

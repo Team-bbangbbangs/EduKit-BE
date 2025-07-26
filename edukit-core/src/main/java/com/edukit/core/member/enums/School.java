@@ -1,5 +1,8 @@
 package com.edukit.core.member.enums;
 
+import com.edukit.core.member.exception.MemberException;
+import com.edukit.core.member.exception.MemberErrorCode;
+import java.util.Arrays;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
@@ -10,4 +13,11 @@ public enum School {
     HIGH_SCHOOL("high");
 
     private final String name;
+
+    public static School fromName(final String name) {
+        return Arrays.stream(School.values())
+                .filter(school -> school.getName().equalsIgnoreCase(name))
+                .findFirst()
+                .orElseThrow(() -> new MemberException(MemberErrorCode.INVALID_SCHOOL_TYPE));
+    }
 }
