@@ -1,4 +1,4 @@
-package com.edukit.common.exception.code;
+package com.edukit.common.exception;
 
 public interface ErrorCode {
 

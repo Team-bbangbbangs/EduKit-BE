@@ -2,7 +2,7 @@ package com.edukit.api.security.filter;
 
 import com.edukit.api.common.EdukitResponse;
 import com.edukit.common.exception.BusinessException;
-import com.edukit.common.exception.code.ErrorCode;
+import com.edukit.common.exception.ErrorCode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.http.HttpServletRequest;

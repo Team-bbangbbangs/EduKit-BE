@@ -4,7 +4,6 @@ import com.edukit.api.common.EdukitResponse;
 import com.edukit.api.controller.auth.request.MemberSignUpRequest;
 import com.edukit.api.security.handler.RefreshTokenCookieHandler;
 import com.edukit.api.security.util.PasswordValidator;
-import com.edukit.common.exception.code.CommonSuccessCode;
 import com.edukit.core.auth.facade.AuthFacade;
 import com.edukit.core.auth.facade.response.MemberSignUpResponse;
 import jakarta.validation.Valid;
@@ -40,6 +39,6 @@ public class AuthController {
 
         return ResponseEntity.ok()
                 .header(HttpHeaders.SET_COOKIE, refreshCookie.toString())
-                .body(EdukitResponse.success(CommonSuccessCode.OK, response));
+                .body(EdukitResponse.success(response));
     }
 }

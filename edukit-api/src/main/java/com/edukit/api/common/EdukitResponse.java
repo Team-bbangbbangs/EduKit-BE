@@ -1,7 +1,6 @@
 package com.edukit.api.common;
 
-import com.edukit.common.exception.code.ErrorCode;
-import com.edukit.common.exception.code.SuccessCode;
+import com.edukit.common.exception.ErrorCode;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -23,12 +22,12 @@ public class EdukitResponse<T> {
         this.data = null;
     }
 
-    public static <T> EdukitResponse<T> success(final SuccessCode successCode) {
-        return new EdukitResponse<>(successCode.getCode(), successCode.getMessage());
+    public static <T> EdukitResponse<T> success() {
+        return new EdukitResponse<>("SUCCESS", "요청이 성공했습니다.");
     }
 
-    public static <T> EdukitResponse<T> success(final SuccessCode successCode, final T data) {
-        return new EdukitResponse<>(successCode.getCode(), successCode.getMessage(), data);
+    public static <T> EdukitResponse<T> success(final T data) {
+        return new EdukitResponse<>("SUCCESS", "요청이 성공했습니다.", data);
     }
 
     public static <T> EdukitResponse<T> fail(final ErrorCode errorCode) {

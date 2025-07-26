@@ -1,6 +1,6 @@
 package com.edukit.core.subject.exception;
 
-import com.edukit.common.exception.code.ErrorCode;
+import com.edukit.common.exception.ErrorCode;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 

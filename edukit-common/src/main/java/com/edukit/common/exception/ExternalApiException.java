@@ -1,6 +1,5 @@
 package com.edukit.common.exception;
 
-import com.edukit.common.exception.code.ErrorCode;
 import lombok.Getter;
 
 @Getter
