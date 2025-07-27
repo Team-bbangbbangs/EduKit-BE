@@ -1,7 +1,7 @@
 package com.edukit.core.notice.enums;
 
 import com.edukit.core.notice.exception.NoticeException;
-import com.edukit.core.notice.exception.code.NoticeErrorCode;
+import com.edukit.core.notice.exception.NoticeErrorCode;
 import java.util.Arrays;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;

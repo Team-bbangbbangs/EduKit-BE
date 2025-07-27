@@ -4,7 +4,7 @@ import com.edukit.core.notice.entity.Notice;
 import com.edukit.core.notice.entity.NoticeFile;
 import com.edukit.core.notice.enums.NoticeCategory;
 import com.edukit.core.notice.exception.NoticeException;
-import com.edukit.core.notice.exception.code.NoticeErrorCode;
+import com.edukit.core.notice.exception.NoticeErrorCode;
 import com.edukit.core.notice.repository.NoticeFileRepository;
 import com.edukit.core.notice.repository.NoticeRepository;
 import java.util.List;
