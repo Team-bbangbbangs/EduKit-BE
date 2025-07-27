@@ -1,10 +1,10 @@
 package com.edukit.api.security.config;
 
-import com.edukit.api.security.encoder.CustomPasswordEncoder;
-import com.edukit.api.security.handler.JwtAccessDeniedHandler;
-import com.edukit.api.security.handler.JwtAuthenticationEntryPoint;
 import com.edukit.api.security.filter.ExceptionHandlerFilter;
 import com.edukit.api.security.filter.JwtAuthenticationFilter;
+import com.edukit.api.security.handler.JwtAccessDeniedHandler;
+import com.edukit.api.security.handler.JwtAuthenticationEntryPoint;
+import com.edukit.api.security.util.CustomPasswordEncoder;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

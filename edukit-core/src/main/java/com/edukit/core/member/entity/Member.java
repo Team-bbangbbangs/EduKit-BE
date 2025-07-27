@@ -3,6 +3,7 @@ package com.edukit.core.member.entity;
 import com.edukit.core.common.domain.BaseTimeEntity;
 import com.edukit.core.member.enums.MemberRole;
 import com.edukit.core.member.enums.School;
+import com.edukit.core.subject.entity.Subject;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -93,5 +94,16 @@ public class Member extends BaseTimeEntity {
                 .isDeleted(false)
                 .memberUuid(UUID.randomUUID().toString())
                 .build();
+    }
+
+    public void restore(final String password, final Subject subject, final String nickname, final School school) {
+        this.isDeleted = false;
+        this.deletedAt = null;
+        this.password = password;
+        this.subject = subject;
+        this.nickname = nickname;
+        this.school = school;
+        this.role = MemberRole.PENDING_TEACHER;
+        this.verifiedAt = null;
     }
 }

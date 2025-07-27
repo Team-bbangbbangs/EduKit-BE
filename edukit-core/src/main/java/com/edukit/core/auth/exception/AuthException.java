@@ -1,7 +1,7 @@
 package com.edukit.core.auth.exception;
 
 import com.edukit.common.exception.BusinessException;
-import com.edukit.common.exception.code.ErrorCode;
+import com.edukit.common.exception.ErrorCode;
 
 public class AuthException extends BusinessException {
 

@@ -1,8 +1,8 @@
 package com.edukit.api.security.filter;
 
-import com.edukit.api.common.ApiResponse;
+import com.edukit.api.common.EdukitResponse;
 import com.edukit.common.exception.BusinessException;
-import com.edukit.common.exception.code.ErrorCode;
+import com.edukit.common.exception.ErrorCode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.http.HttpServletRequest;
@@ -48,6 +48,6 @@ public class ExceptionHandlerFilter extends OncePerRequestFilter {
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
         response.setCharacterEncoding(StandardCharsets.UTF_8.name());
         PrintWriter writer = response.getWriter();
-        writer.write(objectMapper.writeValueAsString(ApiResponse.fail(customCode, message)));
+        writer.write(objectMapper.writeValueAsString(EdukitResponse.fail(customCode, message)));
     }
 }
