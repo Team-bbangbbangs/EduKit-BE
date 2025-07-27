@@ -1,4 +1,4 @@
-package com.edukit.api.notice.controller;
+package com.edukit.api.controller.notice;
 
 import com.edukit.api.common.ApiResponse;
 import com.edukit.common.exception.code.CommonSuccessCode;
