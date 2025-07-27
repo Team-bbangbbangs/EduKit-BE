@@ -1,4 +1,4 @@
-package com.edukit.external.s3.dto.exception;
+package com.edukit.external.s3.exception;
 
 import com.edukit.common.exception.code.ErrorCode;
 import lombok.Getter;
