@@ -1,7 +1,6 @@
 package com.edukit.external.ai;
 
 import com.edukit.external.ai.response.OpenAIVersionResponse;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import lombok.RequiredArgsConstructor;
 import org.springframework.ai.chat.client.ChatClient;
@@ -19,11 +18,11 @@ public class OpenAIService {
             학생의 정보를 바탕으로 생활기록부를 작성합니다.
             """;
 
+
     public Flux<OpenAIVersionResponse> getVersionedStreamingResponse(final String prompt) {
         return Flux.create(sink -> {
             StringBuilder buffer = new StringBuilder();
             AtomicInteger currentVersion = new AtomicInteger(0);
-            AtomicBoolean isCollectingVersion = new AtomicBoolean(false);
 
             chatClient.prompt()
                     .system(SYSTEM_INSTRUCTIONS)
@@ -47,34 +46,47 @@ public class OpenAIService {
                                     ));
 
                                     currentVersion.incrementAndGet();
-
-                                    if (currentVersion.get() >= 3) {
-                                        sink.complete();
-                                    }
                                 }
                             },
                             sink::error,
-                            sink::complete
+                            () -> {
+                                // 스트림 완료 시 3번째 버전 처리
+                                String finalBuffer = buffer.toString();
+
+                                // 아직 처리하지 않은 버전이 있다면 처리
+                                if (currentVersion.get() < 3) {
+                                    String version3Content = extractCompleteVersion(finalBuffer, 3);
+
+                                    if (!version3Content.isEmpty()) {
+                                        sink.next(OpenAIVersionResponse.of(
+                                                3,
+                                                version3Content,
+                                                true // 마지막 버전
+                                        ));
+                                    }
+                                }
+
+                                sink.complete();
+                            }
                     );
         });
     }
 
     private boolean isVersionComplete(String buffer, int currentVersion) {
         String currentVersionPattern = "===VERSION_" + (currentVersion + 1) + "===";
-        String nextVersionPattern = "===VERSION_" + (currentVersion + 2) + "===";
 
         if (!buffer.contains(currentVersionPattern)) {
             return false;
         }
 
         if (currentVersion < 2) {
+            // 1, 2번 버전: 다음 버전이 시작되었으면 완성
+            String nextVersionPattern = "===VERSION_" + (currentVersion + 2) + "===";
             return buffer.contains(nextVersionPattern);
-        } else {
-            // 마지막 버전인 경우 충분한 길이가 있는지 확인
-            int startIndex = buffer.indexOf(currentVersionPattern);
-            String versionContent = buffer.substring(startIndex + currentVersionPattern.length()).trim();
-            return versionContent.length() > 100; // 최소 길이 체크
         }
+
+        // 3번째 버전은 여기서 처리하지 않음 (onComplete에서 처리)
+        return false;
     }
 
     private String extractCompleteVersion(String buffer, int versionNumber) {
@@ -92,6 +104,7 @@ public class OpenAIService {
         if (endIndex != -1) {
             return buffer.substring(contentStart, endIndex).trim();
         } else {
+            // 다음 버전이 없으면 끝까지 (주로 3번째 버전에서 발생)
             return buffer.substring(contentStart).trim();
         }
     }
