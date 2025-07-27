@@ -6,6 +6,7 @@ import com.edukit.api.security.handler.RefreshTokenCookieHandler;
 import com.edukit.api.security.util.PasswordValidator;
 import com.edukit.core.auth.facade.AuthFacade;
 import com.edukit.core.auth.facade.response.MemberSignUpResponse;
+import com.edukit.core.member.enums.School;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
@@ -32,8 +33,10 @@ public class AuthController {
 
         PasswordValidator.validatePasswordFormat(request.password());
         String encodedPassword = passwordEncoder.encode(request.password());
+        School school = School.fromName(request.school());
+
         MemberSignUpResponse response = authFacade.signUp(request.email(), encodedPassword, request.subject(),
-                request.nickname(), request.school());
+                request.nickname(), school);
 
         ResponseCookie refreshCookie = cookieHandler.createRefreshTokenCookie(response.refreshToken());
 

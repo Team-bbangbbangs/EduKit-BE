@@ -29,7 +29,7 @@ public class MemberService {
 
     @Transactional
     public Member createMember(final String email, final String encodedPassword, final Subject subject,
-                               final String nickname, final String school) {
+                               final String nickname, final School school) {
         try {
             return saveMember(email, encodedPassword, subject, nickname, school);
         } catch (DataIntegrityViolationException e) {
@@ -38,9 +38,7 @@ public class MemberService {
     }
 
     private Member saveMember(final String email, final String encodedPassword, final Subject subject,
-                              final String nickname, final String schoolName) {
-        School school = School.fromName(schoolName);
-
+                              final String nickname, final School school) {
         Optional<Member> restored = restoreIfSoftDeletedMemberByEmail(email, encodedPassword, subject, nickname,
                 school);
         if (restored.isPresent()) { // 재가입 회원 -> 복구 처리

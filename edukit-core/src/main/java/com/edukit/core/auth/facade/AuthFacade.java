@@ -3,11 +3,12 @@ package com.edukit.core.auth.facade;
 import com.edukit.core.auth.enums.AuthCodeType;
 import com.edukit.core.auth.event.MemberSignedUpEvent;
 import com.edukit.core.auth.facade.response.MemberSignUpResponse;
-import com.edukit.core.auth.jwt.dto.Token;
+import com.edukit.core.auth.jwt.dto.JwtToken;
 import com.edukit.core.auth.service.AuthCodeService;
 import com.edukit.core.auth.service.AuthService;
 import com.edukit.core.auth.service.JwtTokenService;
 import com.edukit.core.member.entity.Member;
+import com.edukit.core.member.enums.School;
 import com.edukit.core.member.service.MemberService;
 import com.edukit.core.subject.entity.Subject;
 import com.edukit.core.subject.service.SubjectService;
@@ -29,17 +30,17 @@ public class AuthFacade {
 
     @Transactional
     public MemberSignUpResponse signUp(final String email, final String password, final String subjectName,
-                                       final String nickname, final String school) {
+                                       final String nickname, final School school) {
         authService.validateCondition(email, nickname);
         Subject subject = subjectService.getSubjectByName(subjectName);
         Member member = memberService.createMember(email, password, subject, nickname, school);
 
-        Token token = jwtTokenService.generateTokens(member.getMemberUuid());
+        JwtToken jwtToken = jwtTokenService.generateTokens(member.getMemberUuid());
         // refreshToken을 Redis에 저장하는 로직 구현
 
         String authCode = authCodeService.issueVerificationCode(member, AuthCodeType.TEACHER_VERIFICATION);
 
         eventPublisher.publishEvent(MemberSignedUpEvent.of(member.getEmail(), member.getMemberUuid(), authCode));
-        return MemberSignUpResponse.of(token.accessToken(), token.refreshToken());
+        return MemberSignUpResponse.of(jwtToken.accessToken(), jwtToken.refreshToken());
     }
 }

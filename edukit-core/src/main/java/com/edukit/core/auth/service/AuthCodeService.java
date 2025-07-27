@@ -15,11 +15,10 @@ import org.springframework.transaction.annotation.Transactional;
 public class AuthCodeService {
 
     private final AuthCodeRepository authCodeRepository;
-    private final RandomCodeGenerator randomCodeGenerator;
 
     @Transactional
     public String issueVerificationCode(final Member member, final AuthCodeType authCodeType) {
-        String code = randomCodeGenerator.generate();
+        String code = RandomCodeGenerator.generate();
         AuthCode authorizationCode = AuthCode.create(member, code, AuthorizeStatus.PENDING, authCodeType);
         authCodeRepository.save(authorizationCode);
         return code;
