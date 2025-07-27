@@ -1,5 +1,8 @@
 package com.edukit.core.notice.enums;
 
+import com.edukit.core.notice.exception.NoticeException;
+import com.edukit.core.notice.exception.NoticeErrorCode;
+import java.util.Arrays;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
@@ -12,4 +15,18 @@ public enum NoticeCategory {
 
     private final int id;
     private final String text;
+
+    public static NoticeCategory fromId(final Integer code) {
+        if (code == null) {
+            return ALL;
+        }
+        return Arrays.stream(NoticeCategory.values())
+                .filter(category -> category.id == code)
+                .findFirst()
+                .orElseThrow(() -> new NoticeException(NoticeErrorCode.INVALID_NOTICE_CATEGORY));
+    }
+
+    public boolean isCreatable() {
+        return this != ALL;
+    }
 }
