@@ -1,6 +1,6 @@
 package com.edukit.core.auth.enums;
 
-public enum AuthorizeStatus {
+public enum VerificationStatus {
     COMPLETE,
     PENDING,
     EXPIRED

@@ -1,6 +1,6 @@
 package com.edukit.core.auth.enums;
 
-public enum AuthCodeType {
+public enum VerificationCodeType {
     TEACHER_VERIFICATION,
     PASSWORD_RESET
 }

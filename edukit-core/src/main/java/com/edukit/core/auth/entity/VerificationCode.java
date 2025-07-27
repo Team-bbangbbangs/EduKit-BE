@@ -2,8 +2,8 @@ package com.edukit.core.auth.entity;
 
 import static jakarta.persistence.GenerationType.IDENTITY;
 
-import com.edukit.core.auth.enums.AuthorizeStatus;
-import com.edukit.core.auth.enums.AuthCodeType;
+import com.edukit.core.auth.enums.VerificationCodeType;
+import com.edukit.core.auth.enums.VerificationStatus;
 import com.edukit.core.member.entity.Member;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -39,11 +39,11 @@ public class VerificationCode {
 
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
-    private AuthorizeStatus status;
+    private VerificationStatus status;
 
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
-    private AuthCodeType type;
+    private VerificationCodeType type;
 
     @Column(nullable = false)
     private LocalDateTime createdAt;
@@ -55,7 +55,8 @@ public class VerificationCode {
 
     @Builder(access = AccessLevel.PRIVATE)
     private VerificationCode(final Member member, final String verificationCode, final LocalDateTime createdAt,
-                             final LocalDateTime expiredAt, final AuthorizeStatus status, final AuthCodeType type) {
+                             final LocalDateTime expiredAt, final VerificationStatus status,
+                             final VerificationCodeType type) {
         this.member = member;
         this.verificationCode = verificationCode;
         this.createdAt = createdAt;
@@ -65,7 +66,7 @@ public class VerificationCode {
     }
 
     public static VerificationCode create(final Member member, final String verificationCode,
-                                          final AuthorizeStatus status, final AuthCodeType type) {
+                                          final VerificationStatus status, final VerificationCodeType type) {
         return VerificationCode.builder()
                 .member(member)
                 .verificationCode(verificationCode)
@@ -74,9 +75,5 @@ public class VerificationCode {
                 .createdAt(LocalDateTime.now())
                 .expiredAt(LocalDateTime.now().plusMinutes(MINUTES_TO_EXPIRE))
                 .build();
-    }
-
-    public void updateStatus(final AuthorizeStatus status) {
-        this.status = status;
     }
 }

@@ -1,6 +1,6 @@
 package com.edukit.core.auth.facade;
 
-import com.edukit.core.auth.enums.AuthCodeType;
+import com.edukit.core.auth.enums.VerificationCodeType;
 import com.edukit.core.auth.event.MemberSignedUpEvent;
 import com.edukit.core.auth.facade.response.MemberSignUpResponse;
 import com.edukit.core.auth.jwt.dto.AuthToken;
@@ -39,7 +39,7 @@ public class AuthFacade {
         // refreshToken을 Redis에 저장하는 로직 구현
 
         String verificationCode = verificationCodeService.issueVerificationCode(member,
-                AuthCodeType.TEACHER_VERIFICATION);
+                VerificationCodeType.TEACHER_VERIFICATION);
 
         eventPublisher.publishEvent(
                 MemberSignedUpEvent.of(member.getEmail(), member.getMemberUuid(), verificationCode));
