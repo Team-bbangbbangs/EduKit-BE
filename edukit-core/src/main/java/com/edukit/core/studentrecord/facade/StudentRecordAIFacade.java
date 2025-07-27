@@ -3,12 +3,10 @@ package com.edukit.core.studentrecord.facade;
 import com.edukit.core.member.entity.Member;
 import com.edukit.core.member.service.MemberService;
 import com.edukit.core.studentrecord.entity.StudentRecord;
-import com.edukit.core.studentrecord.facade.response.StudentRecordCreateResponse;
 import com.edukit.core.studentrecord.facade.response.StudentRecordTaskResponse;
 import com.edukit.core.studentrecord.service.StudentRecordService;
 import com.edukit.core.studentrecord.util.AIPromptGenerator;
 import com.edukit.external.ai.OpenAIService;
-import com.edukit.external.ai.response.OpenAIResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,18 +21,6 @@ public class StudentRecordAIFacade {
     private final OpenAIService openAIService;
 
     @Transactional
-    public StudentRecordTaskResponse getPrompt(final long memberId, final long recordId, final int byteCount,
-                                               final String userPrompt) {
-        Member member = memberService.getMemberById(memberId);
-        StudentRecord studentRecord = studentRecordService.getRecordDetail(member.getId(), recordId);
-
-        String requestPrompt = AIPromptGenerator.createPrompt(studentRecord.getStudentRecordType(), byteCount,
-                userPrompt);
-        long taskId = studentRecordService.createAITask(studentRecord, userPrompt);
-        return StudentRecordTaskResponse.of(taskId, requestPrompt);
-    }
-
-    @Transactional
     public StudentRecordTaskResponse getStreamingPrompt(final long memberId, final long recordId, final int byteCount,
                                                         final String userPrompt) {
         Member member = memberService.getMemberById(memberId);
@@ -46,13 +32,27 @@ public class StudentRecordAIFacade {
         return StudentRecordTaskResponse.of(taskId, requestPrompt);
     }
 
-    public StudentRecordCreateResponse generateAIStudentRecord(final String prompt) {
-        OpenAIResponse openAIResponse = openAIService.getThreeAIResponses(prompt);
-        return StudentRecordCreateResponse.of(openAIResponse.description1(), openAIResponse.description2(),
-                openAIResponse.description3());
-    }
-
     public Flux<String> generateAIStudentRecordStream(final String prompt) {
         return openAIService.getStreamingResponse(prompt);
     }
+
+    /* v1.0.0
+    @Transactional
+    public StudentRecordTaskResponse getPrompt(final long memberId, final long recordId, final int byteCount,
+                                               final String userPrompt) {
+        Member member = memberService.getMemberById(memberId);
+        StudentRecord studentRecord = studentRecordService.getRecordDetail(member.getId(), recordId);
+
+        String requestPrompt = AIPromptGenerator.createPrompt(studentRecord.getStudentRecordType(), byteCount,
+                userPrompt);
+        long taskId = studentRecordService.createAITask(studentRecord, userPrompt);
+        return StudentRecordTaskResponse.of(taskId, requestPrompt);
+    }
+
+    public StudentRecordCreateResponse generateAIStudentRecord(final String prompt) {
+        OpenAIResponse openAIResponse = openAIService.getMultipleChatResponses(prompt);
+        return StudentRecordCreateResponse.of(openAIResponse.description1(), openAIResponse.description2(),
+                openAIResponse.description3());
+    }
+     */
 }

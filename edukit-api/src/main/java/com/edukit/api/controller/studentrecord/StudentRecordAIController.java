@@ -1,15 +1,12 @@
 package com.edukit.api.controller.studentrecord;
 
-import com.edukit.api.common.EdukitResponse;
 import com.edukit.api.common.annotation.MemberId;
 import com.edukit.api.controller.studentrecord.request.StudentRecordPromptRequest;
 import com.edukit.core.studentrecord.facade.StudentRecordAIFacade;
-import com.edukit.core.studentrecord.facade.response.StudentRecordCreateResponse;
 import com.edukit.core.studentrecord.facade.response.StudentRecordTaskResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -24,6 +21,7 @@ public class StudentRecordAIController {
 
     private final StudentRecordAIFacade studentRecordAIFacade;
 
+    /* v1.0.0
     @PostMapping("/ai-generate/{recordId}")
     public ResponseEntity<EdukitResponse<StudentRecordCreateResponse>> aiGenerateStudentRecord(
             @MemberId final long memberId,
@@ -36,6 +34,7 @@ public class StudentRecordAIController {
                 promptResponse.inputPrompt());
         return ResponseEntity.ok(EdukitResponse.success(response));
     }
+     */
 
     @PostMapping(value = "/ai-generate/{recordId}/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<String> aiGenerateStudentRecordStream(
