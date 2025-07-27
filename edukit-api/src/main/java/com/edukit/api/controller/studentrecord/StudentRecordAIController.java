@@ -55,6 +55,10 @@ public class StudentRecordAIController {
                         .id(String.valueOf(response.versionNumber()))
                         .event("student-record-created")
                         .data(response)
-                        .build());
+                        .build())
+                .onErrorResume(throwable -> Flux.just(ServerSentEvent.<StudentRecordCreateResponse>builder()
+                        .event("error")
+                        .comment("스트리밍 중 오류가 발생했습니다: " + throwable.getMessage())
+                        .build()));
     }
 }
