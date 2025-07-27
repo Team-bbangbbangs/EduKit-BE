@@ -43,7 +43,7 @@ public class NoticeFile extends BaseTimeEntity {
                 .build();
     }
 
-    public boolean isExcludedFrom(List<NoticeFile> newNoticeFiles) {
+    public boolean isExcludedFrom(final List<NoticeFile> newNoticeFiles) {
         return !newNoticeFiles.contains(this);
     }
 
