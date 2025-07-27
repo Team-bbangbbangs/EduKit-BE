@@ -3,10 +3,12 @@ package com.edukit.core.studentrecord.facade;
 import com.edukit.core.member.entity.Member;
 import com.edukit.core.member.service.MemberService;
 import com.edukit.core.studentrecord.entity.StudentRecord;
+import com.edukit.core.studentrecord.facade.response.StudentRecordCreateResponse;
 import com.edukit.core.studentrecord.facade.response.StudentRecordTaskResponse;
 import com.edukit.core.studentrecord.service.StudentRecordService;
 import com.edukit.core.studentrecord.util.AIPromptGenerator;
 import com.edukit.external.ai.OpenAIService;
+import com.edukit.external.ai.response.OpenAIVersionResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,8 +34,13 @@ public class StudentRecordAIFacade {
         return StudentRecordTaskResponse.of(taskId, requestPrompt);
     }
 
-    public Flux<String> generateAIStudentRecordStream(final String prompt) {
-        return openAIService.getStreamingResponse(prompt);
+    public Flux<StudentRecordCreateResponse> generateAIStudentRecordStream(final String prompt) {
+        return openAIService.getVersionedStreamingResponse(prompt)
+                .map(this::mapToStudentRecordCreateResponse);
+    }
+
+    private StudentRecordCreateResponse mapToStudentRecordCreateResponse(final OpenAIVersionResponse response) {
+        return StudentRecordCreateResponse.of(response.versionNumber(), response.content(), response.isLast());
     }
 
     /* v1.0.0

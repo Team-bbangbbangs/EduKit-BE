@@ -1,11 +1,11 @@
 package com.edukit.external.ai;
 
-import com.edukit.external.ai.exception.OpenAiErrorCode;
-import com.edukit.external.ai.exception.OpenAiException;
+import com.edukit.external.ai.response.OpenAIVersionResponse;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 import lombok.RequiredArgsConstructor;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.ResourceAccessException;
 import reactor.core.publisher.Flux;
 
 @Service
@@ -19,17 +19,80 @@ public class OpenAIService {
             학생의 정보를 바탕으로 생활기록부를 작성합니다.
             """;
 
-    public Flux<String> getStreamingResponse(final String prompt) {
-        try {
-            return chatClient.prompt()
+    public Flux<OpenAIVersionResponse> getVersionedStreamingResponse(final String prompt) {
+        return Flux.create(sink -> {
+            StringBuilder buffer = new StringBuilder();
+            AtomicInteger currentVersion = new AtomicInteger(0);
+            AtomicBoolean isCollectingVersion = new AtomicBoolean(false);
+
+            chatClient.prompt()
                     .system(SYSTEM_INSTRUCTIONS)
                     .user(prompt)
                     .stream()
-                    .content();
-        } catch (ResourceAccessException ex) {
-            throw new OpenAiException(OpenAiErrorCode.OPEN_AI_TIMEOUT, ex);
-        } catch (Exception e) {
-            throw new OpenAiException(OpenAiErrorCode.OPEN_AI_INTERNAL_ERROR, e);
+                    .content()
+                    .subscribe(
+                            chunk -> {
+                                buffer.append(chunk);
+                                String currentBuffer = buffer.toString();
+
+                                // 버전 완성 감지 및 전송 로직
+                                if (isVersionComplete(currentBuffer, currentVersion.get())) {
+                                    String completeVersion = extractCompleteVersion(currentBuffer,
+                                            currentVersion.get() + 1);
+
+                                    sink.next(OpenAIVersionResponse.of(
+                                            currentVersion.get() + 1,
+                                            completeVersion,
+                                            currentVersion.get() == 2 // 3번째 버전이면 마지막
+                                    ));
+
+                                    currentVersion.incrementAndGet();
+
+                                    if (currentVersion.get() >= 3) {
+                                        sink.complete();
+                                    }
+                                }
+                            },
+                            sink::error,
+                            sink::complete
+                    );
+        });
+    }
+
+    private boolean isVersionComplete(String buffer, int currentVersion) {
+        String currentVersionPattern = "===VERSION_" + (currentVersion + 1) + "===";
+        String nextVersionPattern = "===VERSION_" + (currentVersion + 2) + "===";
+
+        if (!buffer.contains(currentVersionPattern)) {
+            return false;
+        }
+
+        if (currentVersion < 2) {
+            return buffer.contains(nextVersionPattern);
+        } else {
+            // 마지막 버전인 경우 충분한 길이가 있는지 확인
+            int startIndex = buffer.indexOf(currentVersionPattern);
+            String versionContent = buffer.substring(startIndex + currentVersionPattern.length()).trim();
+            return versionContent.length() > 100; // 최소 길이 체크
+        }
+    }
+
+    private String extractCompleteVersion(String buffer, int versionNumber) {
+        String versionPattern = "===VERSION_" + versionNumber + "===";
+        String nextVersionPattern = "===VERSION_" + (versionNumber + 1) + "===";
+
+        int startIndex = buffer.indexOf(versionPattern);
+        if (startIndex == -1) {
+            return "";
+        }
+
+        int contentStart = startIndex + versionPattern.length();
+        int endIndex = buffer.indexOf(nextVersionPattern);
+
+        if (endIndex != -1) {
+            return buffer.substring(contentStart, endIndex).trim();
+        } else {
+            return buffer.substring(contentStart).trim();
         }
     }
 

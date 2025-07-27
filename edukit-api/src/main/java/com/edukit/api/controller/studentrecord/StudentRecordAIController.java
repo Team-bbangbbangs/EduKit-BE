@@ -3,10 +3,12 @@ package com.edukit.api.controller.studentrecord;
 import com.edukit.api.common.annotation.MemberId;
 import com.edukit.api.controller.studentrecord.request.StudentRecordPromptRequest;
 import com.edukit.core.studentrecord.facade.StudentRecordAIFacade;
+import com.edukit.core.studentrecord.facade.response.StudentRecordCreateResponse;
 import com.edukit.core.studentrecord.facade.response.StudentRecordTaskResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
+import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -37,16 +39,19 @@ public class StudentRecordAIController {
      */
 
     @PostMapping(value = "/ai-generate/{recordId}/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Flux<String> aiGenerateStudentRecordStream(
+    public Flux<ServerSentEvent<StudentRecordCreateResponse>> aiGenerateStudentRecordStream(
             @MemberId final long memberId,
             @PathVariable final long recordId,
             @RequestBody @Valid final StudentRecordPromptRequest request
     ) {
         StudentRecordTaskResponse promptResponse = studentRecordAIFacade.getStreamingPrompt(memberId, recordId,
                 request.byteCount(), request.prompt());
-        
+
         return studentRecordAIFacade.generateAIStudentRecordStream(promptResponse.inputPrompt())
-                .map(chunk -> "data: " + chunk + "\n\n")
-                .concatWithValues("data: [DONE]\n\n");
+                .map(response -> ServerSentEvent.<StudentRecordCreateResponse>builder()
+                        .id(String.valueOf(response.versionNumber()))
+                        .event("student-record-created")
+                        .data(response)
+                        .build());
     }
 }
