@@ -1,18 +1,16 @@
 package com.edukit.external.ai;
 
-import com.edukit.external.ai.dto.response.StudentRecordAICreateResponse;
-import com.edukit.external.ai.exception.OpenAiException;
+import com.edukit.external.ai.response.OpenAIResponse;
 import com.edukit.external.ai.exception.OpenAiErrorCode;
+import com.edukit.external.ai.exception.OpenAiException;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.client.ChatClient;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 import org.springframework.web.client.ResourceAccessException;
 
-@Slf4j
-@Component
+@Service
 @RequiredArgsConstructor
-public class OpenAiClient {
+public class OpenAIService {
 
     private final ChatClient chatClient;
 
@@ -21,17 +19,17 @@ public class OpenAiClient {
             학생의 정보를 바탕으로 생활기록부를 작성합니다.
             """;
 
-    public StudentRecordAICreateResponse getThreeAIResponses(final String prompt) {
+    public OpenAIResponse getThreeAIResponses(final String prompt) {
         return getMultipleChatResponses(prompt);
     }
 
-    private StudentRecordAICreateResponse getMultipleChatResponses(final String prompt) {
+    private OpenAIResponse getMultipleChatResponses(final String prompt) {
         try {
             return chatClient.prompt()
                     .system(SYSTEM_INSTRUCTIONS)
                     .user(prompt)
                     .call()
-                    .entity(StudentRecordAICreateResponse.class);
+                    .entity(OpenAIResponse.class);
         } catch (ResourceAccessException ex) { // 타임 아웃
             throw new OpenAiException(OpenAiErrorCode.OPEN_AI_TIMEOUT, ex);
         } catch (Exception e) { // 기타 예외 처리

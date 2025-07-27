@@ -4,6 +4,7 @@ import com.edukit.api.common.EdukitResponse;
 import com.edukit.api.common.annotation.MemberId;
 import com.edukit.api.controller.studentrecord.request.StudentRecordPromptRequest;
 import com.edukit.core.studentrecord.facade.StudentRecordAIFacade;
+import com.edukit.core.studentrecord.facade.response.StudentRecordCreateResponse;
 import com.edukit.core.studentrecord.facade.response.StudentRecordTaskResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -22,12 +23,14 @@ public class StudentRecordAIController {
     private final StudentRecordAIFacade studentRecordAIFacade;
 
     @PostMapping("/ai-generate/{recordId}")
-    public ResponseEntity<EdukitResponse<Void>> aiGenerateStudentRecord(@MemberId final long memberId,
-                                                                        @PathVariable final long recordId,
-                                                                        @RequestBody @Valid final StudentRecordPromptRequest request) {
+    public ResponseEntity<EdukitResponse<StudentRecordCreateResponse>> aiGenerateStudentRecord(
+            @MemberId final long memberId,
+            @PathVariable final long recordId,
+            @RequestBody @Valid final StudentRecordPromptRequest request) {
         StudentRecordTaskResponse promptResponse = studentRecordAIFacade.getPrompt(memberId, recordId,
                 request.byteCount(), request.prompt());
-        // studentRecordAIFacade.generateAIStudentRecord(promptResponse.inputPrompt());
-        return ResponseEntity.ok(EdukitResponse.success());
+        StudentRecordCreateResponse response = studentRecordAIFacade.generateAIStudentRecord(
+                promptResponse.inputPrompt());
+        return ResponseEntity.ok(EdukitResponse.success(response));
     }
 }
