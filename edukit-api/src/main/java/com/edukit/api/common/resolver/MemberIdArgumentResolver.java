@@ -16,13 +16,13 @@ public class MemberIdArgumentResolver implements HandlerMethodArgumentResolver {
     public boolean supportsParameter(final MethodParameter parameter) {
         boolean hasMemberIdAnnotation = parameter.hasParameterAnnotation(MemberId.class);
         Class<?> type = parameter.getParameterType();
-        boolean isLongType = type.equals(long.class) || type.equals(Long.class);
+        boolean isLongType = type.equals(long.class);
         return hasMemberIdAnnotation && isLongType;
     }
 
     @Override
     public Object resolveArgument(final MethodParameter parameter, final ModelAndViewContainer mavContainer,
-                                  final NativeWebRequest webRequest, final WebDataBinderFactory binderFactory) throws Exception {
+                                  final NativeWebRequest webRequest, final WebDataBinderFactory binderFactory) {
         return SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     }
 }
