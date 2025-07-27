@@ -2,6 +2,7 @@ package com.edukit.api.controller.studentrecord;
 
 import com.edukit.api.common.annotation.MemberId;
 import com.edukit.api.controller.studentrecord.request.StudentRecordPromptRequest;
+import com.edukit.core.auth.facade.AuthFacade;
 import com.edukit.core.studentrecord.facade.StudentRecordAIFacade;
 import com.edukit.core.studentrecord.facade.response.StudentRecordCreateResponse;
 import com.edukit.core.studentrecord.facade.response.StudentRecordTaskResponse;
@@ -22,6 +23,7 @@ import reactor.core.publisher.Flux;
 public class StudentRecordAIController {
 
     private final StudentRecordAIFacade studentRecordAIFacade;
+    private final AuthFacade authFacade;
 
     /* v1.0.0
     @PostMapping("/ai-generate/{recordId}")
@@ -44,6 +46,7 @@ public class StudentRecordAIController {
             @PathVariable final long recordId,
             @RequestBody @Valid final StudentRecordPromptRequest request
     ) {
+        authFacade.checkHasPermission(memberId);
         StudentRecordTaskResponse promptResponse = studentRecordAIFacade.getStreamingPrompt(memberId, recordId,
                 request.byteCount(), request.prompt());
 

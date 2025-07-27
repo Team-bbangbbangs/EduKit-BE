@@ -2,12 +2,15 @@ package com.edukit.core.auth.facade;
 
 import com.edukit.core.auth.enums.VerificationCodeType;
 import com.edukit.core.auth.event.MemberSignedUpEvent;
+import com.edukit.core.auth.exception.AuthErrorCode;
+import com.edukit.core.auth.exception.AuthException;
 import com.edukit.core.auth.facade.response.MemberSignUpResponse;
 import com.edukit.core.auth.jwt.dto.AuthToken;
 import com.edukit.core.auth.service.AuthService;
 import com.edukit.core.auth.service.JwtTokenService;
 import com.edukit.core.auth.service.VerificationCodeService;
 import com.edukit.core.member.entity.Member;
+import com.edukit.core.member.enums.MemberRole;
 import com.edukit.core.member.enums.School;
 import com.edukit.core.member.service.MemberService;
 import com.edukit.core.subject.entity.Subject;
@@ -44,5 +47,13 @@ public class AuthFacade {
         eventPublisher.publishEvent(
                 MemberSignedUpEvent.of(member.getEmail(), member.getMemberUuid(), verificationCode));
         return MemberSignUpResponse.of(authToken.accessToken(), authToken.refreshToken());
+    }
+
+    @Transactional(readOnly = true)
+    public void checkHasPermission(final long memberId) {
+        Member member = memberService.getMemberById(memberId);
+        if (member.getRole() == MemberRole.PENDING_TEACHER) {
+            throw new AuthException(AuthErrorCode.FORBIDDEN_MEMBER);
+        }
     }
 }

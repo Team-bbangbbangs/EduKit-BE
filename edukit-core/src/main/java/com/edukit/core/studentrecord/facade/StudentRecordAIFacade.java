@@ -1,6 +1,5 @@
 package com.edukit.core.studentrecord.facade;
 
-import com.edukit.core.member.entity.Member;
 import com.edukit.core.member.service.MemberService;
 import com.edukit.core.studentrecord.entity.StudentRecord;
 import com.edukit.core.studentrecord.facade.response.StudentRecordCreateResponse;
@@ -25,8 +24,7 @@ public class StudentRecordAIFacade {
     @Transactional
     public StudentRecordTaskResponse getStreamingPrompt(final long memberId, final long recordId, final int byteCount,
                                                         final String userPrompt) {
-        Member member = memberService.getMemberById(memberId);
-        StudentRecord studentRecord = studentRecordService.getRecordDetail(member.getId(), recordId);
+        StudentRecord studentRecord = studentRecordService.getRecordDetail(memberId, recordId);
 
         String requestPrompt = AIPromptGenerator.createStreamingPrompt(studentRecord.getStudentRecordType(), byteCount,
                 userPrompt);
