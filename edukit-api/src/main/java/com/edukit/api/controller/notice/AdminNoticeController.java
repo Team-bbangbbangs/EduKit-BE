@@ -1,8 +1,8 @@
-package com.edukit.api.notice.controller;
+package com.edukit.api.controller.notice;
 
 import com.edukit.api.common.ApiResponse;
-import com.edukit.api.notice.controller.request.NoticeCreateRequest;
-import com.edukit.api.notice.controller.request.NoticeUpdateRequest;
+import com.edukit.api.controller.notice.request.NoticeCreateRequest;
+import com.edukit.api.controller.notice.request.NoticeUpdateRequest;
 import com.edukit.common.exception.code.CommonSuccessCode;
 import com.edukit.core.notice.enums.NoticeCategory;
 import com.edukit.core.notice.facade.NoticeFacade;
