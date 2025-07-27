@@ -5,6 +5,7 @@ import com.edukit.external.ai.exception.OpenAiErrorCode;
 import com.edukit.external.ai.exception.OpenAiException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.ai.chat.client.ChatClient;
+import reactor.core.publisher.Flux;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.ResourceAccessException;
 
@@ -21,6 +22,20 @@ public class OpenAIService {
 
     public OpenAIResponse getThreeAIResponses(final String prompt) {
         return getMultipleChatResponses(prompt);
+    }
+
+    public Flux<String> getStreamingResponse(final String prompt) {
+        try {
+            return chatClient.prompt()
+                    .system(SYSTEM_INSTRUCTIONS)
+                    .user(prompt)
+                    .stream()
+                    .content();
+        } catch (ResourceAccessException ex) {
+            throw new OpenAiException(OpenAiErrorCode.OPEN_AI_TIMEOUT, ex);
+        } catch (Exception e) {
+            throw new OpenAiException(OpenAiErrorCode.OPEN_AI_INTERNAL_ERROR, e);
+        }
     }
 
     private OpenAIResponse getMultipleChatResponses(final String prompt) {
