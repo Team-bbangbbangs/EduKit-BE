@@ -80,12 +80,10 @@ public class OpenAIService {
         }
 
         if (currentVersion < 2) {
-            // 1, 2번 버전: 다음 버전이 시작되었으면 완성
             String nextVersionPattern = "===VERSION_" + (currentVersion + 2) + "===";
             return buffer.contains(nextVersionPattern);
         }
 
-        // 3번째 버전은 여기서 처리하지 않음 (onComplete에서 처리)
         return false;
     }
 
