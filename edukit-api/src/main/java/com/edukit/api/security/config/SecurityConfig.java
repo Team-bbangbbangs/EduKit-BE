@@ -46,7 +46,7 @@ public class SecurityConfig {
                         .requestMatchers(SecurityWhitelist.BUSINESS_WHITE_LIST).permitAll()
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
-                        .requestMatchers("/api/v1/student-records/**").hasAnyRole("TEACHER", "ADMIN")
+                        .requestMatchers("/api/v*/student-records/**").hasAnyRole("TEACHER", "ADMIN")
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
