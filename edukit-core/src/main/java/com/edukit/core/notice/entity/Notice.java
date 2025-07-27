@@ -56,7 +56,7 @@ public class Notice extends BaseTimeEntity {
                 .build();
     }
 
-    public void update(NoticeCategory category, String title, String content) {
+    public void update(final NoticeCategory category, final String title, final String content) {
         this.category = category;
         this.title = title;
         this.content = content;
