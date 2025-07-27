@@ -26,7 +26,8 @@ public class StudentRecordAIController {
     public ResponseEntity<EdukitResponse<StudentRecordCreateResponse>> aiGenerateStudentRecord(
             @MemberId final long memberId,
             @PathVariable final long recordId,
-            @RequestBody @Valid final StudentRecordPromptRequest request) {
+            @RequestBody @Valid final StudentRecordPromptRequest request
+    ) {
         StudentRecordTaskResponse promptResponse = studentRecordAIFacade.getPrompt(memberId, recordId,
                 request.byteCount(), request.prompt());
         StudentRecordCreateResponse response = studentRecordAIFacade.generateAIStudentRecord(

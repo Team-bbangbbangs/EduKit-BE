@@ -2,10 +2,8 @@ package com.edukit.external.ai;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
-@ConfigurationProperties("openai.api")
+@ConfigurationProperties("ai.chatgpt")
 public record OpenAiProperties(
-        String baseUrl,
-        String key,
         int connectTimeout,
         int readTimeout
 ) {
