@@ -24,7 +24,7 @@ public class StudentRecord extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "student_record_detail_id")
+    @Column(name = "student_record_id")
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
