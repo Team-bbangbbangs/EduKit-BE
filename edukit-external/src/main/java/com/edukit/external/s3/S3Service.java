@@ -1,9 +1,8 @@
-package com.edukit.external.s3.dto;
+package com.edukit.external.s3;
 
-import com.edukit.external.s3.AwsS3Properties;
-import com.edukit.external.s3.dto.exception.S3ErrorCode;
-import com.edukit.external.s3.dto.exception.S3Exception;
-import com.edukit.external.s3.dto.response.UploadPresignedUrlResponse;
+import com.edukit.external.s3.exception.S3ErrorCode;
+import com.edukit.external.s3.exception.S3Exception;
+import com.edukit.external.s3.response.UploadPresignedUrlResponse;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
