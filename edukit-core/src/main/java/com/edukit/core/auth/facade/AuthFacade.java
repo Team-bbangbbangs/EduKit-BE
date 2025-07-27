@@ -3,10 +3,10 @@ package com.edukit.core.auth.facade;
 import com.edukit.core.auth.enums.AuthCodeType;
 import com.edukit.core.auth.event.MemberSignedUpEvent;
 import com.edukit.core.auth.facade.response.MemberSignUpResponse;
-import com.edukit.core.auth.jwt.dto.JwtToken;
-import com.edukit.core.auth.service.AuthCodeService;
+import com.edukit.core.auth.jwt.dto.AuthToken;
 import com.edukit.core.auth.service.AuthService;
 import com.edukit.core.auth.service.JwtTokenService;
+import com.edukit.core.auth.service.VerificationCodeService;
 import com.edukit.core.member.entity.Member;
 import com.edukit.core.member.enums.School;
 import com.edukit.core.member.service.MemberService;
@@ -22,10 +22,10 @@ import org.springframework.transaction.annotation.Transactional;
 public class AuthFacade {
 
     private final AuthService authService;
-    private final AuthCodeService authCodeService;
     private final MemberService memberService;
     private final SubjectService subjectService;
     private final JwtTokenService jwtTokenService;
+    private final VerificationCodeService verificationCodeService;
     private final ApplicationEventPublisher eventPublisher;
 
     @Transactional
@@ -35,12 +35,14 @@ public class AuthFacade {
         Subject subject = subjectService.getSubjectByName(subjectName);
         Member member = memberService.createMember(email, password, subject, nickname, school);
 
-        JwtToken jwtToken = jwtTokenService.generateTokens(member.getMemberUuid());
+        AuthToken authToken = jwtTokenService.generateTokens(member.getMemberUuid());
         // refreshToken을 Redis에 저장하는 로직 구현
 
-        String authCode = authCodeService.issueVerificationCode(member, AuthCodeType.TEACHER_VERIFICATION);
+        String verificationCode = verificationCodeService.issueVerificationCode(member,
+                AuthCodeType.TEACHER_VERIFICATION);
 
-        eventPublisher.publishEvent(MemberSignedUpEvent.of(member.getEmail(), member.getMemberUuid(), authCode));
-        return MemberSignUpResponse.of(jwtToken.accessToken(), jwtToken.refreshToken());
+        eventPublisher.publishEvent(
+                MemberSignedUpEvent.of(member.getEmail(), member.getMemberUuid(), verificationCode));
+        return MemberSignUpResponse.of(authToken.accessToken(), authToken.refreshToken());
     }
 }

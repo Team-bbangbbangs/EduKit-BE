@@ -3,7 +3,7 @@ package com.edukit.core.auth.service;
 import com.edukit.core.auth.jwt.JwtGenerator;
 import com.edukit.core.auth.jwt.JwtParser;
 import com.edukit.core.auth.jwt.JwtValidator;
-import com.edukit.core.auth.jwt.dto.JwtToken;
+import com.edukit.core.auth.jwt.dto.AuthToken;
 import com.edukit.core.auth.jwt.type.TokenType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -16,10 +16,10 @@ public class JwtTokenService {
     private final JwtParser jwtParser;
     private final JwtValidator jwtValidator;
 
-    public JwtToken generateTokens(final String memberUuid) {
+    public AuthToken generateTokens(final String memberUuid) {
         String accessToken = jwtGenerator.generateToken(memberUuid, TokenType.ACCESS);
         String refreshToken = jwtGenerator.generateToken(memberUuid, TokenType.REFRESH);
-        return JwtToken.of(accessToken, refreshToken);
+        return AuthToken.of(accessToken, refreshToken);
     }
 
     public String parseMemberUuidFromAccessToken(final String accessToken) {

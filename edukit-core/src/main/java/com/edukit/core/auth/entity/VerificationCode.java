@@ -23,10 +23,10 @@ import lombok.NoArgsConstructor;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class AuthCode {
+public class VerificationCode {
 
     @Id
-    @Column(name = "auth_code_id")
+    @Column(name = "verification_code_id")
     @GeneratedValue(strategy = IDENTITY)
     private Long id;
 
@@ -35,7 +35,7 @@ public class AuthCode {
     private Member member;
 
     @Column(nullable = false)
-    private String authorizationCode;
+    private String verificationCode;
 
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
@@ -54,21 +54,21 @@ public class AuthCode {
     private static final int MINUTES_TO_EXPIRE = 10;
 
     @Builder(access = AccessLevel.PRIVATE)
-    private AuthCode(final Member member, final String authorizationCode, final LocalDateTime createdAt,
-                     final LocalDateTime expiredAt, final AuthorizeStatus status, final AuthCodeType type) {
+    private VerificationCode(final Member member, final String verificationCode, final LocalDateTime createdAt,
+                             final LocalDateTime expiredAt, final AuthorizeStatus status, final AuthCodeType type) {
         this.member = member;
-        this.authorizationCode = authorizationCode;
+        this.verificationCode = verificationCode;
         this.createdAt = createdAt;
         this.expiredAt = expiredAt;
         this.status = status;
         this.type = type;
     }
 
-    public static AuthCode create(final Member member, final String authorizationCode,
-                                  final AuthorizeStatus status, final AuthCodeType type) {
-        return AuthCode.builder()
+    public static VerificationCode create(final Member member, final String verificationCode,
+                                          final AuthorizeStatus status, final AuthCodeType type) {
+        return VerificationCode.builder()
                 .member(member)
-                .authorizationCode(authorizationCode)
+                .verificationCode(verificationCode)
                 .status(status)
                 .type(type)
                 .createdAt(LocalDateTime.now())
