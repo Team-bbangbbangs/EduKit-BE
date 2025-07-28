@@ -1,5 +1,7 @@
 package com.edukit.external.ai;
 
+import com.edukit.external.ai.exception.OpenAiErrorCode;
+import com.edukit.external.ai.exception.OpenAiException;
 import com.edukit.external.ai.response.OpenAIVersionResponse;
 import java.util.concurrent.atomic.AtomicInteger;
 import lombok.RequiredArgsConstructor;
@@ -38,6 +40,11 @@ public class OpenAIService {
                                 if (isVersionComplete(currentBuffer, currentVersion.get())) {
                                     String completeVersion = extractCompleteVersion(currentBuffer,
                                             currentVersion.get() + 1);
+
+                                    if (completeVersion.isEmpty()) {
+                                        sink.error(new OpenAiException(OpenAiErrorCode.OPEN_AI_INTERNAL_ERROR));
+                                        return;
+                                    }
 
                                     sink.next(OpenAIVersionResponse.of(
                                             currentVersion.get() + 1,
