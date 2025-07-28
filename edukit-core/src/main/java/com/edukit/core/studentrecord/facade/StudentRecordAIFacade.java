@@ -1,6 +1,5 @@
 package com.edukit.core.studentrecord.facade;
 
-import com.edukit.core.member.service.MemberService;
 import com.edukit.core.studentrecord.entity.StudentRecord;
 import com.edukit.core.studentrecord.facade.response.StudentRecordCreateResponse;
 import com.edukit.core.studentrecord.facade.response.StudentRecordTaskResponse;
@@ -17,7 +16,6 @@ import reactor.core.publisher.Flux;
 @RequiredArgsConstructor
 public class StudentRecordAIFacade {
 
-    private final MemberService memberService;
     private final StudentRecordService studentRecordService;
     private final OpenAIService openAIService;
 

@@ -1,10 +1,10 @@
 package com.edukit.api.controller.studentrecord.request;
 
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 
 public record StudentRecordPromptRequest(
-        @NotNull(message = "필수 입력값입니다.")
+        @Positive(message = "바이트 수는 양수여야 합니다.")
         int byteCount,
         @NotBlank(message = "필수 입력값입니다.")
         String prompt
