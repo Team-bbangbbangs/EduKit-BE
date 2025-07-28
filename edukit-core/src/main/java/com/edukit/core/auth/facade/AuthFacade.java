@@ -5,6 +5,7 @@ import com.edukit.core.auth.event.MemberSignedUpEvent;
 import com.edukit.core.auth.exception.AuthErrorCode;
 import com.edukit.core.auth.exception.AuthException;
 import com.edukit.core.auth.facade.response.MemberLoginResponse;
+import com.edukit.core.auth.facade.response.MemberReissueResponse;
 import com.edukit.core.auth.facade.response.MemberSignUpResponse;
 import com.edukit.core.auth.jwt.dto.AuthToken;
 import com.edukit.core.auth.service.AuthService;
@@ -80,5 +81,22 @@ public class AuthFacade {
     public void logout(final long memberId) {
         Member member = memberService.getMemberById(memberId);
         // refreshToken Redis 삭제
+    }
+
+    @Transactional
+    public MemberReissueResponse reissue(final String refreshToken) {
+        String memberUuid = jwtTokenService.parseMemberUuidFromRefreshToken(refreshToken);
+        Member member = memberService.getMemberByUuid(memberUuid);
+        String storedRefreshToken = "";     //redis에서 refreshToken 조회
+
+        if (!jwtTokenService.isTokenEqual(refreshToken, storedRefreshToken)) {
+            logout(member.getId());
+            throw new AuthException(AuthErrorCode.INVALID_TOKEN);
+        }
+
+        AuthToken authToken = jwtTokenService.generateTokens(memberUuid);
+        // refreshToken을 Redis에 저장
+
+        return MemberReissueResponse.of(authToken.accessToken(), authToken.refreshToken(), member.isAdmin());
     }
 }
