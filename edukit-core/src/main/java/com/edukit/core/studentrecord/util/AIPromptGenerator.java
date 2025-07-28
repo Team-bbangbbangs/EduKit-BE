@@ -53,14 +53,19 @@ public class AIPromptGenerator {
             중학교, 고등학교 생활기록부 글처럼 작성해주세요.
             """;
 
+    private static final int MINIMUM_BYTE_BUFFER = 10;
+
+    private static final int MAXIMUM_BYTE_BUFFER = 100;
+
+
     public static String createStreamingPrompt(final StudentRecordType recordType, final int byteCount,
                                                final String inputPrompt) {
         return String.format(STREAMING_PROMPT_TEMPLATE,
                 recordType.name(),
                 byteCount,
-                byteCount - 10,
+                byteCount - MINIMUM_BYTE_BUFFER,
                 inputPrompt,
-                byteCount - 100
+                byteCount - MAXIMUM_BYTE_BUFFER
         );
     }
 
