@@ -13,8 +13,7 @@ import software.amazon.awssdk.services.s3.presigner.S3Presigner;
 public class AwsS3Config {
 
     @Bean
-    public S3Presigner s3Presigner(final AwsCredentialsProvider credentialsProvider, final AwsS3Properties properties) {
-        return S3Presigner.builder()
+    public S3Presigner s3Presigner(final AwsCredentialsProvider credentialsProvider, final AwsS3Properties properties) {return S3Presigner.builder()
                 .region(Region.of(properties.region()))
                 .credentialsProvider(credentialsProvider)
                 .build();
