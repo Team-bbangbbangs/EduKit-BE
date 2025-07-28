@@ -14,7 +14,7 @@ public class RefreshTokenCookieHandler {
 
     private final JwtProperties jwtProperties;
 
-    private static final String REFRESH_TOKEN_COOKIE_NAME = "refreshToken";
+    public static final String REFRESH_TOKEN_COOKIE_NAME = "refreshToken";
 
     public ResponseCookie createRefreshTokenCookie(final String refreshToken) {
         return ResponseCookie.from(REFRESH_TOKEN_COOKIE_NAME, refreshToken)
