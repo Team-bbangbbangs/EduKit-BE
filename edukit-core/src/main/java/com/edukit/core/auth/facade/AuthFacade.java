@@ -77,4 +77,8 @@ public class AuthFacade {
         //TODO refresh token 삭제
     }
 
+    public void logout(final long memberId) {
+        Member member = memberService.getMemberById(memberId);
+        // refreshToken Redis 삭제
+    }
 }

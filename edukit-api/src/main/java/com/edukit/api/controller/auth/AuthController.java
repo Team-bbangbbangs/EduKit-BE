@@ -68,4 +68,13 @@ public class AuthController {
         authFacade.withdraw(memberId);
         return ResponseEntity.ok().body(EdukitResponse.success());
     }
+
+    @PostMapping("/logout")
+    public ResponseEntity<EdukitResponse<Void>> logout(@MemberId final long memberId) {
+        authFacade.logout(memberId);
+        ResponseCookie clearedRefreshTokenCookie = cookieHandler.createClearedRefreshTokenCookie();
+        return ResponseEntity.ok()
+                .header(HttpHeaders.SET_COOKIE, clearedRefreshTokenCookie.toString())
+                .body(EdukitResponse.success());
+    }
 }
