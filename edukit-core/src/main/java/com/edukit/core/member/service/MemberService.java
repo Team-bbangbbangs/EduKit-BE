@@ -29,7 +29,7 @@ public class MemberService {
 
     @Transactional(readOnly = true)
     public Member getMemberById(final long memberId) {
-        return memberRepository.findById(memberId)
+        return memberRepository.findByIdAndIsDeleted(memberId, false)
                 .orElseThrow(() -> new MemberException(MemberErrorCode.MEMBER_NOT_FOUND));
     }
 
