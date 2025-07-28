@@ -111,4 +111,9 @@ public class MemberService {
         return memberRepository.findByEmailAndIsDeleted(email, false)
                 .orElseThrow(() -> new MemberException(MemberErrorCode.MEMBER_NOT_FOUND));
     }
+
+    @Transactional
+    public void updatePassword(final Member member, final String encodedPassword) {
+        member.updatePassword(encodedPassword);
+    }
 }

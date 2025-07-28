@@ -6,6 +6,7 @@ import com.edukit.api.common.EdukitResponse;
 import com.edukit.api.common.annotation.MemberId;
 import com.edukit.api.controller.auth.request.MemberLoginRequest;
 import com.edukit.api.controller.auth.request.MemberSignUpRequest;
+import com.edukit.api.controller.auth.request.UpdatePasswordRequest;
 import com.edukit.api.security.handler.RefreshTokenCookieHandler;
 import com.edukit.api.security.util.PasswordValidator;
 import com.edukit.core.auth.facade.AuthFacade;
@@ -88,9 +89,19 @@ public class AuthController {
             @CookieValue(value = REFRESH_TOKEN_COOKIE_NAME) final String refreshToken) {
         MemberReissueResponse reissueResponse = authFacade.reissue(refreshToken.strip());
         ResponseCookie refreshTokenCookie = cookieHandler.createRefreshTokenCookie(reissueResponse.refreshToken());
-        log.info("토큰 재발급 성공: refreshToken(앞 8자리)={}", refreshToken.length() > 8 ? refreshToken.substring(0, 8) : refreshToken);
+        log.info("토큰 재발급 성공: refreshToken(앞 8자리)={}",
+                refreshToken.length() > 8 ? refreshToken.substring(0, 8) : refreshToken);
         return ResponseEntity.ok()
                 .header(HttpHeaders.SET_COOKIE, refreshTokenCookie.toString())
                 .body(EdukitResponse.success(reissueResponse));
+    }
+
+    @PatchMapping("/password")
+    public ResponseEntity<EdukitResponse<Void>> updatePassword(
+            @RequestBody @Valid final UpdatePasswordRequest request) {
+        PasswordValidator.validatePasswordFormat(request.password());
+        authFacade.updatePassword(request.verificationCode().strip(), request.email().strip(),
+                request.password().strip(), request.confirmPassword().strip());
+        return ResponseEntity.ok().build();
     }
 }

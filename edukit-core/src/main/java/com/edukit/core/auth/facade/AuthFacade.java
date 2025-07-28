@@ -99,4 +99,18 @@ public class AuthFacade {
 
         return MemberReissueResponse.of(authToken.accessToken(), authToken.refreshToken(), member.isAdmin());
     }
+
+    @Transactional
+    public void updatePassword(final String verificationCode, final String email, final String password,
+                               final String confirmPassword) {
+        Member member = memberService.getMemberByEmail(email);
+        verificationCodeService.verifyPasswordResetCode(member, verificationCode);
+        if (!password.equals(confirmPassword)) {
+            throw new AuthException(AuthErrorCode.PASSWORD_CONFIRM_MISMATCH);
+        }
+        if (passwordEncryptor.matches(password, member.getPassword())) {
+            throw new AuthException(AuthErrorCode.SAME_PASSWORD);
+        }
+        memberService.updatePassword(member, passwordEncryptor.encode(password));
+    }
 }
