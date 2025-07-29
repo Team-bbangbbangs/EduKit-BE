@@ -15,20 +15,20 @@ public class RefreshTokenStoreService {
 
     private static final String REFRESH_TOKEN_PREFIX = "refresh:";
 
-    public void save(String memberUuid, String refreshToken) {
+    public void save(final String memberUuid, final String refreshToken) {
         Duration ttl = Duration.ofMillis(jwtProperties.refreshTokenExpiration());
         keyValueStoreService.set(refreshKey(memberUuid), refreshToken, ttl);
     }
 
-    public String get(String memberUuid) {
+    public String get(final String memberUuid) {
         return keyValueStoreService.get(refreshKey(memberUuid));
     }
 
-    public void delete(String memberUuid) {
+    public void delete(final String memberUuid) {
         keyValueStoreService.delete(refreshKey(memberUuid));
     }
 
-    private String refreshKey(String memberUuid) {
+    private String refreshKey(final String memberUuid) {
         return REFRESH_TOKEN_PREFIX + memberUuid;
     }
 }

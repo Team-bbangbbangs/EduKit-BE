@@ -14,17 +14,17 @@ public class RedisStoreService implements KeyValueStoreService {
     private final RedisTemplate<String, String> redisTemplate;
 
     @Override
-    public void set(String key, String value, Duration ttl) {
+    public void set(final String key, final String value, final Duration ttl) {
         redisTemplate.opsForValue().set(key, value, ttl);
     }
 
     @Override
-    public String get(String key) {
+    public String get(final String key) {
         return redisTemplate.opsForValue().get(key);    // null 반환 가능
     }
 
     @Override
-    public void delete(String key) {
+    public void delete(final String key) {
         redisTemplate.delete(key);
     }
 }

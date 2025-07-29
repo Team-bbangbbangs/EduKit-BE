@@ -3,9 +3,9 @@ package com.edukit.external.redis;
 import java.time.Duration;
 
 public interface KeyValueStoreService {
-    void set(String key, String value, Duration ttl);
+    void set(final String key, final String value, final Duration ttl);
 
-    String get(String key);
+    String get(final String key);
 
-    void delete(String key);
+    void delete(final String key);
 }
