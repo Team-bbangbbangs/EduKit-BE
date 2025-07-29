@@ -10,6 +10,7 @@ import com.edukit.core.auth.facade.response.MemberSignUpResponse;
 import com.edukit.core.auth.jwt.dto.AuthToken;
 import com.edukit.core.auth.service.AuthService;
 import com.edukit.core.auth.service.JwtTokenService;
+import com.edukit.core.auth.service.RefreshTokenStoreService;
 import com.edukit.core.auth.service.VerificationCodeService;
 import com.edukit.core.auth.util.PasswordEncryptor;
 import com.edukit.core.member.entity.Member;
@@ -32,6 +33,7 @@ public class AuthFacade {
     private final SubjectService subjectService;
     private final JwtTokenService jwtTokenService;
     private final VerificationCodeService verificationCodeService;
+    private final RefreshTokenStoreService refreshTokenStoreService;
     private final ApplicationEventPublisher eventPublisher;
     private final PasswordEncryptor passwordEncryptor;
 
@@ -43,7 +45,7 @@ public class AuthFacade {
         Member member = memberService.createMember(email, password, subject, nickname, school);
 
         AuthToken authToken = jwtTokenService.generateTokens(member.getMemberUuid());
-        // refreshToken을 Redis에 저장하는 로직 구현
+        refreshTokenStoreService.save(member.getMemberUuid(), authToken.refreshToken());
 
         String verificationCode = verificationCodeService.issueVerificationCode(member,
                 VerificationCodeType.TEACHER_VERIFICATION);
@@ -66,8 +68,10 @@ public class AuthFacade {
         if (!passwordEncryptor.matches(password, member.getPassword())) {
             throw new AuthException(AuthErrorCode.INVALID_PASSWORD);
         }
+
         AuthToken authToken = jwtTokenService.generateTokens(member.getMemberUuid());
-        // refreshToken을 Redis에 저장하는 로직 구현
+        refreshTokenStoreService.save(member.getMemberUuid(), authToken.refreshToken());
+
         return MemberLoginResponse.of(authToken.accessToken(), authToken.refreshToken(), member.isAdmin());
     }
 
@@ -80,22 +84,21 @@ public class AuthFacade {
 
     public void logout(final long memberId) {
         Member member = memberService.getMemberById(memberId);
-        // refreshToken Redis 삭제
+        refreshTokenStoreService.delete(member.getMemberUuid());
     }
 
     @Transactional
     public MemberReissueResponse reissue(final String refreshToken) {
         String memberUuid = jwtTokenService.parseMemberUuidFromRefreshToken(refreshToken);
         Member member = memberService.getMemberByUuid(memberUuid);
-        String storedRefreshToken = "";     //redis에서 refreshToken 조회
-
+        String storedRefreshToken = refreshTokenStoreService.get(memberUuid);
         if (!jwtTokenService.isTokenEqual(refreshToken, storedRefreshToken)) {
             logout(member.getId());
             throw new AuthException(AuthErrorCode.INVALID_TOKEN);
         }
 
         AuthToken authToken = jwtTokenService.generateTokens(memberUuid);
-        // refreshToken을 Redis에 저장
+        refreshTokenStoreService.save(memberUuid, authToken.refreshToken());
 
         return MemberReissueResponse.of(authToken.accessToken(), authToken.refreshToken(), member.isAdmin());
     }
@@ -111,6 +114,7 @@ public class AuthFacade {
         if (passwordEncryptor.matches(password, member.getPassword())) {
             throw new AuthException(AuthErrorCode.SAME_PASSWORD);
         }
+
         memberService.updatePassword(member, passwordEncryptor.encode(password));
     }
 }
