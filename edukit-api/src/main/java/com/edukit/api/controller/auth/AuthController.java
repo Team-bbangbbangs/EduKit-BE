@@ -61,6 +61,7 @@ public class AuthController {
     public ResponseEntity<EdukitResponse<MemberLoginResponse>> login(
             @RequestBody @Valid final MemberLoginRequest request) {
         MemberLoginResponse loginResponse = authFacade.login(request.email().strip(), request.password().strip());
+
         ResponseCookie refreshTokenCookie = cookieHandler.createRefreshTokenCookie(loginResponse.refreshToken());
         log.info("로그인 성공: email={}", request.email().strip());
         return ResponseEntity.ok()
@@ -78,6 +79,7 @@ public class AuthController {
     @PostMapping("/logout")
     public ResponseEntity<EdukitResponse<Void>> logout(@MemberId final long memberId) {
         authFacade.logout(memberId);
+
         ResponseCookie clearedRefreshTokenCookie = cookieHandler.createClearedRefreshTokenCookie();
         return ResponseEntity.ok()
                 .header(HttpHeaders.SET_COOKIE, clearedRefreshTokenCookie.toString())
@@ -88,6 +90,7 @@ public class AuthController {
     public ResponseEntity<EdukitResponse<MemberReissueResponse>> reissue(
             @CookieValue(value = REFRESH_TOKEN_COOKIE_NAME) final String refreshToken) {
         MemberReissueResponse reissueResponse = authFacade.reissue(refreshToken.strip());
+
         ResponseCookie refreshTokenCookie = cookieHandler.createRefreshTokenCookie(reissueResponse.refreshToken());
         log.info("토큰 재발급 성공: refreshToken(앞 8자리)={}",
                 refreshToken.length() > 8 ? refreshToken.substring(0, 8) : refreshToken);
@@ -100,6 +103,7 @@ public class AuthController {
     public ResponseEntity<EdukitResponse<Void>> updatePassword(
             @RequestBody @Valid final UpdatePasswordRequest request) {
         PasswordValidator.validatePasswordFormat(request.password());
+
         authFacade.updatePassword(request.verificationCode().strip(), request.email().strip(),
                 request.password().strip(), request.confirmPassword().strip());
         return ResponseEntity.ok().build();
