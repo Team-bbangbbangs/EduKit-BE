@@ -17,6 +17,8 @@ public class MemberDetailReader implements UserDetailsService {
 
     private final MemberService memberService;
 
+    private static final String UNUSED_PASSWORD = "unused";
+
     @Override
     public UserDetails loadUserByUsername(final String memberUuid) {
         Member member = memberService.getMemberByUuid(memberUuid);
@@ -24,6 +26,6 @@ public class MemberDetailReader implements UserDetailsService {
         MemberRole memberRole = member.getRole();
         Collection<? extends GrantedAuthority> authorities = MemberRoleConverter.toGrantedAuthorities(memberRole);
 
-        return new User(memberId, null, authorities);
+        return new User(memberId, UNUSED_PASSWORD, authorities);
     }
 }
