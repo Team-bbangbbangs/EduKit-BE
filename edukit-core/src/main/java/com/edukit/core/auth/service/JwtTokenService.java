@@ -35,7 +35,7 @@ public class JwtTokenService {
         return jwtParser.parseClaims(refreshToken).getSubject();
     }
 
-    public boolean isTokenEqual(String requestToken, String storedToken) {
+    public boolean isTokenEqual(final String requestToken, final String storedToken) {
         if (requestToken == null || storedToken == null) {
             return false;
         }

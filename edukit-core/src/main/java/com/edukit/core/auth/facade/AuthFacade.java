@@ -75,19 +75,12 @@ public class AuthFacade {
         return MemberLoginResponse.of(authToken.accessToken(), authToken.refreshToken(), member.isAdmin());
     }
 
-    @Transactional
-    public void withdraw(final long memberId) {
-        Member member = memberService.getMemberById(memberId);
-        memberService.withdraw(member);
-        //TODO refresh token 삭제
-    }
-
     public void logout(final long memberId) {
         Member member = memberService.getMemberById(memberId);
         refreshTokenStoreService.delete(member.getMemberUuid());
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     public MemberReissueResponse reissue(final String refreshToken) {
         String memberUuid = jwtTokenService.parseMemberUuidFromRefreshToken(refreshToken);
         Member member = memberService.getMemberByUuid(memberUuid);
@@ -116,5 +109,12 @@ public class AuthFacade {
         }
 
         memberService.updatePassword(member, passwordEncryptor.encode(password));
+    }
+
+    @Transactional
+    public void withdraw(final long memberId) {
+        Member member = memberService.getMemberById(memberId);
+        memberService.withdraw(member);
+        //TODO refresh token 삭제
     }
 }

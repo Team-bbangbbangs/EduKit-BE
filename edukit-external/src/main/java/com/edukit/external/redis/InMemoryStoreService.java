@@ -15,18 +15,18 @@ public class InMemoryStoreService implements KeyValueStoreService {
     private final Map<String, String> memory = new HashMap<>();
 
     @Override
-    public void set(String key, String value, Duration ttl) {
+    public void set(final String key, final String value, final Duration ttl) {
         // TTL 무시
         memory.put(key, value);
     }
 
     @Override
-    public String get(String key) {
+    public String get(final String key) {
         return memory.get(key);
     }
 
     @Override
-    public void delete(String key) {
+    public void delete(final String key) {
         memory.remove(key);
     }
 }
