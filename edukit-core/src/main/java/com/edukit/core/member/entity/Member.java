@@ -110,4 +110,10 @@ public class Member extends BaseTimeEntity {
     public boolean isVerifyTeacher() {
         return this.role != MemberRole.PENDING_TEACHER;
     }
+
+    public void updateProfile(final Subject subject, final School school, final String nickname) {
+        this.subject = subject;
+        this.school = school;
+        this.nickname = nickname;
+    }
 }
