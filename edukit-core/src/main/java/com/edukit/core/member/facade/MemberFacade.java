@@ -2,6 +2,7 @@ package com.edukit.core.member.facade;
 
 import com.edukit.core.member.entity.Member;
 import com.edukit.core.member.enums.School;
+import com.edukit.core.member.facade.response.MemberNicknameValidationResponse;
 import com.edukit.core.member.facade.response.MemberProfileGetResponse;
 import com.edukit.core.member.service.MemberService;
 import com.edukit.core.subject.entity.Subject;
@@ -32,5 +33,13 @@ public class MemberFacade {
         Member member = memberService.getMemberById(memberId);
         Subject subject = subjectService.getSubjectByName(subjectName);
         memberService.updateMemberProfile(member, subject, school, nickname);
+    }
+
+    public MemberNicknameValidationResponse validateNickname(final long memberId, final String nickname) {
+        Member member = memberService.getMemberById(memberId);
+        return MemberNicknameValidationResponse.of(
+                memberService.isNicknameInvalid(nickname),
+                memberService.isNicknameDuplicated(member, nickname)
+        );
     }
 }

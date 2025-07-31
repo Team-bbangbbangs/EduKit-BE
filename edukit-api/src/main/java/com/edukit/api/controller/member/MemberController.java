@@ -5,6 +5,7 @@ import com.edukit.api.common.annotation.MemberId;
 import com.edukit.api.controller.member.request.MemberProfileUpdateRequest;
 import com.edukit.core.member.enums.School;
 import com.edukit.core.member.facade.MemberFacade;
+import com.edukit.core.member.facade.response.MemberNicknameValidationResponse;
 import com.edukit.core.member.facade.response.MemberProfileGetResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -35,5 +37,13 @@ public class MemberController {
         School school = School.fromName(request.school());
         memberFacade.updateMemberProfile(memberId, request.subject(), school, request.nickname());
         return ResponseEntity.ok().body(EdukitResponse.success());
+    }
+
+    @GetMapping("/nickname")
+    public ResponseEntity<EdukitResponse<MemberNicknameValidationResponse>> validateNickname(
+            @MemberId final long memberId,
+            @RequestParam final String nickname
+    ) {
+        return ResponseEntity.ok().body(EdukitResponse.success(memberFacade.validateNickname(memberId, nickname)));
     }
 }
