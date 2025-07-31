@@ -56,4 +56,11 @@ public class AuthFacade {
             throw new AuthException(AuthErrorCode.FORBIDDEN_MEMBER);
         }
     }
+
+    @Transactional
+    public void withdraw(final long memberId) {
+        Member member = memberService.getMemberById(memberId);
+        memberService.withdraw(member);
+        //TODO refresh token 삭제
+    }
 }

@@ -1,6 +1,7 @@
 package com.edukit.api.controller.auth;
 
 import com.edukit.api.common.EdukitResponse;
+import com.edukit.api.common.annotation.MemberId;
 import com.edukit.api.controller.auth.request.MemberSignUpRequest;
 import com.edukit.api.security.handler.RefreshTokenCookieHandler;
 import com.edukit.api.security.util.PasswordValidator;
@@ -13,6 +14,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -43,5 +45,11 @@ public class AuthController {
         return ResponseEntity.ok()
                 .header(HttpHeaders.SET_COOKIE, refreshCookie.toString())
                 .body(EdukitResponse.success(response));
+    }
+
+    @DeleteMapping("/withdraw")
+    public ResponseEntity<EdukitResponse<Void>> withdraw(@MemberId final long memberId) {
+        authFacade.withdraw(memberId);
+        return ResponseEntity.ok().build();
     }
 }

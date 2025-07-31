@@ -72,6 +72,11 @@ public class MemberService {
         return memberRepository.existsByIdNotAndNicknameIgnoreCaseAndIsDeleted(member.getId(), nickname, false);
     }
 
+    @Transactional
+    public void withdraw(final Member member) {
+        member.withdraw();
+    }
+
     private Member saveMember(final String email, final String encodedPassword, final Subject subject,
                               final String nickname, final School school) {
         Optional<Member> restored = restoreIfSoftDeletedMemberByEmail(email, encodedPassword, subject, nickname,

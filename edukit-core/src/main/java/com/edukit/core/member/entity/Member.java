@@ -116,4 +116,9 @@ public class Member extends BaseTimeEntity {
         this.school = school;
         this.nickname = nickname;
     }
+
+    public void withdraw() {
+        this.isDeleted = true;
+        this.deletedAt = LocalDateTime.now();
+    }
 }
