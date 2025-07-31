@@ -18,6 +18,7 @@ import org.springframework.web.bind.MissingRequestCookieException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.HandlerMethodValidationException;
 
 @Slf4j
 @RestControllerAdvice
@@ -44,6 +45,31 @@ public class GlobalExceptionHandler {
         Map<String, String> validationErrors = new HashMap<>();
         for (FieldError fieldError : e.getFieldErrors()) {
             validationErrors.put(fieldError.getField(), fieldError.getDefaultMessage());
+        }
+
+        return EdukitResponse.fail("FAIL-400", "validation 오류", validationErrors);
+    }
+
+    @ExceptionHandler(HandlerMethodValidationException.class)
+    public EdukitResponse<Map<String, String>> handleHandlerMethodValidationException(final HandlerMethodValidationException e) {
+        log.info("Validation parameter exception occurred: {}", e.getMessage());
+
+        Map<String, String> validationErrors = new HashMap<>();
+        for (var error : e.getAllErrors()) {
+            String fieldName;
+            if (error instanceof FieldError fe) {
+                fieldName = fe.getField();
+            } else {
+                String[] codes = error.getCodes();
+                if (codes.length > 0) {
+                    String firstCode = codes[0];
+                    int dotIndex = firstCode.lastIndexOf('.');
+                    fieldName = dotIndex != -1 ? firstCode.substring(dotIndex + 1) : firstCode;
+                } else {
+                    fieldName = "unknown";
+                }
+            }
+            validationErrors.put(fieldName, error.getDefaultMessage());
         }
 
         return EdukitResponse.fail("FAIL-400", "validation 오류", validationErrors);
