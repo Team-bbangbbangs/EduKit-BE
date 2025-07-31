@@ -106,4 +106,8 @@ public class Member extends BaseTimeEntity {
         this.role = MemberRole.PENDING_TEACHER;
         this.verifiedAt = null;
     }
+
+    public boolean isVerifyTeacher() {
+        return this.role != MemberRole.PENDING_TEACHER;
+    }
 }
