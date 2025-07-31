@@ -22,12 +22,18 @@ public class SecurityWhitelist {
             "/api/v1/notices/{noticeId:\\d+}"
     };
 
+    protected static final String[] SWAGGER_WHITE_LIST = {
+            "/swagger-ui/**",
+            "/v3/api-docs/**"
+    };
+
     private static final String[] ALL_WHITELIST;
 
     static {
         List<String> allWhitelist = new ArrayList<>();
         allWhitelist.addAll(Arrays.asList(AUTH_WHITELIST));
         allWhitelist.addAll(Arrays.asList(BUSINESS_WHITE_LIST));
+        allWhitelist.addAll(Arrays.asList(SWAGGER_WHITE_LIST));
         ALL_WHITELIST = allWhitelist.toArray(new String[0]);
     }
 
