@@ -3,6 +3,8 @@ package com.edukit.core.member.repository;
 import com.edukit.core.member.entity.Member;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 public interface MemberRepository extends JpaRepository<Member, Long> {
 
@@ -15,4 +17,7 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
     boolean existsByEmailAndIsDeleted(String email, boolean isDeleted);
 
     boolean existsByIdNotAndNicknameIgnoreCaseAndIsDeleted(long id, String nickname, boolean isDeleted);
+
+    @Query("SELECT m FROM Member m JOIN FETCH m.subject WHERE m.id = :id AND m.isDeleted = :isDeleted")
+    Optional<Member> findByIdAndIsDeletedFetchJoinSubject(@Param("id") long id, @Param("isDeleted") boolean isDeleted);
 }

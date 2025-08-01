@@ -20,7 +20,7 @@ public class MemberFacade {
 
     @Transactional(readOnly = true)
     public MemberProfileGetResponse getMemberProfile(final long memberId) {
-        Member member = memberService.getMemberById(memberId);
+        Member member = memberService.getMemberWithSubjectById(memberId);
         return MemberProfileGetResponse.of(
                 member.getEmail(), member.getSubject().getName(), member.isVerifyTeacher(),
                 member.getSchool().getName(), member.getNickname()

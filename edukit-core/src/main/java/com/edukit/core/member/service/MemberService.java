@@ -37,6 +37,12 @@ public class MemberService {
                 .orElseThrow(() -> new MemberException(MemberErrorCode.MEMBER_NOT_FOUND));
     }
 
+    @Transactional(readOnly = true)
+    public Member getMemberWithSubjectById(final long memberId) {
+        return memberRepository.findByIdAndIsDeletedFetchJoinSubject(memberId, false)
+                .orElseThrow(() -> new MemberException(MemberErrorCode.MEMBER_NOT_FOUND));
+    }
+
     @Transactional
     public Member createMember(final String email, final String encodedPassword, final Subject subject,
                                final String nickname, final School school) {
