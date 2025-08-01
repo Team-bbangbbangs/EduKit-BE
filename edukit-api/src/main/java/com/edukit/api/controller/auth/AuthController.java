@@ -106,6 +106,6 @@ public class AuthController {
 
         authFacade.updatePassword(request.verificationCode().strip(), request.email().strip(),
                 request.password().strip(), request.confirmPassword().strip());
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok(EdukitResponse.success());
     }
 }
