@@ -115,6 +115,6 @@ public class AuthFacade {
     public void withdraw(final long memberId) {
         Member member = memberService.getMemberById(memberId);
         memberService.withdraw(member);
-        //TODO refresh token 삭제
+        refreshTokenStoreService.delete(member.getMemberUuid());
     }
 }
