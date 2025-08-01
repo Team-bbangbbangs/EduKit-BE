@@ -104,7 +104,7 @@ public class AuthController {
             @RequestBody @Valid final UpdatePasswordRequest request) {
         PasswordValidator.validatePasswordFormat(request.password());
 
-        authFacade.updatePassword(request.verificationCode().strip(), request.email().strip(),
+        authFacade.updatePassword(request.memberUuid().strip(), request.verificationCode().strip(),
                 request.password().strip(), request.confirmPassword().strip());
         return ResponseEntity.ok(EdukitResponse.success());
     }

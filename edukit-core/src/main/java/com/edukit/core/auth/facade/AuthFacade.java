@@ -97,9 +97,9 @@ public class AuthFacade {
     }
 
     @Transactional
-    public void updatePassword(final String verificationCode, final String email, final String password,
+    public void updatePassword(final String memberUuid, final String verificationCode, final String password,
                                final String confirmPassword) {
-        Member member = memberService.getMemberByEmail(email);
+        Member member = memberService.getMemberByUuid(memberUuid);
         verificationCodeService.verifyPasswordResetCode(member, verificationCode);
         if (!password.equals(confirmPassword)) {
             throw new AuthException(AuthErrorCode.PASSWORD_CONFIRM_MISMATCH);
