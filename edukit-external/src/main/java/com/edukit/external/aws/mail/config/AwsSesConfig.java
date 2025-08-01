@@ -1,5 +1,6 @@
 package com.edukit.external.aws.mail.config;
 
+import com.edukit.external.aws.mail.setting.AwsSesProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

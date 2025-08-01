@@ -1,6 +1,5 @@
-package com.edukit.external.aws.mail;
+package com.edukit.external.aws.mail.setting;
 
-import com.edukit.external.aws.mail.config.AwsSesProperties;
 import com.edukit.external.aws.mail.exception.MailErrorCode;
 import com.edukit.external.aws.mail.exception.MailException;
 import java.nio.charset.StandardCharsets;
@@ -23,26 +22,17 @@ public class AwsSesEmailMapper {
     private final AwsSesProperties awsSesProperties;
 
     private static final String DEFAULT_CHARSET = StandardCharsets.UTF_8.name();
-    private static final String EMAIL_SUBJECT = "EduMate 회원가입을 환영합니다.";
-    private static final String EMAIL_SUBJECT_EMAIL_UPDATE_VERIFICATION = "EduMate 새로운 이메일을 인증해 주세요.";
 
     public SendEmailRequest buildEmailRequestForSignUp(final String emailReceiver, final String memberUuid,
                                                        final String verificationCode) {
-        String htmlBody = buildVerificationEmail(memberUuid, verificationCode, "email-verification");
-        return buildSendEmailRequest(emailReceiver, EMAIL_SUBJECT, htmlBody);
+        String htmlBody = buildVerificationEmail(memberUuid, verificationCode);
+        return buildSendEmailRequest(emailReceiver, "EduKit 회원가입을 환영합니다.", htmlBody);
     }
 
-    public SendEmailRequest buildEmailRequestForEmailUpdate(final String emailReceiver, final String memberUuid,
-                                                            final String verificationCode) {
-        String htmlBody = buildVerificationEmail(memberUuid, verificationCode, "update-email-verification");
-        return buildSendEmailRequest(emailReceiver, EMAIL_SUBJECT_EMAIL_UPDATE_VERIFICATION, htmlBody);
-    }
-
-    private String buildVerificationEmail(final String memberUuid, final String verificationCode,
-                                          final String templateName) {
+    private String buildVerificationEmail(final String memberUuid, final String verificationCode) {
         Context context = new Context();
         context.setVariable("verificationLink", buildVerificationUrl(memberUuid, verificationCode));
-        return templateEngine.process(templateName, context);
+        return templateEngine.process("email-verification", context);
     }
 
     public SendEmailRequest buildSendEmailRequest(final String emailReceiver, final String subject,

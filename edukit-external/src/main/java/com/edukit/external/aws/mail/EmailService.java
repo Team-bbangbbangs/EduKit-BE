@@ -1,5 +1,6 @@
 package com.edukit.external.aws.mail;
 
+import com.edukit.external.aws.mail.setting.AwsSesEmailMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
