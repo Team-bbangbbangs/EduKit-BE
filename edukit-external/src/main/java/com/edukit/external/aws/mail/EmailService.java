@@ -1,5 +1,7 @@
 package com.edukit.external.aws.mail;
 
+import com.edukit.external.aws.mail.exception.MailErrorCode;
+import com.edukit.external.aws.mail.exception.MailException;
 import com.edukit.external.aws.mail.setting.AwsSesEmailMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -19,7 +21,8 @@ public class EmailService {
     private final AwsSesEmailMapper awsSesEmailMapper;
 
     public void sendEmail(final String emailReceiver, final String memberUuid, final String verificationCode) {
-        SendEmailRequest request = awsSesEmailMapper.buildEmailRequestForSignUp(emailReceiver, memberUuid, verificationCode);
+        SendEmailRequest request = awsSesEmailMapper.buildEmailRequestForSignUp(emailReceiver, memberUuid,
+                verificationCode);
         send(request, emailReceiver, memberUuid);
     }
 
@@ -34,6 +37,7 @@ public class EmailService {
             log.info("[SES] 이메일 발송 성공: to={}", emailReceiver);
         } else {
             log.error("[SES] 이메일 발송 실패: to={}, reason={}", emailReceiver, httpResponse.statusText().orElse("unknown"));
+            throw new MailException(MailErrorCode.EMAIL_SEND_FAILED);
         }
     }
 }
