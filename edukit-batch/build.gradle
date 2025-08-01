@@ -14,6 +14,16 @@ dependencies {
 
 	// JSON 처리 (Lambda 이벤트 처리용)
 	implementation 'com.fasterxml.jackson.core:jackson-databind'
+
+	// 배치에 불필요한 의존성 제외
+	configurations.configureEach {
+		exclude group: 'org.springframework.boot', module: 'spring-boot-starter-security'
+		exclude group: 'org.springframework.boot', module: 'spring-boot-starter-validation'
+		exclude group: 'io.jsonwebtoken'
+		exclude group: 'org.springframework.ai'
+		exclude group: 'org.springframework.boot', module: 'spring-boot-starter-actuator'
+		exclude group: 'org.springdoc'  // Swagger 제외
+	}
 }
 
 // 실행 가능한 JAR 설정
@@ -26,4 +36,13 @@ jar {
 bootJar {
 	archiveBaseName = 'edukit-batch'
 	archiveVersion = project.version
+
+	// 불필요한 패키지 제외
+	exclude '**/external/ai/**'        // OpenAI 관련
+	exclude '**/external/s3/**'        // S3 관련
+
+	// 경량화 설정
+	launchScript {
+		enabled = false  // Lambda에서는 불필요
+	}
 } 
