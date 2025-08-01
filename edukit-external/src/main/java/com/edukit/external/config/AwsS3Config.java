@@ -1,6 +1,6 @@
 package com.edukit.external.config;
 
-import com.edukit.external.s3.AwsS3Properties;
+import com.edukit.external.aws.s3.AwsS3Properties;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
