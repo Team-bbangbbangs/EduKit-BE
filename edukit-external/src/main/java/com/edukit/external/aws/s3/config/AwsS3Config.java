@@ -1,4 +1,4 @@
-package com.edukit.external.config;
+package com.edukit.external.aws.s3.config;
 
 import com.edukit.external.aws.s3.AwsS3Properties;
 import lombok.RequiredArgsConstructor;
