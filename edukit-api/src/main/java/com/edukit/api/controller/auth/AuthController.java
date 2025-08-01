@@ -50,6 +50,6 @@ public class AuthController {
     @DeleteMapping("/withdraw")
     public ResponseEntity<EdukitResponse<Void>> withdraw(@MemberId final long memberId) {
         authFacade.withdraw(memberId);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok().body(EdukitResponse.success());
     }
 }
