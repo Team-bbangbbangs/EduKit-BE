@@ -44,6 +44,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(SecurityWhitelist.AUTH_WHITELIST).permitAll()
                         .requestMatchers(SecurityWhitelist.BUSINESS_WHITE_LIST).permitAll()
+                        .requestMatchers(SecurityWhitelist.SWAGGER_WHITE_LIST).permitAll()
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers("/api/v2/student-records/ai-generate/**").permitAll()
                         .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")

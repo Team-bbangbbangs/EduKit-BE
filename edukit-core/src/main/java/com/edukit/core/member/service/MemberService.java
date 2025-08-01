@@ -6,8 +6,10 @@ import com.edukit.core.member.enums.School;
 import com.edukit.core.member.exception.MemberErrorCode;
 import com.edukit.core.member.exception.MemberException;
 import com.edukit.core.member.repository.MemberRepository;
+import com.edukit.core.member.repository.NicknameBannedWordRepository;
 import com.edukit.core.subject.entity.Subject;
 import java.util.Optional;
+import java.util.regex.Pattern;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
@@ -18,8 +20,10 @@ import org.springframework.transaction.annotation.Transactional;
 public class MemberService {
 
     private final MemberRepository memberRepository;
+    private final NicknameBannedWordRepository nicknameBannedWordRepository;
 
     private static final boolean DELETED = true;
+    private static final Pattern NICKNAME_PATTERN = Pattern.compile("^[가-힣a-zA-Z0-9]{2,16}$");
 
     @Transactional(readOnly = true)
     public Member getMemberByUuid(final String memberUuid) {
@@ -33,6 +37,12 @@ public class MemberService {
                 .orElseThrow(() -> new MemberException(MemberErrorCode.MEMBER_NOT_FOUND));
     }
 
+    @Transactional(readOnly = true)
+    public Member getMemberWithSubjectById(final long memberId) {
+        return memberRepository.findByIdAndIsDeletedFetchJoinSubject(memberId, false)
+                .orElseThrow(() -> new MemberException(MemberErrorCode.MEMBER_NOT_FOUND));
+    }
+
     @Transactional
     public Member createMember(final String email, final String encodedPassword, final Subject subject,
                                final String nickname, final School school) {
@@ -41,6 +51,36 @@ public class MemberService {
         } catch (DataIntegrityViolationException e) {
             throw new MemberException(MemberErrorCode.MEMBER_ALREADY_REGISTERED);
         }
+    }
+
+    @Transactional
+    public void updateMemberProfile(final Member member, final Subject subject, final School school, final String nickname) {
+        validateNickname(member, nickname);
+        member.updateProfile(subject, school, nickname);
+    }
+
+    private void validateNickname(final Member member, final String nickname) {
+        if (isNicknameInvalid(nickname)) {
+            throw new MemberException(MemberErrorCode.INVALID_NICKNAME);
+        }
+        if (isNicknameDuplicated(member, nickname)) {
+            throw new MemberException(MemberErrorCode.DUPLICATED_NICKNAME);
+        }
+    }
+
+    public boolean isNicknameInvalid(final String nickname) {
+        return nickname.isBlank()
+                || !NICKNAME_PATTERN.matcher(nickname).matches()
+                || nicknameBannedWordRepository.existsBannedWordIn(nickname);
+    }
+
+    public boolean isNicknameDuplicated(final Member member, final String nickname) {
+        return memberRepository.existsByIdNotAndNicknameIgnoreCaseAndIsDeleted(member.getId(), nickname, false);
+    }
+
+    @Transactional
+    public void withdraw(final Member member) {
+        member.withdraw();
     }
 
     private Member saveMember(final String email, final String encodedPassword, final Subject subject,

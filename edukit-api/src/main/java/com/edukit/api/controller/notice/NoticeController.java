@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/v1/notices")
 @RequiredArgsConstructor
-public class NoticeController {
+public class NoticeController implements NoticeApi {
 
     private final NoticeFacade noticeFacade;
 

@@ -23,10 +23,11 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/v1/admin/notices")
 @RequiredArgsConstructor
-public class AdminNoticeController {
+public class AdminNoticeController implements AdminNoticeApi {
 
     private final NoticeFacade noticeFacade;
 
+    @Override
     @PostMapping
     public ResponseEntity<EdukitResponse<Void>> createNotice(
             @RequestBody @Valid final NoticeCreateRequest request
