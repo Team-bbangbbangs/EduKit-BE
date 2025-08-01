@@ -1,7 +1,7 @@
 package com.edukit.core.auth.service;
 
 import com.edukit.core.auth.jwt.setting.JwtProperties;
-import com.edukit.external.redis.KeyValueStoreService;
+import com.edukit.external.redis.RedisStoreService;
 import java.time.Duration;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -10,22 +10,22 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class RefreshTokenStoreService {
 
-    private final KeyValueStoreService keyValueStoreService;
+    private final RedisStoreService redisStoreService;
     private final JwtProperties jwtProperties;
 
     private static final String REFRESH_TOKEN_PREFIX = "refresh:";
 
-    public void save(final String memberUuid, final String refreshToken) {
+    public void store(final String memberUuid, final String refreshToken) {
         Duration ttl = Duration.ofMillis(jwtProperties.refreshTokenExpiration());
-        keyValueStoreService.set(refreshKey(memberUuid), refreshToken, ttl);
+        redisStoreService.store(refreshKey(memberUuid), refreshToken, ttl);
     }
 
     public String get(final String memberUuid) {
-        return keyValueStoreService.get(refreshKey(memberUuid));
+        return redisStoreService.get(refreshKey(memberUuid));
     }
 
     public void delete(final String memberUuid) {
-        keyValueStoreService.delete(refreshKey(memberUuid));
+        redisStoreService.delete(refreshKey(memberUuid));
     }
 
     private String refreshKey(final String memberUuid) {

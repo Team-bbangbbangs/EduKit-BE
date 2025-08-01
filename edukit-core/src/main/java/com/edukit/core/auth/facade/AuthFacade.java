@@ -45,7 +45,7 @@ public class AuthFacade {
         Member member = memberService.createMember(email, password, subject, nickname, school);
 
         AuthToken authToken = jwtTokenService.generateTokens(member.getMemberUuid());
-        refreshTokenStoreService.save(member.getMemberUuid(), authToken.refreshToken());
+        refreshTokenStoreService.store(member.getMemberUuid(), authToken.refreshToken());
 
         String verificationCode = verificationCodeService.issueVerificationCode(member,
                 VerificationCodeType.TEACHER_VERIFICATION);
@@ -70,7 +70,7 @@ public class AuthFacade {
         }
 
         AuthToken authToken = jwtTokenService.generateTokens(member.getMemberUuid());
-        refreshTokenStoreService.save(member.getMemberUuid(), authToken.refreshToken());
+        refreshTokenStoreService.store(member.getMemberUuid(), authToken.refreshToken());
 
         return MemberLoginResponse.of(authToken.accessToken(), authToken.refreshToken(), member.isAdmin());
     }
@@ -91,7 +91,7 @@ public class AuthFacade {
         }
 
         AuthToken authToken = jwtTokenService.generateTokens(memberUuid);
-        refreshTokenStoreService.save(memberUuid, authToken.refreshToken());
+        refreshTokenStoreService.store(memberUuid, authToken.refreshToken());
 
         return MemberReissueResponse.of(authToken.accessToken(), authToken.refreshToken(), member.isAdmin());
     }
