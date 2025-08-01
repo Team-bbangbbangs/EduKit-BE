@@ -20,6 +20,9 @@ dependencies {
 
 	// AWS - S3
 	implementation 'software.amazon.awssdk:s3'
+
+	// REDIS
+	implementation 'org.springframework.boot:spring-boot-starter-data-redis'
 }
 
 // 라이브러리 JAR 생성

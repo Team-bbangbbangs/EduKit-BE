@@ -76,4 +76,16 @@ public class VerificationCode {
                 .expiredAt(LocalDateTime.now().plusMinutes(MINUTES_TO_EXPIRE))
                 .build();
     }
+
+    public void complete() {
+        this.status = VerificationStatus.COMPLETE;
+    }
+
+    public void expire() {
+        this.status = VerificationStatus.EXPIRED;
+    }
+
+    public boolean isExpired() {
+        return LocalDateTime.now().isAfter(expiredAt);
+    }
 }

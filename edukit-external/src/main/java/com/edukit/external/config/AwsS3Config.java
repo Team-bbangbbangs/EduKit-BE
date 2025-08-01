@@ -16,10 +16,8 @@ import software.amazon.awssdk.services.s3.presigner.S3Presigner;
 @EnableConfigurationProperties(AwsS3Properties.class)
 public class AwsS3Config {
 
-    private final AwsS3Properties properties;
-
     @Bean
-    public AwsCredentialsProvider awsCredentialsProvider() {
+    public AwsCredentialsProvider awsCredentialsProvider(final AwsS3Properties properties) {
         return StaticCredentialsProvider.create(
                 AwsBasicCredentials.create(
                         properties.accessKey(),
@@ -29,7 +27,7 @@ public class AwsS3Config {
     }
 
     @Bean
-    public S3Presigner s3Presigner(final AwsCredentialsProvider credentialsProvider) {
+    public S3Presigner s3Presigner(final AwsS3Properties properties, final AwsCredentialsProvider credentialsProvider) {
         return S3Presigner.builder()
                 .region(Region.of(properties.region()))
                 .credentialsProvider(credentialsProvider)
