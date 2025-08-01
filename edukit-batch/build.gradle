@@ -7,8 +7,13 @@ plugins {
 dependencies {
 	// 내부 모듈 의존성 - Core 계층만 참조
 	implementation project(':edukit-core')
-	
-	// 필요한 의존성은 나중에 추가
+
+	// AWS Lambda
+	implementation 'com.amazonaws:aws-lambda-java-core:1.2.3'
+	implementation 'com.amazonaws:aws-lambda-java-events:3.11.4'
+
+	// JSON 처리 (Lambda 이벤트 처리용)
+	implementation 'com.fasterxml.jackson.core:jackson-databind'
 }
 
 // 실행 가능한 JAR 설정
