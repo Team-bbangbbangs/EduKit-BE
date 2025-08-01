@@ -4,8 +4,7 @@ import com.edukit.external.aws.mail.setting.AwsSesProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
-import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
+import software.amazon.awssdk.auth.credentials.AwsCredentialsProvider;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.ses.SesClient;
 
@@ -14,9 +13,7 @@ import software.amazon.awssdk.services.ses.SesClient;
 public class AwsSesConfig {
 
     @Bean
-    SesClient createSesClient(final AwsSesProperties properties) {
-        AwsBasicCredentials awsCredentials = AwsBasicCredentials.create(properties.accessKey(), properties.secretKey());
-        StaticCredentialsProvider credentialsProvider = StaticCredentialsProvider.create(awsCredentials);
+    SesClient createSesClient(final AwsSesProperties properties, final AwsCredentialsProvider credentialsProvider) {
         return SesClient.builder()
                 .credentialsProvider(credentialsProvider)
                 .region(Region.of(properties.region()))
