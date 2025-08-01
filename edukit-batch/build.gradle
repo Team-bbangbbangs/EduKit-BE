@@ -15,6 +15,9 @@ dependencies {
 	// JSON 처리 (Lambda 이벤트 처리용)
 	implementation 'com.fasterxml.jackson.core:jackson-databind'
 
+	// Database
+	implementation 'com.mysql:mysql-connector-j'
+
 	// 배치에 불필요한 의존성 제외
 	configurations.configureEach {
 		exclude group: 'org.springframework.boot', module: 'spring-boot-starter-security'
