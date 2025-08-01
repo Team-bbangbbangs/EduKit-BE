@@ -8,6 +8,8 @@ import com.edukit.core.auth.exception.AuthException;
 import com.edukit.core.auth.repository.VerificationCodeRepository;
 import com.edukit.core.auth.util.RandomCodeGenerator;
 import com.edukit.core.member.entity.Member;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -53,7 +55,10 @@ public class VerificationCodeService {
         if (code.isExpired()) {
             throw new AuthException(AuthErrorCode.INVALID_TOKEN);
         }
-        if (!code.getVerificationCode().equals(inputCode)) {
+        if (!MessageDigest.isEqual(
+                code.getVerificationCode().getBytes(StandardCharsets.UTF_8),
+                inputCode.getBytes(StandardCharsets.UTF_8))
+        ) {
             throw new AuthException(AuthErrorCode.INVALID_TOKEN);
         }
     }
