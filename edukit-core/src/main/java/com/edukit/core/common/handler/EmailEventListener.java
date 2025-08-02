@@ -1,7 +1,8 @@
-package com.edukit.core.auth.event;
+package com.edukit.core.common.handler;
 
 import com.edukit.core.auth.entity.VerificationCode;
 import com.edukit.core.auth.enums.VerificationCodeType;
+import com.edukit.core.auth.event.MemberSignedUpEvent;
 import com.edukit.core.auth.service.VerificationCodeService;
 import com.edukit.core.member.entity.Member;
 import com.edukit.core.member.event.MemberStatusInitializeEvent;
@@ -36,8 +37,10 @@ public class EmailEventListener {
     public void handleEmailEvent(final MemberStatusInitializeEvent event) {
         try {
             for (Member member : event.members()) {
-                VerificationCode verificationCode = verificationCodeService.getVerificationCode(member, VerificationCodeType.TEACHER_VERIFICATION);
-                emailService.sendEmail(member.getEmail(), member.getMemberUuid(), verificationCode.getVerificationCode());
+                VerificationCode verificationCode = verificationCodeService.getVerificationCode(member,
+                        VerificationCodeType.TEACHER_VERIFICATION);
+                emailService.sendEmail(member.getEmail(), member.getMemberUuid(),
+                        verificationCode.getVerificationCode());
             }
         } catch (Exception e) {
             log.error("이메일 발송 실패. event={} message={}", event, e.getMessage());
