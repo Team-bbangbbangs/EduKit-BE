@@ -3,6 +3,8 @@ package com.edukit.core.auth.service;
 import com.edukit.core.auth.entity.VerificationCode;
 import com.edukit.core.auth.enums.VerificationCodeType;
 import com.edukit.core.auth.enums.VerificationStatus;
+import com.edukit.core.auth.exception.AuthErrorCode;
+import com.edukit.core.auth.exception.AuthException;
 import com.edukit.core.auth.repository.VerificationCodeRepository;
 import com.edukit.core.auth.util.RandomCodeGenerator;
 import com.edukit.core.member.entity.Member;
@@ -34,5 +36,10 @@ public class VerificationCodeService {
                     VerificationCodeType.TEACHER_VERIFICATION);
             verificationCodeRepository.save(verificationCode);
         }
+    }
+
+    public VerificationCode getVerificationCode(final Member member, final VerificationCodeType verificationCodeType) {
+        return verificationCodeRepository.findByMemberAndType(member, verificationCodeType)
+                .orElseThrow(() -> new AuthException(AuthErrorCode.CODE_NOT_FOUND));
     }
 }
