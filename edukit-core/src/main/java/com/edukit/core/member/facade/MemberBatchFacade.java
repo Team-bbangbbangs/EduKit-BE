@@ -1,7 +1,9 @@
 package com.edukit.core.member.facade;
 
 import com.edukit.core.auth.service.VerificationCodeService;
+import com.edukit.core.member.entity.Member;
 import com.edukit.core.member.service.MemberBatchService;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,5 +19,7 @@ public class MemberBatchFacade {
     @Transactional
     public void initializeTeacherVerification() {
         memberBatchService.resetToTeacherVerificationStatus();
+        List<Member> members = memberBatchService.getMembersForVerificationEmail();
+        verificationCodeService.issueVerificationCodesForMembers(members);
     }
 }

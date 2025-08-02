@@ -6,6 +6,7 @@ import com.edukit.core.auth.enums.VerificationStatus;
 import com.edukit.core.auth.repository.VerificationCodeRepository;
 import com.edukit.core.auth.util.RandomCodeGenerator;
 import com.edukit.core.member.entity.Member;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,5 +24,15 @@ public class VerificationCodeService {
                 verificationCodeType);
         verificationCodeRepository.save(authorizationCode);
         return code;
+    }
+
+    @Transactional
+    public void issueVerificationCodesForMembers(final List<Member> members) {
+        for (Member member : members) {
+            String code = RandomCodeGenerator.generate();
+            VerificationCode verificationCode = VerificationCode.create(member, code, VerificationStatus.PENDING,
+                    VerificationCodeType.TEACHER_VERIFICATION);
+            verificationCodeRepository.save(verificationCode);
+        }
     }
 }
