@@ -1,4 +1,4 @@
-package com.edukit.external.s3.exception;
+package com.edukit.external.aws.s3.exception;
 
 import com.edukit.common.exception.ErrorCode;
 import lombok.Getter;

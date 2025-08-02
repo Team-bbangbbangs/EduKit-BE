@@ -1,4 +1,4 @@
-package com.edukit.external.config;
+package com.edukit.external.ai.config;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.ai.chat.client.ChatClient;
