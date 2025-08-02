@@ -26,6 +26,8 @@ public class OpenAIService {
             학생의 정보를 바탕으로 생활기록부를 작성합니다.
             """;
 
+    private static final String FALLBACK_MESSAGE = "현재 AI 서비스에 일시적인 문제가 발생하여 요청을 처리할 수 없습니다. 잠시 후 다시 시도해 주세요.";
+
 
     public Flux<OpenAIVersionResponse> getVersionedStreamingResponse(final String prompt) {
         return Flux.<OpenAIVersionResponse>create(sink -> {
@@ -82,10 +84,10 @@ public class OpenAIService {
                 })
                 .transformDeferred(CircuitBreakerOperator.of(openAiCircuitBreaker))
                 .doOnError(throwable -> log.error("OpenAI API 호출 중 오류 발생: {}", throwable.getMessage()))
-                .onErrorResume(throwable -> getFallbackResponse(prompt, throwable));
+                .onErrorResume(this::getFallbackResponse);
     }
 
-    private boolean isVersionComplete(String buffer, int currentVersion) {
+    private boolean isVersionComplete(final String buffer, final int currentVersion) {
         String currentVersionPattern = "===VERSION_" + (currentVersion + 1) + "===";
 
         if (!buffer.contains(currentVersionPattern)) {
@@ -100,7 +102,7 @@ public class OpenAIService {
         return false;
     }
 
-    private Flux<OpenAIVersionResponse> getFallbackResponse(final String prompt, Throwable throwable) {
+    private Flux<OpenAIVersionResponse> getFallbackResponse(final Throwable throwable) {
         log.warn("OpenAI API 호출 실패로 인한 fallback 응답 제공. 오류: {}", throwable.getMessage());
 
         // 서킷 브레이커가 열려있는 경우와 기타 오류를 구분
@@ -108,17 +110,14 @@ public class OpenAIService {
             log.info("서킷 브레이커가 열려있어 fallback 응답을 제공합니다.");
         }
 
-        // 기본 fallback 응답 생성
-        String fallbackMessage = "현재 AI 서비스에 일시적인 문제가 발생하여 요청을 처리할 수 없습니다. 잠시 후 다시 시도해 주세요.";
-
         return Flux.just(
-                OpenAIVersionResponse.of(1, fallbackMessage + " (버전 1)", false),
-                OpenAIVersionResponse.of(2, fallbackMessage + " (버전 2)", false),
-                OpenAIVersionResponse.of(3, fallbackMessage + " (버전 3)", true)
+                OpenAIVersionResponse.of(1, FALLBACK_MESSAGE + " (버전 1)", false),
+                OpenAIVersionResponse.of(2, FALLBACK_MESSAGE + " (버전 2)", false),
+                OpenAIVersionResponse.of(3, FALLBACK_MESSAGE + " (버전 3)", true)
         );
     }
 
-    private String extractCompleteVersion(String buffer, int versionNumber) {
+    private String extractCompleteVersion(final String buffer, int versionNumber) {
         String versionPattern = "===VERSION_" + versionNumber + "===";
         String nextVersionPattern = "===VERSION_" + (versionNumber + 1) + "===";
 

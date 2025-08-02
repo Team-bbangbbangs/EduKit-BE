@@ -10,9 +10,11 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class CircuitBreakerConfig {
 
+    private static final String OPENAI_CIRCUIT_BREAKER_NAME = "openai";
+
     @Bean
     public CircuitBreaker openAiCircuitBreaker(final CircuitBreakerRegistry circuitBreakerRegistry) {
-        CircuitBreaker circuitBreaker = circuitBreakerRegistry.circuitBreaker("openai");
+        CircuitBreaker circuitBreaker = circuitBreakerRegistry.circuitBreaker(OPENAI_CIRCUIT_BREAKER_NAME);
 
         circuitBreaker.getEventPublisher()
                 .onStateTransition(event ->
