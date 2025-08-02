@@ -111,9 +111,9 @@ public class OpenAIService {
         }
 
         return Flux.just(
-                OpenAIVersionResponse.of(1, FALLBACK_MESSAGE + " (버전 1)", false),
-                OpenAIVersionResponse.of(2, FALLBACK_MESSAGE + " (버전 2)", false),
-                OpenAIVersionResponse.of(3, FALLBACK_MESSAGE + " (버전 3)", true)
+                OpenAIVersionResponse.ofFallback(1, FALLBACK_MESSAGE + " (버전 1)", false),
+                OpenAIVersionResponse.ofFallback(2, FALLBACK_MESSAGE + " (버전 2)", false),
+                OpenAIVersionResponse.ofFallback(3, FALLBACK_MESSAGE + " (버전 3)", true)
         );
     }
 

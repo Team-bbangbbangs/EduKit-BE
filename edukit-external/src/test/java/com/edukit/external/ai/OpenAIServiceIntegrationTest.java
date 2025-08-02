@@ -209,9 +209,9 @@ class OpenAIServiceIntegrationTest {
         String fallbackMessage = "현재 AI 서비스에 일시적인 문제가 발생하여 요청을 처리할 수 없습니다. 잠시 후 다시 시도해 주세요.";
 
         return List.of(
-                OpenAIVersionResponse.of(1, fallbackMessage + " (버전 1)", false),
-                OpenAIVersionResponse.of(2, fallbackMessage + " (버전 2)", false),
-                OpenAIVersionResponse.of(3, fallbackMessage + " (버전 3)", true)
+                OpenAIVersionResponse.ofFallback(1, fallbackMessage + " (버전 1)", false),
+                OpenAIVersionResponse.ofFallback(2, fallbackMessage + " (버전 2)", false),
+                OpenAIVersionResponse.ofFallback(3, fallbackMessage + " (버전 3)", true)
         );
     }
 }

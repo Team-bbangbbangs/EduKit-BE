@@ -36,7 +36,7 @@ public class StudentRecordAIFacade {
     }
 
     private StudentRecordCreateResponse mapToStudentRecordCreateResponse(final OpenAIVersionResponse response) {
-        return StudentRecordCreateResponse.of(response.versionNumber(), response.content(), response.isLast());
+        return StudentRecordCreateResponse.of(response.versionNumber(), response.content(), response.isLast(), response.isFallback());
     }
 
     /* v1.0.0
