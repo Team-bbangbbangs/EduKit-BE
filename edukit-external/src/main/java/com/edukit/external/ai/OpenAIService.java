@@ -3,17 +3,23 @@ package com.edukit.external.ai;
 import com.edukit.external.ai.exception.OpenAiErrorCode;
 import com.edukit.external.ai.exception.OpenAiException;
 import com.edukit.external.ai.response.OpenAIVersionResponse;
+import io.github.resilience4j.circuitbreaker.CallNotPermittedException;
+import io.github.resilience4j.circuitbreaker.CircuitBreaker;
+import io.github.resilience4j.reactor.circuitbreaker.operator.CircuitBreakerOperator;
 import java.util.concurrent.atomic.AtomicInteger;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class OpenAIService {
 
     private final ChatClient chatClient;
+    private final CircuitBreaker openAiCircuitBreaker;
 
     private static final String SYSTEM_INSTRUCTIONS = """
             당신은 중고등학교 생활기록부 작성을 보조하는 AI 어시스턴트입니다.
@@ -22,61 +28,61 @@ public class OpenAIService {
 
 
     public Flux<OpenAIVersionResponse> getVersionedStreamingResponse(final String prompt) {
-        return Flux.create(sink -> {
-            StringBuilder buffer = new StringBuilder();
-            AtomicInteger currentVersion = new AtomicInteger(0);
+        return Flux.<OpenAIVersionResponse>create(sink -> {
+                    StringBuilder buffer = new StringBuilder();
+                    AtomicInteger currentVersion = new AtomicInteger(0);
 
-            chatClient.prompt()
-                    .system(SYSTEM_INSTRUCTIONS)
-                    .user(prompt)
-                    .stream()
-                    .content()
-                    .subscribe(
-                            chunk -> {
-                                buffer.append(chunk);
-                                String currentBuffer = buffer.toString();
+                    chatClient.prompt()
+                            .system(SYSTEM_INSTRUCTIONS)
+                            .user(prompt)
+                            .stream()
+                            .content()
+                            .subscribe(
+                                    chunk -> {
+                                        buffer.append(chunk);
+                                        String currentBuffer = buffer.toString();
 
-                                // 버전 완성 감지 및 전송 로직
-                                if (isVersionComplete(currentBuffer, currentVersion.get())) {
-                                    String completeVersion = extractCompleteVersion(currentBuffer,
-                                            currentVersion.get() + 1);
+                                        if (isVersionComplete(currentBuffer, currentVersion.get())) {
+                                            String completeVersion = extractCompleteVersion(currentBuffer,
+                                                    currentVersion.get() + 1);
 
-                                    if (completeVersion.isEmpty()) {
-                                        sink.error(new OpenAiException(OpenAiErrorCode.OPEN_AI_INTERNAL_ERROR));
-                                        return;
+                                            if (completeVersion.isEmpty()) {
+                                                sink.error(new OpenAiException(OpenAiErrorCode.OPEN_AI_INTERNAL_ERROR));
+                                                return;
+                                            }
+
+                                            sink.next(OpenAIVersionResponse.of(
+                                                    currentVersion.get() + 1,
+                                                    completeVersion,
+                                                    currentVersion.get() == 2
+                                            ));
+
+                                            currentVersion.incrementAndGet();
+                                        }
+                                    },
+                                    sink::error,
+                                    () -> {
+                                        String finalBuffer = buffer.toString();
+
+                                        if (currentVersion.get() < 3) {
+                                            String version3Content = extractCompleteVersion(finalBuffer, 3);
+
+                                            if (!version3Content.isEmpty()) {
+                                                sink.next(OpenAIVersionResponse.of(
+                                                        3,
+                                                        version3Content,
+                                                        true
+                                                ));
+                                            }
+                                        }
+
+                                        sink.complete();
                                     }
-
-                                    sink.next(OpenAIVersionResponse.of(
-                                            currentVersion.get() + 1,
-                                            completeVersion,
-                                            currentVersion.get() == 2 // 3번째 버전이면 마지막
-                                    ));
-
-                                    currentVersion.incrementAndGet();
-                                }
-                            },
-                            sink::error,
-                            () -> {
-                                // 스트림 완료 시 3번째 버전 처리
-                                String finalBuffer = buffer.toString();
-
-                                // 아직 처리하지 않은 버전이 있다면 처리
-                                if (currentVersion.get() < 3) {
-                                    String version3Content = extractCompleteVersion(finalBuffer, 3);
-
-                                    if (!version3Content.isEmpty()) {
-                                        sink.next(OpenAIVersionResponse.of(
-                                                3,
-                                                version3Content,
-                                                true // 마지막 버전
-                                        ));
-                                    }
-                                }
-
-                                sink.complete();
-                            }
-                    );
-        });
+                            );
+                })
+                .transformDeferred(CircuitBreakerOperator.of(openAiCircuitBreaker))
+                .doOnError(throwable -> log.error("OpenAI API 호출 중 오류 발생: {}", throwable.getMessage()))
+                .onErrorResume(throwable -> getFallbackResponse(prompt, throwable));
     }
 
     private boolean isVersionComplete(String buffer, int currentVersion) {
@@ -92,6 +98,24 @@ public class OpenAIService {
         }
 
         return false;
+    }
+
+    private Flux<OpenAIVersionResponse> getFallbackResponse(final String prompt, Throwable throwable) {
+        log.warn("OpenAI API 호출 실패로 인한 fallback 응답 제공. 오류: {}", throwable.getMessage());
+
+        // 서킷 브레이커가 열려있는 경우와 기타 오류를 구분
+        if (throwable instanceof CallNotPermittedException) {
+            log.info("서킷 브레이커가 열려있어 fallback 응답을 제공합니다.");
+        }
+
+        // 기본 fallback 응답 생성
+        String fallbackMessage = "현재 AI 서비스에 일시적인 문제가 발생하여 요청을 처리할 수 없습니다. 잠시 후 다시 시도해 주세요.";
+
+        return Flux.just(
+                OpenAIVersionResponse.of(1, fallbackMessage + " (버전 1)", false),
+                OpenAIVersionResponse.of(2, fallbackMessage + " (버전 2)", false),
+                OpenAIVersionResponse.of(3, fallbackMessage + " (버전 3)", true)
+        );
     }
 
     private String extractCompleteVersion(String buffer, int versionNumber) {
