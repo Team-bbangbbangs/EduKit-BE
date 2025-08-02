@@ -1,12 +1,12 @@
 package com.edukit.core.member.event;
 
-import com.edukit.core.member.entity.Member;
+import com.edukit.core.auth.service.dto.MemberVerificationData;
 import java.util.List;
 
 public record MemberStatusInitializeEvent(
-        List<Member> members
+        List<MemberVerificationData> memberVerificationData
 ) {
-    public static MemberStatusInitializeEvent of(final List<Member> members) {
-        return new MemberStatusInitializeEvent(members);
+    public static MemberStatusInitializeEvent of(final List<MemberVerificationData> memberVerificationData) {
+        return new MemberStatusInitializeEvent(memberVerificationData);
     }
 }

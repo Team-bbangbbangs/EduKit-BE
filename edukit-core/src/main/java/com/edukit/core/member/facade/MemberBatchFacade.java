@@ -1,6 +1,7 @@
 package com.edukit.core.member.facade;
 
 import com.edukit.core.auth.service.VerificationCodeService;
+import com.edukit.core.auth.service.dto.MemberVerificationData;
 import com.edukit.core.member.entity.Member;
 import com.edukit.core.member.event.MemberStatusInitializeEvent;
 import com.edukit.core.member.service.MemberBatchService;
@@ -23,7 +24,7 @@ public class MemberBatchFacade {
     public void initializeTeacherVerification() {
         memberBatchService.resetToTeacherVerificationStatus();
         List<Member> members = memberBatchService.getMembersForVerificationEmail();
-        verificationCodeService.issueVerificationCodesForMembers(members);
-        eventPublisher.publishEvent(MemberStatusInitializeEvent.of(members));
+        List<MemberVerificationData> memberVerificationData = verificationCodeService.issueVerificationCodesForMembers(members);
+        eventPublisher.publishEvent(MemberStatusInitializeEvent.of(memberVerificationData));
     }
 }

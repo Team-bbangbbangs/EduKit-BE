@@ -1,10 +1,6 @@
 package com.edukit.core.common.handler;
 
-import com.edukit.core.auth.entity.VerificationCode;
-import com.edukit.core.auth.enums.VerificationCodeType;
 import com.edukit.core.auth.event.MemberSignedUpEvent;
-import com.edukit.core.auth.service.VerificationCodeService;
-import com.edukit.core.member.entity.Member;
 import com.edukit.core.member.event.MemberStatusInitializeEvent;
 import com.edukit.external.aws.mail.EmailService;
 import lombok.RequiredArgsConstructor;
@@ -20,7 +16,6 @@ import org.springframework.transaction.event.TransactionalEventListener;
 public class EmailEventListener {
 
     private final EmailService emailService;
-    private final VerificationCodeService verificationCodeService;
 
     @Async("emailTaskExecutor")
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
@@ -28,7 +23,7 @@ public class EmailEventListener {
         try {
             emailService.sendEmail(event.email(), event.memberUuid(), event.verificationCode());
         } catch (Exception e) {
-            log.error("이메일 발송 실패. event={} message={}", event, e.getMessage());
+            log.error("[회원가입] 이메일 발송 실패. event={} message={}", event, e.getMessage());
         }
     }
 
@@ -36,14 +31,11 @@ public class EmailEventListener {
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void handleEmailEvent(final MemberStatusInitializeEvent event) {
         try {
-            for (Member member : event.members()) {
-                VerificationCode verificationCode = verificationCodeService.getVerificationCode(member,
-                        VerificationCodeType.TEACHER_VERIFICATION);
-                emailService.sendEmail(member.getEmail(), member.getMemberUuid(),
-                        verificationCode.getVerificationCode());
+            for (var memberData : event.memberVerificationData()) {
+                emailService.sendEmail(memberData.email(), memberData.memberUuid(), memberData.verificationCode());
             }
         } catch (Exception e) {
-            log.error("이메일 발송 실패. event={} message={}", event, e.getMessage());
+            log.error("[Batch 작업] 이메일 발송 실패. event={} message={}", event, e.getMessage());
         }
     }
 }
