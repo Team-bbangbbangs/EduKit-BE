@@ -4,10 +4,8 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 
 @ConfigurationProperties("aws.s3")
 public record AwsS3Properties(
-    String accessKey,
-    String secretKey,
-    String region,
-    String bucket,
-    String cdnUrl
+        String region,
+        String bucket,
+        String cdnUrl
 ) {
 }
