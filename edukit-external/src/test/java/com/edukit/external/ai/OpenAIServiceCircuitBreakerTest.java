@@ -2,6 +2,7 @@ package com.edukit.external.ai;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertAll;
 
 import com.edukit.external.ai.response.OpenAIVersionResponse;
 import io.github.resilience4j.circuitbreaker.CallNotPermittedException;
@@ -50,9 +51,11 @@ class OpenAIServiceCircuitBreakerTest {
         }
 
         // Then: 서킷브레이커가 CLOSED 상태를 유지
-        assertThat(circuitBreaker.getState()).isEqualTo(CircuitBreaker.State.CLOSED);
-        assertThat(circuitBreaker.getMetrics().getNumberOfSuccessfulCalls()).isEqualTo(5);
-        assertThat(circuitBreaker.getMetrics().getNumberOfFailedCalls()).isEqualTo(0);
+        assertAll(
+                () -> assertThat(circuitBreaker.getState()).isEqualTo(CircuitBreaker.State.CLOSED),
+                () -> assertThat(circuitBreaker.getMetrics().getNumberOfSuccessfulCalls()).isEqualTo(5),
+                () -> assertThat(circuitBreaker.getMetrics().getNumberOfFailedCalls()).isEqualTo(0)
+        );
     }
 
     @Test
@@ -97,7 +100,7 @@ class OpenAIServiceCircuitBreakerTest {
 
         // When & Then: OPEN 상태에서 호출 시 CallNotPermittedException 발생
         assertThat(circuitBreaker.getState()).isEqualTo(CircuitBreaker.State.OPEN);
-        
+
         assertThatThrownBy(() -> circuitBreaker.executeSupplier(() -> "테스트"))
                 .isInstanceOf(CallNotPermittedException.class)
                 .hasMessageContaining("CircuitBreaker 'test-openai' is OPEN");
@@ -162,9 +165,11 @@ class OpenAIServiceCircuitBreakerTest {
 
         // Then: 메트릭스가 올바르게 기록됨
         CircuitBreaker.Metrics metrics = circuitBreaker.getMetrics();
-        assertThat(metrics.getNumberOfSuccessfulCalls()).isEqualTo(2);
-        assertThat(metrics.getNumberOfFailedCalls()).isEqualTo(3);
-        assertThat(metrics.getFailureRate()).isEqualTo(60.0f); // 3/5 = 60%
+        assertAll(
+                () -> assertThat(metrics.getNumberOfSuccessfulCalls()).isEqualTo(2),
+                () -> assertThat(metrics.getNumberOfFailedCalls()).isEqualTo(3),
+                () -> assertThat(metrics.getFailureRate()).isEqualTo(60.0f)
+        );
     }
 
     @Test
@@ -208,24 +213,26 @@ class OpenAIServiceCircuitBreakerTest {
     void shouldValidateFallbackResponseFormat() {
         // Given: OpenAI 서비스의 fallback 응답과 동일한 형태
         String fallbackMessage = "현재 AI 서비스에 일시적인 문제가 발생하여 요청을 처리할 수 없습니다. 잠시 후 다시 시도해 주세요.";
-        
+
         List<OpenAIVersionResponse> fallbackResponses = List.of(
-                OpenAIVersionResponse.of(1, fallbackMessage + " (버전 1)", false),
-                OpenAIVersionResponse.of(2, fallbackMessage + " (버전 2)", false),
-                OpenAIVersionResponse.of(3, fallbackMessage + " (버전 3)", true)
+                OpenAIVersionResponse.ofFallback(1, fallbackMessage, false),
+                OpenAIVersionResponse.ofFallback(2, fallbackMessage, false),
+                OpenAIVersionResponse.ofFallback(3, fallbackMessage, true)
         );
 
-        // When & Then: fallback 응답 형태 검증
-        assertThat(fallbackResponses).hasSize(3);
-        
-        OpenAIVersionResponse version1 = fallbackResponses.get(0);
-        assertThat(version1.versionNumber()).isEqualTo(1);
-        assertThat(version1.content()).contains("현재 AI 서비스에 일시적인 문제가 발생");
-        assertThat(version1.isLast()).isFalse();
-
+        OpenAIVersionResponse version1 = fallbackResponses.getFirst();
         OpenAIVersionResponse version3 = fallbackResponses.get(2);
-        assertThat(version3.versionNumber()).isEqualTo(3);
-        assertThat(version3.isLast()).isTrue();
+
+        assertAll(
+                () -> assertThat(fallbackResponses).hasSize(3),
+                () -> assertThat(version1.versionNumber()).isEqualTo(1),
+                () -> assertThat(version1.content()).contains("현재 AI 서비스에 일시적인 문제가 발생"),
+                () -> assertThat(version1.isFallback()).isTrue(),
+                () -> assertThat(version1.isLast()).isFalse(),
+                () -> assertThat(version3.versionNumber()).isEqualTo(3),
+                () -> assertThat(version3.isFallback()).isTrue(),
+                () -> assertThat(version3.isLast()).isTrue()
+        );
     }
 
     @Test
@@ -234,7 +241,7 @@ class OpenAIServiceCircuitBreakerTest {
         // Given: 비동기 작업들
         CompletableFuture<String> future1 = CompletableFuture.supplyAsync(() ->
                 circuitBreaker.executeSupplier(() -> "비동기 성공 1"));
-        
+
         CompletableFuture<String> future2 = CompletableFuture.supplyAsync(() ->
                 circuitBreaker.executeSupplier(() -> "비동기 성공 2"));
 
