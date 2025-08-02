@@ -17,6 +17,5 @@ public class MemberBatchFacade {
     @Transactional
     public void initializeTeacherVerification() {
         memberBatchService.resetToTeacherVerificationStatus();
-
     }
 }

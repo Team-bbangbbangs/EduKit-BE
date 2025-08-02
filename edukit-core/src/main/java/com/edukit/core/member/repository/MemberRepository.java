@@ -25,11 +25,14 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
     Optional<Member> findByIdAndIsDeletedFetchJoinSubject(@Param("id") long id, @Param("isDeleted") boolean isDeleted);
 
     @Query("""
-    SELECT m FROM Member m 
-    WHERE m.isDeleted = false 
-    AND m.role = :role
-    AND m.verifiedAt < :lastVerificationCutoff
-    ORDER BY m.id
-    """)
-    List<Member> findTeachersForVerificationReset(@Param("role") MemberRole role, @Param("lastVerificationCutoff") LocalDateTime cutOffDate);
+            SELECT m FROM Member m 
+            WHERE m.isDeleted = false 
+            AND m.role = :role
+            AND m.verifiedAt < :lastVerificationCutoff
+            ORDER BY m.id
+            """)
+    List<Member> findTeachersForVerificationReset(@Param("role") MemberRole role,
+                                                  @Param("lastVerificationCutoff") LocalDateTime cutOffDate);
+
+    List<Member> findMembersByRoleAndIsDeleted(MemberRole role, boolean isDeleted);
 }

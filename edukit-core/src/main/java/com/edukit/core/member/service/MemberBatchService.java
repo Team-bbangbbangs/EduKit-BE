@@ -34,4 +34,8 @@ public class MemberBatchService {
         }
         log.info("Successfully reset verification status for {} members", resetCount);
     }
+
+    public List<Member> getMembersForVerificationEmail() {
+        return memberRepository.findMembersByRoleAndIsDeleted(MemberRole.PENDING_TEACHER, false);
+    }
 }
