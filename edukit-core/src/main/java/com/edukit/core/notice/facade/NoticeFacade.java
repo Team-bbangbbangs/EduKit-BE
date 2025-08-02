@@ -12,12 +12,14 @@ import com.edukit.external.aws.s3.S3Service;
 import com.edukit.external.aws.s3.response.UploadPresignedUrlResponse;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
+@ConditionalOnBean(S3Service.class)
 public class NoticeFacade {
 
     private final NoticeService noticeService;

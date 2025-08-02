@@ -8,12 +8,14 @@ import com.edukit.core.studentrecord.util.AIPromptGenerator;
 import com.edukit.external.ai.OpenAIService;
 import com.edukit.external.ai.response.OpenAIVersionResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import reactor.core.publisher.Flux;
 
 @Service
 @RequiredArgsConstructor
+@ConditionalOnBean(OpenAIService.class)
 public class StudentRecordAIFacade {
 
     private final StudentRecordService studentRecordService;
