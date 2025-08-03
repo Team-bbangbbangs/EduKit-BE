@@ -21,12 +21,11 @@ public class EmailService {
     private final AwsSesEmailMapper awsSesEmailMapper;
 
     public void sendEmail(final String emailReceiver, final String memberUuid, final String verificationCode) {
-        SendEmailRequest request = awsSesEmailMapper.buildEmailRequestForSignUp(emailReceiver, memberUuid,
-                verificationCode);
-        send(request, emailReceiver, memberUuid);
+        SendEmailRequest request = awsSesEmailMapper.buildEmailRequestForSignUp(emailReceiver, memberUuid, verificationCode);
+        send(request, emailReceiver);
     }
 
-    private void send(final SendEmailRequest request, final String emailReceiver, final String memberUuid) {
+    private void send(final SendEmailRequest request, final String emailReceiver) {
         SendEmailResponse result = sesClient.sendEmail(request);
         validateSendResult(emailReceiver, result);
     }

@@ -16,5 +16,6 @@ public class TeacherVerificationJob {
 
     public void execute() {
         List<MemberVerificationData> memberVerificationData = memberBatchFacade.initializeTeacherVerification();
+        memberBatchFacade.sendVerificationEmails(memberVerificationData);
     }
 }
