@@ -16,9 +16,9 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class MemberBatchFacade {
 
+    private final EmailService emailService;
     private final MemberBatchService memberBatchService;
     private final VerificationCodeService verificationCodeService;
-    private final EmailService emailService;
 
     @Transactional
     public List<MemberVerificationData> initializeTeacherVerification() {
