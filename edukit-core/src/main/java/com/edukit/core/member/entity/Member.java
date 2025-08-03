@@ -121,4 +121,8 @@ public class Member extends BaseTimeEntity {
         this.isDeleted = true;
         this.deletedAt = LocalDateTime.now();
     }
+
+    public void resetToTeacherVerificationPending() {
+        this.role = MemberRole.PENDING_TEACHER;
+    }
 }

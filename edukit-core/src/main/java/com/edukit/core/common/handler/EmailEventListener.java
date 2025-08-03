@@ -1,5 +1,6 @@
-package com.edukit.core.auth.event;
+package com.edukit.core.common.handler;
 
+import com.edukit.core.auth.event.MemberSignedUpEvent;
 import com.edukit.external.aws.mail.EmailService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,7 +22,7 @@ public class EmailEventListener {
         try {
             emailService.sendEmail(event.email(), event.memberUuid(), event.verificationCode());
         } catch (Exception e) {
-            log.error("이메일 발송 실패. event={} message={}", event, e.getMessage());
+            log.error("[회원가입] 이메일 발송 실패. event={} message={}", event, e.getMessage());
         }
     }
 }
