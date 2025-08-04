@@ -19,7 +19,7 @@ scrape_configs:
           module: api
           level: error
           environment: ${ENVIRONMENT}
-          __path__: /log/module-api/error/*.log
+          __path__: /log/error/*.log
     pipeline_stages:
       - json:
           expressions:
@@ -56,7 +56,7 @@ scrape_configs:
           module: api
           level: info
           environment: ${ENVIRONMENT}
-          __path__: /log/module-api/info/*.log
+          __path__: /log/info/*.log
     pipeline_stages:
       - json:
           expressions:
@@ -93,7 +93,7 @@ scrape_configs:
           module: api
           level: warn
           environment: ${ENVIRONMENT}
-          __path__: /log/module-api/warn/*.log
+          __path__: /log/warn/*.log
     pipeline_stages:
       - json:
           expressions:

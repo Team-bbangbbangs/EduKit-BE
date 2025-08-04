@@ -20,7 +20,7 @@
         <encoder class="net.logstash.logback.encoder.LogstashEncoder">
             <includeContext>true</includeContext>
             <includeMdc>true</includeMdc>
-            <customFields>{"module":"batch","environment":"${SPRING_PROFILES_ACTIVE:-lambda}","requestId":"${aws.requestId:-}","functionName":"${aws.functionName:-}","functionVersion":"${aws.functionVersion:-}"}</customFields>
+            <customFields>{"module":"batch","requestId":"${aws.requestId:-}","functionName":"${aws.functionName:-}","functionVersion":"${aws.functionVersion:-}"}</customFields>
             <fieldNames>
                 <timestamp>timestamp</timestamp>
                 <level>level</level>
