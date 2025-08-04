@@ -39,11 +39,8 @@ scrape_configs:
           expression: '.*(org\.springframework\.web\.servlet\.DispatcherServlet|org\.apache\.catalina\.core\.ContainerBase).*(GET|POST).*/actuator.*'
           source: logger
       - labels:
-          level:
           thread:
           logger:
-          module:
-          environment:
       - timestamp:
           source: timestamp
           format: "2006-01-02 15:04:05.000"
@@ -79,11 +76,8 @@ scrape_configs:
           expression: '.*(org\.springframework\.web\.servlet\.DispatcherServlet|org\.apache\.catalina\.core\.ContainerBase).*(GET|POST).*/actuator.*'
           source: logger
       - labels:
-          level:
           thread:
           logger:
-          module:
-          environment:
       - timestamp:
           source: timestamp
           format: "2006-01-02 15:04:05.000"
@@ -119,11 +113,8 @@ scrape_configs:
           expression: '.*(org\.springframework\.web\.servlet\.DispatcherServlet|org\.apache\.catalina\.core\.ContainerBase).*(GET|POST).*/actuator.*'
           source: logger
       - labels:
-          level:
           thread:
           logger:
-          module:
-          environment:
       - timestamp:
           source: timestamp
           format: "2006-01-02 15:04:05.000"
