@@ -1,4 +1,4 @@
-package com.edukit.external.config;
+package com.edukit.external.ai.config;
 
 import io.github.resilience4j.circuitbreaker.CircuitBreaker;
 import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry;

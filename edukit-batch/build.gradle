@@ -16,8 +16,9 @@ dependencies {
         exclude group: 'software.amazon.awssdk', module: 's3'
         exclude group: 'io.github.resilience4j'
         exclude group: 'org.springframework.boot', module: 'spring-boot-starter-data-redis'
+        exclude group: 'io.projectreactor.netty', module: 'reactor-netty-http'
     }
-
+    
     // AWS Lambda
     implementation 'com.amazonaws:aws-lambda-java-core:1.3.0'
     implementation 'com.amazonaws:aws-lambda-java-events:3.16.1'
@@ -37,5 +38,5 @@ jar {
 }
 
 bootJar {
-    archiveFileName = 'app-batch.jar'  // 고정된 파일명으로 변경
+    archiveFileName = 'app-batch.jar'
 } 

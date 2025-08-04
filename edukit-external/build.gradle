@@ -12,6 +12,8 @@ dependencies {
 	// Spring AI
 	implementation 'org.springframework.ai:spring-ai-starter-model-openai:1.0.0-M7'
 
+	implementation 'io.projectreactor.netty:reactor-netty-http'
+
 	// AWS
 	implementation platform('software.amazon.awssdk:bom:2.25.28')
 
