@@ -1,4 +1,4 @@
-package com.edukit.api.studentrecord.request;
+package com.edukit.api.studentrecord.controller.request;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Positive;

@@ -1,4 +1,4 @@
-package com.edukit.core.studentrecord.facade.response;
+package com.edukit.api.studentrecord.facade.response;
 
 public record StudentRecordCreateResponse(
         int versionNumber,

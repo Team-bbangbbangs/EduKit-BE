@@ -1,4 +1,4 @@
-package com.edukit.core.member.facade.response;
+package com.edukit.api.member.facade.response;
 
 public record MemberProfileGetResponse(
         String email,

@@ -1,4 +1,4 @@
-package com.edukit.api.admin.request;
+package com.edukit.api.admin.controller.request;
 
 import jakarta.validation.constraints.NotNull;
 import java.util.List;

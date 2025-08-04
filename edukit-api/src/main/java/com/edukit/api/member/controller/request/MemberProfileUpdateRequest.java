@@ -1,4 +1,4 @@
-package com.edukit.api.member.request;
+package com.edukit.api.member.controller.request;
 
 import jakarta.validation.constraints.NotNull;
 

@@ -1,4 +1,4 @@
-package com.edukit.core.studentrecord.facade;
+package com.edukit.api.studentrecord.facade;
 
 import org.springframework.stereotype.Service;
 

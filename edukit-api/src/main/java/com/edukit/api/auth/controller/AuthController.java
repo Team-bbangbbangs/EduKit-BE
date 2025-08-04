@@ -4,14 +4,14 @@ import static com.edukit.api.common.security.handler.RefreshTokenCookieHandler.R
 
 import com.edukit.api.common.EdukitResponse;
 import com.edukit.api.common.annotation.MemberId;
-import com.edukit.api.auth.request.MemberLoginRequest;
-import com.edukit.api.auth.request.MemberSignUpRequest;
-import com.edukit.api.auth.request.UpdatePasswordRequest;
+import com.edukit.api.auth.controller.request.MemberLoginRequest;
+import com.edukit.api.auth.controller.request.MemberSignUpRequest;
+import com.edukit.api.auth.controller.request.UpdatePasswordRequest;
 import com.edukit.api.common.security.handler.RefreshTokenCookieHandler;
-import com.edukit.core.auth.facade.AuthFacade;
-import com.edukit.core.auth.facade.response.MemberLoginResponse;
-import com.edukit.core.auth.facade.response.MemberReissueResponse;
-import com.edukit.core.auth.facade.response.MemberSignUpResponse;
+import com.edukit.api.auth.facade.AuthFacade;
+import com.edukit.api.auth.facade.response.MemberLoginResponse;
+import com.edukit.api.auth.facade.response.MemberReissueResponse;
+import com.edukit.api.auth.facade.response.MemberSignUpResponse;
 import com.edukit.core.member.db.enums.School;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

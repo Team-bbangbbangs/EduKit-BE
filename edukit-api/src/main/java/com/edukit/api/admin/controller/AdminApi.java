@@ -1,8 +1,8 @@
 package com.edukit.api.admin.controller;
 
 import com.edukit.api.common.EdukitResponse;
-import com.edukit.api.admin.request.NoticeCreateRequest;
-import com.edukit.api.admin.request.NoticeUpdateRequest;
+import com.edukit.api.admin.controller.request.NoticeCreateRequest;
+import com.edukit.api.admin.controller.request.NoticeUpdateRequest;
 import com.edukit.core.notice.facade.response.NoticeFileUploadPresignedUrlCreateResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;

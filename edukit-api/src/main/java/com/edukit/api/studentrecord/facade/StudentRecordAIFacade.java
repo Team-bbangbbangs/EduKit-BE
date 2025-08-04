@@ -1,10 +1,10 @@
-package com.edukit.core.studentrecord.facade;
+package com.edukit.api.studentrecord.facade;
 
 import com.edukit.core.common.service.AIService;
 import com.edukit.core.common.service.response.OpenAIVersionResponse;
 import com.edukit.core.studentrecord.db.entity.StudentRecord;
-import com.edukit.core.studentrecord.facade.response.StudentRecordCreateResponse;
-import com.edukit.core.studentrecord.facade.response.StudentRecordTaskResponse;
+import com.edukit.api.studentrecord.facade.response.StudentRecordCreateResponse;
+import com.edukit.api.studentrecord.facade.response.StudentRecordTaskResponse;
 import com.edukit.core.studentrecord.service.StudentRecordService;
 import com.edukit.core.studentrecord.util.AIPromptGenerator;
 import lombok.RequiredArgsConstructor;

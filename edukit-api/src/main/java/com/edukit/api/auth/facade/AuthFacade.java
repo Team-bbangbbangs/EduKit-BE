@@ -1,12 +1,12 @@
-package com.edukit.core.auth.facade;
+package com.edukit.api.auth.facade;
 
 import com.edukit.core.auth.db.enums.VerificationCodeType;
 import com.edukit.core.auth.event.MemberSignedUpEvent;
 import com.edukit.core.auth.exception.AuthErrorCode;
 import com.edukit.core.auth.exception.AuthException;
-import com.edukit.core.auth.facade.response.MemberLoginResponse;
-import com.edukit.core.auth.facade.response.MemberReissueResponse;
-import com.edukit.core.auth.facade.response.MemberSignUpResponse;
+import com.edukit.api.auth.facade.response.MemberLoginResponse;
+import com.edukit.api.auth.facade.response.MemberReissueResponse;
+import com.edukit.api.auth.facade.response.MemberSignUpResponse;
 import com.edukit.core.auth.jwt.dto.AuthToken;
 import com.edukit.core.auth.service.AuthService;
 import com.edukit.core.auth.service.JwtTokenService;

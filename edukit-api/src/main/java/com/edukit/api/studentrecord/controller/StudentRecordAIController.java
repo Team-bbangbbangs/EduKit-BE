@@ -1,11 +1,11 @@
 package com.edukit.api.studentrecord.controller;
 
 import com.edukit.api.common.annotation.MemberId;
-import com.edukit.api.studentrecord.request.StudentRecordPromptRequest;
-import com.edukit.core.auth.facade.AuthFacade;
-import com.edukit.core.studentrecord.facade.StudentRecordAIFacade;
-import com.edukit.core.studentrecord.facade.response.StudentRecordCreateResponse;
-import com.edukit.core.studentrecord.facade.response.StudentRecordTaskResponse;
+import com.edukit.api.studentrecord.controller.request.StudentRecordPromptRequest;
+import com.edukit.api.auth.facade.AuthFacade;
+import com.edukit.api.studentrecord.facade.StudentRecordAIFacade;
+import com.edukit.api.studentrecord.facade.response.StudentRecordCreateResponse;
+import com.edukit.api.studentrecord.facade.response.StudentRecordTaskResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;

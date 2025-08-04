@@ -1,4 +1,4 @@
-package com.edukit.core.auth.facade.response;
+package com.edukit.api.auth.facade.response;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
