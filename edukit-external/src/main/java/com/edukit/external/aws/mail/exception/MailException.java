@@ -8,4 +8,7 @@ public class MailException extends ExternalApiException {
         super(errorCode);
     }
 
+    public MailException(final MailErrorCode errorCode, final Throwable cause) {
+        super(errorCode, cause);
+    }
 }
