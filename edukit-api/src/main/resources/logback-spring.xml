@@ -6,9 +6,8 @@
 
     <!-- 패턴 정의 -->
     <property name="CONSOLE_LOG_PATTERN" value="[%clr(%-5level)] [%d{yyyy-MM-dd HH:mm:ss.SSS}] [%thread] %msg%n"/>
-    <property name="LOG_PATTERN" value='{"timestamp":"%d{yyyy-MM-dd HH:mm:ss.SSS}","level":"%level","thread":"%thread","logger":"%logger","module":"api","environment":"${SPRING_PROFILES_ACTIVE:-local}","message":"%msg"}%n'/>
 
-    <!-- Console Appender -->
+    <!-- Console Appender (개발용 - 텍스트 형태) -->
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
             <pattern>${CONSOLE_LOG_PATTERN}</pattern>
@@ -16,16 +15,40 @@
         </encoder>
     </appender>
 
-    <!-- INFO 로그 Appender -->
+    <!-- JSON Console Appender (파일 로그용 - 안전한 JSON) -->
+    <appender name="JSON_CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder class="net.logstash.logback.encoder.LogstashEncoder">
+            <includeContext>true</includeContext>
+            <includeMdc>true</includeMdc>
+            <customFields>{"module":"api","environment":"${SPRING_PROFILES_ACTIVE:-local}"}</customFields>
+            <fieldNames>
+                <timestamp>timestamp</timestamp>
+                <level>level</level>
+                <thread>thread</thread>
+                <logger>logger</logger>
+                <message>message</message>
+            </fieldNames>
+        </encoder>
+    </appender>
+
+    <!-- INFO 로그 Appender (안전한 JSON) -->
     <appender name="INFO" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <filter class="ch.qos.logback.classic.filter.LevelFilter">
             <level>INFO</level>
             <onMatch>ACCEPT</onMatch>
             <onMismatch>DENY</onMismatch>
         </filter>
-        <encoder>
-            <pattern>${LOG_PATTERN}</pattern>
-            <charset>UTF-8</charset>
+        <encoder class="net.logstash.logback.encoder.LogstashEncoder">
+            <includeContext>true</includeContext>
+            <includeMdc>true</includeMdc>
+            <customFields>{"module":"api","environment":"${SPRING_PROFILES_ACTIVE:-local}"}</customFields>
+            <fieldNames>
+                <timestamp>timestamp</timestamp>
+                <level>level</level>
+                <thread>thread</thread>
+                <logger>logger</logger>
+                <message>message</message>
+            </fieldNames>
         </encoder>
         <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
             <fileNamePattern>./log/module-api/info/%d{yyyy-MM-dd}.%i.log</fileNamePattern>
@@ -35,16 +58,24 @@
         </rollingPolicy>
     </appender>
 
-    <!-- WARN 로그 Appender -->
+    <!-- WARN 로그 Appender (안전한 JSON) -->
     <appender name="WARN" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <filter class="ch.qos.logback.classic.filter.LevelFilter">
             <level>WARN</level>
             <onMatch>ACCEPT</onMatch>
             <onMismatch>DENY</onMismatch>
         </filter>
-        <encoder>
-            <pattern>${LOG_PATTERN}</pattern>
-            <charset>UTF-8</charset>
+        <encoder class="net.logstash.logback.encoder.LogstashEncoder">
+            <includeContext>true</includeContext>
+            <includeMdc>true</includeMdc>
+            <customFields>{"module":"api","environment":"${SPRING_PROFILES_ACTIVE:-local}"}</customFields>
+            <fieldNames>
+                <timestamp>timestamp</timestamp>
+                <level>level</level>
+                <thread>thread</thread>
+                <logger>logger</logger>
+                <message>message</message>
+            </fieldNames>
         </encoder>
         <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
             <fileNamePattern>./log/module-api/warn/%d{yyyy-MM-dd}.%i.log</fileNamePattern>
@@ -54,16 +85,24 @@
         </rollingPolicy>
     </appender>
 
-    <!-- ERROR 로그 Appender -->
+    <!-- ERROR 로그 Appender (안전한 JSON) -->
     <appender name="ERROR" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <filter class="ch.qos.logback.classic.filter.LevelFilter">
             <level>ERROR</level>
             <onMatch>ACCEPT</onMatch>
             <onMismatch>DENY</onMismatch>
         </filter>
-        <encoder>
-            <pattern>${LOG_PATTERN}</pattern>
-            <charset>UTF-8</charset>
+        <encoder class="net.logstash.logback.encoder.LogstashEncoder">
+            <includeContext>true</includeContext>
+            <includeMdc>true</includeMdc>
+            <customFields>{"module":"api","environment":"${SPRING_PROFILES_ACTIVE:-local}"}</customFields>
+            <fieldNames>
+                <timestamp>timestamp</timestamp>
+                <level>level</level>
+                <thread>thread</thread>
+                <logger>logger</logger>
+                <message>message</message>
+            </fieldNames>
         </encoder>
         <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
             <fileNamePattern>./log/module-api/error/%d{yyyy-MM-dd}.%i.log</fileNamePattern>
@@ -75,6 +114,7 @@
 
     <!-- 로깅 레벨/대상 설정 (환경별로 다르게) -->
     <springProfile name="local">
+        <!-- 개발환경: 콘솔은 텍스트, 파일은 JSON -->
         <root level="INFO">
             <appender-ref ref="CONSOLE"/>
             <appender-ref ref="INFO"/>
@@ -84,8 +124,9 @@
     </springProfile>
 
     <springProfile name="dev">
+        <!-- 개발서버: 콘솔도 JSON (Promtail 수집용) -->
         <root level="INFO">
-            <appender-ref ref="CONSOLE"/>
+            <appender-ref ref="JSON_CONSOLE"/>
             <appender-ref ref="INFO"/>
             <appender-ref ref="WARN"/>
             <appender-ref ref="ERROR"/>
@@ -93,8 +134,8 @@
     </springProfile>
 
     <springProfile name="prod">
+        <!-- 운영환경: 콘솔 제외, 파일만 JSON -->
         <root level="INFO">
-            <!-- CONSOLE 로깅은 prod에서 제외 -->
             <appender-ref ref="INFO"/>
             <appender-ref ref="WARN"/>
             <appender-ref ref="ERROR"/>
@@ -102,6 +143,7 @@
     </springProfile>
 
     <springProfile name="test">
+        <!-- 테스트환경: 콘솔은 텍스트 -->
         <root level="INFO">
             <appender-ref ref="CONSOLE"/>
             <appender-ref ref="INFO"/>

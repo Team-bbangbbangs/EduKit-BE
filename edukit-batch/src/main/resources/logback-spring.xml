@@ -4,11 +4,10 @@
     <conversionRule conversionWord="clr" class="org.springframework.boot.logging.logback.ColorConverter"/>
     <springProperty name="PROFILE" source="monitoring-profile" />
 
-    <!-- 패턴 정의 - CloudWatch Logs용 -->
-    <property name="CONSOLE_LOG_PATTERN" value='{"timestamp":"%d{yyyy-MM-dd HH:mm:ss.SSS}","level":"%level","thread":"%thread","logger":"%logger","module":"batch","environment":"${SPRING_PROFILES_ACTIVE:-lambda}","message":"%msg","requestId":"${aws.requestId:-}","functionName":"${aws.functionName:-}","functionVersion":"${aws.functionVersion:-}"}%n'/>
-    <property name="LOG_PATTERN" value="${CONSOLE_LOG_PATTERN}"/>
+    <!-- 개발용 텍스트 패턴 -->
+    <property name="CONSOLE_LOG_PATTERN" value="[%clr(%-5level)] [%d{yyyy-MM-dd HH:mm:ss.SSS}] [%thread] %msg%n"/>
 
-    <!-- Console Appender - CloudWatch Logs로 자동 전송됨 -->
+    <!-- Console Appender (개발용 - 텍스트 형태) -->
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
             <pattern>${CONSOLE_LOG_PATTERN}</pattern>
@@ -16,26 +15,46 @@
         </encoder>
     </appender>
 
+    <!-- JSON Console Appender (Lambda용 - 안전한 JSON, CloudWatch Logs로 자동 전송) -->
+    <appender name="JSON_CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder class="net.logstash.logback.encoder.LogstashEncoder">
+            <includeContext>true</includeContext>
+            <includeMdc>true</includeMdc>
+            <customFields>{"module":"batch","environment":"${SPRING_PROFILES_ACTIVE:-lambda}","requestId":"${aws.requestId:-}","functionName":"${aws.functionName:-}","functionVersion":"${aws.functionVersion:-}"}</customFields>
+            <fieldNames>
+                <timestamp>timestamp</timestamp>
+                <level>level</level>
+                <thread>thread</thread>
+                <logger>logger</logger>
+                <message>message</message>
+            </fieldNames>
+        </encoder>
+    </appender>
+
     <!-- Lambda 환경 - Console 로그만 사용 (CloudWatch Logs로 자동 전송) -->
     <springProfile name="local">
+        <!-- 로컬 개발: 텍스트 형태로 읽기 쉽게 -->
         <root level="DEBUG">
             <appender-ref ref="CONSOLE"/>
         </root>
     </springProfile>
 
     <springProfile name="dev,lambda">
+        <!-- Lambda 개발/운영: 안전한 JSON (CloudWatch Logs 파싱용) -->
         <root level="INFO">
-            <appender-ref ref="CONSOLE"/>
+            <appender-ref ref="JSON_CONSOLE"/>
         </root>
     </springProfile>
 
     <springProfile name="prod">
+        <!-- Lambda 운영: 안전한 JSON, WARN 레벨 이상만 -->
         <root level="WARN">
-            <appender-ref ref="CONSOLE"/>
+            <appender-ref ref="JSON_CONSOLE"/>
         </root>
     </springProfile>
 
     <springProfile name="test">
+        <!-- 테스트: 텍스트 형태로 디버깅 편의성 -->
         <root level="DEBUG">
             <appender-ref ref="CONSOLE"/>
         </root>
