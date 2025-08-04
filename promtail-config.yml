@@ -36,8 +36,8 @@ scrape_configs:
           source: message
 
       - drop:
-          expression: '.*(org\.springframework\.web\.servlet\.DispatcherServlet|org\.apache\.catalina\.core\.ContainerBase).*(GET|POST).*/actuator.*'
-          source: logger
+          expression: '.*(GET|POST|PUT|DELETE).*(actuator|health|metrics|prometheus).*'
+          source: message
       - labels:
           thread:
           logger:
@@ -73,8 +73,8 @@ scrape_configs:
           source: message
 
       - drop:
-          expression: '.*(org\.springframework\.web\.servlet\.DispatcherServlet|org\.apache\.catalina\.core\.ContainerBase).*(GET|POST).*/actuator.*'
-          source: logger
+          expression: '.*(GET|POST|PUT|DELETE).*(actuator|health|metrics|prometheus).*'
+          source: message
       - labels:
           thread:
           logger:
@@ -110,8 +110,8 @@ scrape_configs:
           source: message
 
       - drop:
-          expression: '.*(org\.springframework\.web\.servlet\.DispatcherServlet|org\.apache\.catalina\.core\.ContainerBase).*(GET|POST).*/actuator.*'
-          source: logger
+          expression: '.*(GET|POST|PUT|DELETE).*(actuator|health|metrics|prometheus).*'
+          source: message
       - labels:
           thread:
           logger:
