@@ -26,7 +26,8 @@ public class EmailService {
     private final SlackWebhookService slackWebhookService;
 
     public void sendEmail(final String emailReceiver, final String memberUuid, final String verificationCode) {
-        SendEmailRequest request = awsSesEmailMapper.buildEmailRequestForSignUp(emailReceiver, memberUuid, verificationCode);
+        SendEmailRequest request = awsSesEmailMapper.buildEmailRequestForSignUp(emailReceiver, memberUuid,
+                verificationCode);
         send(request, emailReceiver);
     }
 
@@ -92,10 +93,10 @@ public class EmailService {
                             emailReceiver, e.awsErrorDetails().errorCode(), e.getMessage()),
                     "critical"
             );
-            throw new MailException(MailErrorCode.EMAIL_SDK_RETRY_EXHAUSTED);
+            throw new MailException(MailErrorCode.EMAIL_SDK_RETRY_EXHAUSTED, e);
         }
 
-        throw new MailException(MailErrorCode.EMAIL_SEND_FAILED);
+        throw new MailException(MailErrorCode.EMAIL_SEND_FAILED, e);
     }
 
     private void handleSdkClientException(final String emailReceiver, final SdkClientException e) {
@@ -109,7 +110,7 @@ public class EmailService {
                 "error"
         );
 
-        throw new MailException(MailErrorCode.EMAIL_SEND_FAILED);
+        throw new MailException(MailErrorCode.EMAIL_SEND_FAILED, e);
     }
 
     private void sendSlackAlert(final String title, final String message, final String level) {
