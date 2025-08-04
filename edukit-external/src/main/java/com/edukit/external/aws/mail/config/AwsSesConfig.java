@@ -1,11 +1,13 @@
 package com.edukit.external.aws.mail.config;
 
 import com.edukit.external.aws.mail.setting.AwsSesProperties;
+import java.time.Duration;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import software.amazon.awssdk.auth.credentials.AwsCredentialsProvider;
+import software.amazon.awssdk.core.client.config.ClientOverrideConfiguration;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.ses.SesClient;
 
@@ -19,6 +21,10 @@ public class AwsSesConfig {
         return SesClient.builder()
                 .credentialsProvider(credentialsProvider)
                 .region(Region.of(properties.region()))
+                .overrideConfiguration(ClientOverrideConfiguration.builder()
+                        .apiCallAttemptTimeout(Duration.ofSeconds(properties.singleRequestTimeout()))
+                        .apiCallTimeout(Duration.ofSeconds(properties.totalCallTimeout()))
+                        .build())
                 .build();
     }
 }
