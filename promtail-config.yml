@@ -1,0 +1,142 @@
+server:
+  http_listen_port: 9080
+  grpc_listen_port: 0
+
+positions:
+  filename: /tmp/positions.yaml
+
+clients:
+  - url: "http://${MONITORING_INSTANCE}/loki/api/v1/push"
+
+scrape_configs:
+  # API 모듈 - ERROR 로그
+  - job_name: api_error_logs
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: api_error_logs
+          module: api
+          level: error
+          environment: ${ENVIRONMENT}
+          __path__: /log/module-api/error/*.log
+    pipeline_stages:
+      - regex:
+          expression: '^\[(?P<level>\w+)\] \[(?P<timestamp>\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d{3})\] \[(?P<thread>.*?)\] (?P<message>.*)'
+      - labels:
+          level:
+          thread:
+      - timestamp:
+          source: timestamp
+          format: "2006-01-02 15:04:05.000"
+          location: "Asia/Seoul"
+
+  # API 모듈 - INFO 로그
+  - job_name: api_info_logs
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: api_info_logs
+          module: api
+          level: info
+          environment: ${ENVIRONMENT}
+          __path__: /log/module-api/info/*.log
+    pipeline_stages:
+      - regex:
+          expression: '^\[(?P<level>\w+)\] \[(?P<timestamp>\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d{3})\] \[(?P<thread>.*?)\] (?P<message>.*)'
+      - labels:
+          level:
+          thread:
+      - timestamp:
+          source: timestamp
+          format: "2006-01-02 15:04:05.000"
+          location: "Asia/Seoul"
+
+  # API 모듈 - WARN 로그
+  - job_name: api_warn_logs
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: api_warn_logs
+          module: api
+          level: warn
+          environment: ${ENVIRONMENT}
+          __path__: /log/module-api/warn/*.log
+    pipeline_stages:
+      - regex:
+          expression: '^\[(?P<level>\w+)\] \[(?P<timestamp>\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d{3})\] \[(?P<thread>.*?)\] (?P<message>.*)'
+      - labels:
+          level:
+          thread:
+      - timestamp:
+          source: timestamp
+          format: "2006-01-02 15:04:05.000"
+          location: "Asia/Seoul"
+
+  # 배치 모듈 - ERROR 로그
+  - job_name: batch_error_logs
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: batch_error_logs
+          module: batch
+          level: error
+          environment: ${ENVIRONMENT}
+          __path__: /log/module-batch/error/*.log
+    pipeline_stages:
+      - regex:
+          expression: '^\[(?P<level>\w+)\] \[(?P<timestamp>\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d{3})\] \[(?P<thread>.*?)\] (?P<message>.*)'
+      - labels:
+          level:
+          thread:
+      - timestamp:
+          source: timestamp
+          format: "2006-01-02 15:04:05.000"
+          location: "Asia/Seoul"
+
+  # 배치 모듈 - INFO 로그
+  - job_name: batch_info_logs
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: batch_info_logs
+          module: batch
+          level: info
+          environment: ${ENVIRONMENT}
+          __path__: /log/module-batch/info/*.log
+    pipeline_stages:
+      - regex:
+          expression: '^\[(?P<level>\w+)\] \[(?P<timestamp>\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d{3})\] \[(?P<thread>.*?)\] (?P<message>.*)'
+      - labels:
+          level:
+          thread:
+      - timestamp:
+          source: timestamp
+          format: "2006-01-02 15:04:05.000"
+          location: "Asia/Seoul"
+
+  # 배치 모듈 - WARN 로그
+  - job_name: batch_warn_logs
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: batch_warn_logs
+          module: batch
+          level: warn
+          environment: ${ENVIRONMENT}
+          __path__: /log/module-batch/warn/*.log
+    pipeline_stages:
+      - regex:
+          expression: '^\[(?P<level>\w+)\] \[(?P<timestamp>\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d{3})\] \[(?P<thread>.*?)\] (?P<message>.*)'
+      - labels:
+          level:
+          thread:
+      - timestamp:
+          source: timestamp
+          format: "2006-01-02 15:04:05.000"
+          location: "Asia/Seoul"
