@@ -52,10 +52,13 @@ public class SlackWebhookService {
                     }
                     """, emoji, title, color, message, java.time.LocalDateTime.now());
 
-            webClient.post().uri(webhookUrl).contentType(MediaType.APPLICATION_JSON).bodyValue(payload).retrieve()
-                    .toBodilessEntity().block();
-
-            log.info("Slack 알림 전송 성공: {}", title);
+            webClient.post()
+                    .uri(webhookUrl)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .bodyValue(payload)
+                    .retrieve()
+                    .toBodilessEntity()
+                    .subscribe();
 
         } catch (Exception e) {
             log.error("Slack 알림 전송 실패: {}", e.getMessage(), e);
