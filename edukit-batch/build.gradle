@@ -13,6 +13,9 @@ dependencies {
 
     // JSON 처리 (Lambda 이벤트 처리용)
     implementation 'com.fasterxml.jackson.core:jackson-databind'
+    
+    // JSON 로깅 (안전한 JSON 직렬화)
+    implementation 'net.logstash.logback:logstash-logback-encoder:8.0'
 
     // Database
     implementation 'com.mysql:mysql-connector-j'
