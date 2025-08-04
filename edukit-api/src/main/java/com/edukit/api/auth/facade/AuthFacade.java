@@ -1,18 +1,17 @@
 package com.edukit.api.auth.facade;
 
+import com.edukit.api.auth.facade.response.MemberLoginResponse;
+import com.edukit.api.auth.facade.response.MemberReissueResponse;
+import com.edukit.api.auth.facade.response.MemberSignUpResponse;
 import com.edukit.core.auth.db.enums.VerificationCodeType;
 import com.edukit.core.auth.event.MemberSignedUpEvent;
 import com.edukit.core.auth.exception.AuthErrorCode;
 import com.edukit.core.auth.exception.AuthException;
-import com.edukit.api.auth.facade.response.MemberLoginResponse;
-import com.edukit.api.auth.facade.response.MemberReissueResponse;
-import com.edukit.api.auth.facade.response.MemberSignUpResponse;
 import com.edukit.core.auth.jwt.dto.AuthToken;
 import com.edukit.core.auth.service.AuthService;
 import com.edukit.core.auth.service.JwtTokenService;
 import com.edukit.core.auth.service.RefreshTokenStoreService;
 import com.edukit.core.auth.service.VerificationCodeService;
-import com.edukit.core.auth.util.PasswordHasher;
 import com.edukit.core.auth.util.PasswordValidator;
 import com.edukit.core.member.db.entity.Member;
 import com.edukit.core.member.db.enums.MemberRole;
@@ -22,6 +21,7 @@ import com.edukit.core.subject.db.entity.Subject;
 import com.edukit.core.subject.service.SubjectService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -33,6 +33,7 @@ public class AuthFacade {
     private final MemberService memberService;
     private final SubjectService subjectService;
     private final JwtTokenService jwtTokenService;
+    private final PasswordEncoder passwordEncoder;
     private final VerificationCodeService verificationCodeService;
     private final RefreshTokenStoreService refreshTokenStoreService;
     private final ApplicationEventPublisher eventPublisher;
@@ -42,7 +43,7 @@ public class AuthFacade {
                                        final String nickname, final School school) {
         authService.validateCondition(password, email, nickname);
         Subject subject = subjectService.getSubjectByName(subjectName);
-        String encodedPassword = PasswordHasher.encode(password);
+        String encodedPassword = passwordEncoder.encode(password);
         Member member = memberService.createMember(email, encodedPassword, subject, nickname, school);
 
         AuthToken authToken = jwtTokenService.generateTokens(member.getMemberUuid());
@@ -59,7 +60,7 @@ public class AuthFacade {
     public MemberLoginResponse login(final String email, final String password) {
         Member member = memberService.getMemberByEmail(email);
 
-        if (!PasswordHasher.matches(password, member.getPassword())) {
+        if (!passwordEncoder.matches(password, member.getPassword())) {
             throw new AuthException(AuthErrorCode.INVALID_PASSWORD);
         }
 
@@ -100,7 +101,7 @@ public class AuthFacade {
 
         PasswordValidator.validatePasswordConditionForChange(password, confirmPassword, member.getPassword());
 
-        String encodedPassword = PasswordHasher.encode(password);
+        String encodedPassword = passwordEncoder.encode(password);
         memberService.updatePassword(member, encodedPassword);
     }
 
