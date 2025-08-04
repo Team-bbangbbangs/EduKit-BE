@@ -1,4 +1,4 @@
-package com.edukit.external.config;
+package com.edukit.external.redis.config;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
