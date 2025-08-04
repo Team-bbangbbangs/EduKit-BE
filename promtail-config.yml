@@ -30,6 +30,14 @@ scrape_configs:
             module: module
             environment: environment
             message: message
+
+      - drop:
+          expression: '.*(/health|/actuator|/metrics|/prometheus|favicon\.ico|GET.*200.*(/health|/actuator|/metrics)).*'
+          source: message
+
+      - drop:
+          expression: '.*(org\.springframework\.web\.servlet\.DispatcherServlet|org\.apache\.catalina\.core\.ContainerBase).*(GET|POST).*/actuator.*'
+          source: logger
       - labels:
           level:
           thread:
@@ -62,6 +70,14 @@ scrape_configs:
             module: module
             environment: environment
             message: message
+
+      - drop:
+          expression: '.*(/health|/actuator|/metrics|/prometheus|favicon\.ico|GET.*200.*(/health|/actuator|/metrics)).*'
+          source: message
+
+      - drop:
+          expression: '.*(org\.springframework\.web\.servlet\.DispatcherServlet|org\.apache\.catalina\.core\.ContainerBase).*(GET|POST).*/actuator.*'
+          source: logger
       - labels:
           level:
           thread:
@@ -94,6 +110,14 @@ scrape_configs:
             module: module
             environment: environment
             message: message
+
+      - drop:
+          expression: '.*(/health|/actuator|/metrics|/prometheus|favicon\.ico|GET.*200.*(/health|/actuator|/metrics)).*'
+          source: message
+
+      - drop:
+          expression: '.*(org\.springframework\.web\.servlet\.DispatcherServlet|org\.apache\.catalina\.core\.ContainerBase).*(GET|POST).*/actuator.*'
+          source: logger
       - labels:
           level:
           thread:
@@ -105,7 +129,7 @@ scrape_configs:
           format: "2006-01-02 15:04:05.000"
           location: "Asia/Seoul"
 
-  # 배치 모듈 - ERROR 로그
+  # Batch 모듈 - ERROR 로그
   - job_name: batch_error_logs
     static_configs:
       - targets:
@@ -126,6 +150,14 @@ scrape_configs:
             module: module
             environment: environment
             message: message
+
+      - drop:
+          expression: '.*(/health|/actuator|/metrics|/prometheus|favicon\.ico|GET.*200.*(/health|/actuator|/metrics)).*'
+          source: message
+
+      - drop:
+          expression: '.*(org\.springframework\.web\.servlet\.DispatcherServlet|org\.apache\.catalina\.core\.ContainerBase).*(GET|POST).*/actuator.*'
+          source: logger
       - labels:
           level:
           thread:
@@ -137,7 +169,7 @@ scrape_configs:
           format: "2006-01-02 15:04:05.000"
           location: "Asia/Seoul"
 
-  # 배치 모듈 - INFO 로그
+  # Batch 모듈 - INFO 로그
   - job_name: batch_info_logs
     static_configs:
       - targets:
@@ -158,6 +190,14 @@ scrape_configs:
             module: module
             environment: environment
             message: message
+
+      - drop:
+          expression: '.*(/health|/actuator|/metrics|/prometheus|favicon\.ico|GET.*200.*(/health|/actuator|/metrics)).*'
+          source: message
+
+      - drop:
+          expression: '.*(org\.springframework\.web\.servlet\.DispatcherServlet|org\.apache\.catalina\.core\.ContainerBase).*(GET|POST).*/actuator.*'
+          source: logger
       - labels:
           level:
           thread:
@@ -169,7 +209,7 @@ scrape_configs:
           format: "2006-01-02 15:04:05.000"
           location: "Asia/Seoul"
 
-  # 배치 모듈 - WARN 로그
+  # Batch 모듈 - WARN 로그
   - job_name: batch_warn_logs
     static_configs:
       - targets:
@@ -190,6 +230,14 @@ scrape_configs:
             module: module
             environment: environment
             message: message
+
+      - drop:
+          expression: '.*(/health|/actuator|/metrics|/prometheus|favicon\.ico|GET.*200.*(/health|/actuator|/metrics)).*'
+          source: message
+
+      - drop:
+          expression: '.*(org\.springframework\.web\.servlet\.DispatcherServlet|org\.apache\.catalina\.core\.ContainerBase).*(GET|POST).*/actuator.*'
+          source: logger
       - labels:
           level:
           thread:
