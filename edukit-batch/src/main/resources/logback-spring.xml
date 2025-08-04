@@ -4,11 +4,10 @@
     <conversionRule conversionWord="clr" class="org.springframework.boot.logging.logback.ColorConverter"/>
     <springProperty name="PROFILE" source="monitoring-profile" />
 
-    <!-- 패턴 정의 -->
+    <!-- 개발용 텍스트 패턴 -->
     <property name="CONSOLE_LOG_PATTERN" value="[%clr(%-5level)] [%d{yyyy-MM-dd HH:mm:ss.SSS}] [%thread] %msg%n"/>
-    <property name="LOG_PATTERN" value="[%level] [%d{yyyy-MM-dd HH:mm:ss.SSS}] [%thread] %msg%n"/>
 
-    <!-- Console Appender -->
+    <!-- Console Appender (개발용 - 텍스트 형태) -->
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
             <pattern>${CONSOLE_LOG_PATTERN}</pattern>
@@ -16,97 +15,48 @@
         </encoder>
     </appender>
 
-    <!-- INFO 로그 Appender -->
-    <appender name="INFO" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <filter class="ch.qos.logback.classic.filter.LevelFilter">
-            <level>INFO</level>
-            <onMatch>ACCEPT</onMatch>
-            <onMismatch>DENY</onMismatch>
-        </filter>
-        <encoder>
-            <pattern>${LOG_PATTERN}</pattern>
-            <charset>UTF-8</charset>
+    <!-- JSON Console Appender (Lambda용 - 안전한 JSON, CloudWatch Logs로 자동 전송) -->
+    <appender name="JSON_CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder class="net.logstash.logback.encoder.LogstashEncoder">
+            <includeContext>true</includeContext>
+            <includeMdc>true</includeMdc>
+            <customFields>{"module":"batch","requestId":"${aws.requestId:-}","functionName":"${aws.functionName:-}","functionVersion":"${aws.functionVersion:-}"}</customFields>
+            <fieldNames>
+                <timestamp>timestamp</timestamp>
+                <level>level</level>
+                <thread>thread</thread>
+                <logger>logger</logger>
+                <message>message</message>
+            </fieldNames>
         </encoder>
-        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
-            <fileNamePattern>./log/module-batch/info/%d{yyyy-MM-dd}.%i.log</fileNamePattern>
-            <maxFileSize>100MB</maxFileSize>
-            <maxHistory>30</maxHistory>
-            <totalSizeCap>10GB</totalSizeCap>
-        </rollingPolicy>
     </appender>
 
-    <!-- WARN 로그 Appender -->
-    <appender name="WARN" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <filter class="ch.qos.logback.classic.filter.LevelFilter">
-            <level>WARN</level>
-            <onMatch>ACCEPT</onMatch>
-            <onMismatch>DENY</onMismatch>
-        </filter>
-        <encoder>
-            <pattern>${LOG_PATTERN}</pattern>
-            <charset>UTF-8</charset>
-        </encoder>
-        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
-            <fileNamePattern>./log/module-batch/warn/%d{yyyy-MM-dd}.%i.log</fileNamePattern>
-            <maxFileSize>100MB</maxFileSize>
-            <maxHistory>30</maxHistory>
-            <totalSizeCap>10GB</totalSizeCap>
-        </rollingPolicy>
-    </appender>
-
-    <!-- ERROR 로그 Appender -->
-    <appender name="ERROR" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <filter class="ch.qos.logback.classic.filter.LevelFilter">
-            <level>ERROR</level>
-            <onMatch>ACCEPT</onMatch>
-            <onMismatch>DENY</onMismatch>
-        </filter>
-        <encoder>
-            <pattern>${LOG_PATTERN}</pattern>
-            <charset>UTF-8</charset>
-        </encoder>
-        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
-            <fileNamePattern>./log/module-batch/error/%d{yyyy-MM-dd}.%i.log</fileNamePattern>
-            <maxFileSize>100MB</maxFileSize>
-            <maxHistory>30</maxHistory>
-            <totalSizeCap>10GB</totalSizeCap>
-        </rollingPolicy>
-    </appender>
-
-    <!-- 로깅 레벨/대상 설정 (환경별로 다르게) -->
+    <!-- Lambda 환경 - Console 로그만 사용 (CloudWatch Logs로 자동 전송) -->
     <springProfile name="local">
-        <root level="INFO">
+        <!-- 로컬 개발: 텍스트 형태로 읽기 쉽게 -->
+        <root level="DEBUG">
             <appender-ref ref="CONSOLE"/>
-            <appender-ref ref="INFO"/>
-            <appender-ref ref="WARN"/>
-            <appender-ref ref="ERROR"/>
         </root>
     </springProfile>
 
-    <springProfile name="dev">
+    <springProfile name="dev,lambda">
+        <!-- Lambda 개발/운영: 안전한 JSON (CloudWatch Logs 파싱용) -->
         <root level="INFO">
-            <appender-ref ref="CONSOLE"/>
-            <appender-ref ref="INFO"/>
-            <appender-ref ref="WARN"/>
-            <appender-ref ref="ERROR"/>
+            <appender-ref ref="JSON_CONSOLE"/>
         </root>
     </springProfile>
 
     <springProfile name="prod">
-        <root level="INFO">
-            <!-- CONSOLE 로깅은 prod에서 제외 -->
-            <appender-ref ref="INFO"/>
-            <appender-ref ref="WARN"/>
-            <appender-ref ref="ERROR"/>
+        <!-- Lambda 운영: 안전한 JSON, WARN 레벨 이상만 -->
+        <root level="WARN">
+            <appender-ref ref="JSON_CONSOLE"/>
         </root>
     </springProfile>
 
     <springProfile name="test">
-        <root level="INFO">
+        <!-- 테스트: 텍스트 형태로 디버깅 편의성 -->
+        <root level="DEBUG">
             <appender-ref ref="CONSOLE"/>
-            <appender-ref ref="INFO"/>
-            <appender-ref ref="WARN"/>
-            <appender-ref ref="ERROR"/>
         </root>
     </springProfile>
 

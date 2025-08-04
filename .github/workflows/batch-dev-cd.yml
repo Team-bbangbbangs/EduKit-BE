@@ -46,6 +46,11 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-gradle-
 
+      - name: Create application.yml from secrets
+        run: |
+          mkdir -p edukit-batch/src/main/resources
+          echo '${{ secrets.BATCH_APPLICATION_YML }}' > edukit-batch/src/main/resources/application-dev.yml 
+
       - name: Grant execute permission for gradlew
         run: chmod +x ./gradlew
 
@@ -59,19 +64,37 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
 
-      - name: Package and Deploy to Lambda
+      - name: Package JAR and Check Size
         run: |
           cd edukit-batch/build/libs
-          JAR_FILE=$(ls edukit-batch-*.jar | head -1)
-          echo "Found JAR file: $JAR_FILE"
+          JAR_FILE="app-batch.jar"
+          echo "📦 Using JAR file: $JAR_FILE"
           
-          # JAR를 ZIP으로 패키징
+          echo "📊 JAR 파일 크기:"
+          ls -lh $JAR_FILE
+          
           zip lambda-deployment.zip $JAR_FILE
           
-          # Lambda에 배포
+          echo "🗜️ ZIP 파일 크기:"
+          ls -lh lambda-deployment.zip
+          
+          ZIP_SIZE=$(stat -f%z lambda-deployment.zip 2>/dev/null || stat -c%s lambda-deployment.zip)
+          ZIP_SIZE_MB=$((ZIP_SIZE / 1024 / 1024))
+          
+          if [ $ZIP_SIZE -gt 52428800 ]; then
+            echo "⚠️ ZIP 파일이 50MB를 초과합니다: ${ZIP_SIZE_MB}MB"
+            echo "컨테이너 이미지 배포를 고려해보세요."
+            exit 1
+          else
+            echo "✅ ZIP 파일 크기 OK: ${ZIP_SIZE_MB}MB"
+          fi
+
+      - name: Deploy to Lambda
+        run: |
+          cd edukit-batch/build/libs
           aws lambda update-function-code \
-            --function-name ${{ env.LAMBDA_FUNCTION_NAME }} \
-            --zip-file fileb://lambda-deployment.zip
+          --function-name ${{ env.LAMBDA_FUNCTION_NAME }} \
+          --zip-file fileb://lambda-deployment.zip
           
           echo "✅ Lambda deployment completed"
 
@@ -94,7 +117,6 @@ jobs:
           echo "📄 Lambda execution response:"
           cat response.json
           
-          # HTTP 상태 코드로 성공 여부 판단 (더 안전함)
           STATUS_CODE=$(aws lambda invoke \
             --function-name ${{ env.LAMBDA_FUNCTION_NAME }} \
             --payload '{}' \

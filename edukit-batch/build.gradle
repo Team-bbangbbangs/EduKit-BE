@@ -13,6 +13,9 @@ dependencies {
 
     // JSON 처리 (Lambda 이벤트 처리용)
     implementation 'com.fasterxml.jackson.core:jackson-databind'
+    
+    // JSON 로깅 (안전한 JSON 직렬화)
+    implementation 'net.logstash.logback:logstash-logback-encoder:8.0'
 
     // Database
     implementation 'com.mysql:mysql-connector-j'
@@ -33,15 +36,9 @@ jar {
 }
 
 bootJar {
-    archiveBaseName = 'edukit-batch'
-    archiveVersion = project.version
+    archiveFileName = 'app-batch.jar'  // 고정된 파일명으로 변경
 
     exclude '**/external/ai/**'        // OpenAI 관련
     exclude '**/external/aws/s3/**'        // S3 관련
     exclude '**/external/redis/**'  // redis 관련
-
-    // 경량화 설정
-    launchScript {
-        enabled = false  // Lambda에서는 불필요
-    }
 } 
