@@ -2,6 +2,8 @@ package com.edukit.core.auth.util;
 
 import com.edukit.core.auth.exception.AuthErrorCode;
 import com.edukit.core.auth.exception.AuthException;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
 import java.util.regex.Pattern;
 
 public class PasswordValidator {
@@ -33,7 +35,10 @@ public class PasswordValidator {
 
     private static void validatePasswordEquality(final String newPassword, final String confirmedNewPassword) {
 
-        if (!newPassword.equals(confirmedNewPassword)) {
+        if (!MessageDigest.isEqual(
+                newPassword.getBytes(StandardCharsets.UTF_8),
+                confirmedNewPassword.getBytes(StandardCharsets.UTF_8))
+        ) {
             throw new AuthException(AuthErrorCode.PASSWORD_CONFIRM_MISMATCH);
         }
     }
