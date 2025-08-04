@@ -18,7 +18,7 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-          #with:
+        #with:
         # ref: develop # develop 브랜치에서 코드 체크아웃
 
       - name: Set up JDK 21
@@ -36,6 +36,11 @@ jobs:
           key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
           restore-keys: |
             ${{ runner.os }}-gradle-
+
+      - name: Create application.yml from secrets
+        run: |
+          mkdir -p edukit-batch/src/main/resources
+          echo '${{ secrets.APPLICATION_YML }}' > edukit-batch/src/main/resources/application.yml
 
       - name: Grant execute permission for gradlew
         run: chmod +x ./gradlew
