@@ -1,13 +1,13 @@
 package com.edukit.core.member.service;
 
-import com.edukit.core.member.entity.Member;
-import com.edukit.core.member.enums.MemberRole;
-import com.edukit.core.member.enums.School;
+import com.edukit.core.member.db.entity.Member;
+import com.edukit.core.member.db.enums.MemberRole;
+import com.edukit.core.member.db.enums.School;
 import com.edukit.core.member.exception.MemberErrorCode;
 import com.edukit.core.member.exception.MemberException;
-import com.edukit.core.member.repository.MemberRepository;
-import com.edukit.core.member.repository.NicknameBannedWordRepository;
-import com.edukit.core.subject.entity.Subject;
+import com.edukit.core.member.db.repository.MemberRepository;
+import com.edukit.core.member.db.repository.NicknameBannedWordRepository;
+import com.edukit.core.subject.db.entity.Subject;
 import java.util.Optional;
 import java.util.regex.Pattern;
 import lombok.RequiredArgsConstructor;

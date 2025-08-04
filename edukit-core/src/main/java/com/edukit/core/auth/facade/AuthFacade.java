@@ -1,6 +1,6 @@
 package com.edukit.core.auth.facade;
 
-import com.edukit.core.auth.enums.VerificationCodeType;
+import com.edukit.core.auth.db.enums.VerificationCodeType;
 import com.edukit.core.auth.event.MemberSignedUpEvent;
 import com.edukit.core.auth.exception.AuthErrorCode;
 import com.edukit.core.auth.exception.AuthException;
@@ -12,12 +12,13 @@ import com.edukit.core.auth.service.AuthService;
 import com.edukit.core.auth.service.JwtTokenService;
 import com.edukit.core.auth.service.RefreshTokenStoreService;
 import com.edukit.core.auth.service.VerificationCodeService;
-import com.edukit.core.auth.util.PasswordEncryptor;
-import com.edukit.core.member.entity.Member;
-import com.edukit.core.member.enums.MemberRole;
-import com.edukit.core.member.enums.School;
+import com.edukit.core.auth.util.PasswordHasher;
+import com.edukit.core.auth.util.PasswordValidator;
+import com.edukit.core.member.db.entity.Member;
+import com.edukit.core.member.db.enums.MemberRole;
+import com.edukit.core.member.db.enums.School;
 import com.edukit.core.member.service.MemberService;
-import com.edukit.core.subject.entity.Subject;
+import com.edukit.core.subject.db.entity.Subject;
 import com.edukit.core.subject.service.SubjectService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
@@ -35,14 +36,14 @@ public class AuthFacade {
     private final VerificationCodeService verificationCodeService;
     private final RefreshTokenStoreService refreshTokenStoreService;
     private final ApplicationEventPublisher eventPublisher;
-    private final PasswordEncryptor passwordEncryptor;
 
     @Transactional
     public MemberSignUpResponse signUp(final String email, final String password, final String subjectName,
                                        final String nickname, final School school) {
-        authService.validateCondition(email, nickname);
+        authService.validateCondition(password, email, nickname);
         Subject subject = subjectService.getSubjectByName(subjectName);
-        Member member = memberService.createMember(email, password, subject, nickname, school);
+        String encodedPassword = PasswordHasher.encode(password);
+        Member member = memberService.createMember(email, encodedPassword, subject, nickname, school);
 
         AuthToken authToken = jwtTokenService.generateTokens(member.getMemberUuid());
         refreshTokenStoreService.store(member.getMemberUuid(), authToken.refreshToken());
@@ -55,17 +56,10 @@ public class AuthFacade {
         return MemberSignUpResponse.of(authToken.accessToken(), authToken.refreshToken());
     }
 
-    @Transactional(readOnly = true)
-    public void checkHasPermission(final long memberId) {
-        Member member = memberService.getMemberById(memberId);
-        if (member.getRole() == MemberRole.PENDING_TEACHER) {
-            throw new AuthException(AuthErrorCode.FORBIDDEN_MEMBER);
-        }
-    }
-
     public MemberLoginResponse login(final String email, final String password) {
         Member member = memberService.getMemberByEmail(email);
-        if (!passwordEncryptor.matches(password, member.getPassword())) {
+
+        if (!PasswordHasher.matches(password, member.getPassword())) {
             throw new AuthException(AuthErrorCode.INVALID_PASSWORD);
         }
 
@@ -99,16 +93,15 @@ public class AuthFacade {
     @Transactional
     public void updatePassword(final String memberUuid, final String verificationCode, final String password,
                                final String confirmPassword) {
+        PasswordValidator.validatePasswordFormat(password);
+
         Member member = memberService.getMemberByUuid(memberUuid);
         verificationCodeService.verifyPasswordResetCode(member, verificationCode);
-        if (!password.equals(confirmPassword)) {
-            throw new AuthException(AuthErrorCode.PASSWORD_CONFIRM_MISMATCH);
-        }
-        if (passwordEncryptor.matches(password, member.getPassword())) {
-            throw new AuthException(AuthErrorCode.SAME_PASSWORD);
-        }
 
-        memberService.updatePassword(member, passwordEncryptor.encode(password));
+        PasswordValidator.validatePasswordConditionForChange(password, confirmPassword, member.getPassword());
+
+        String encodedPassword = PasswordHasher.encode(password);
+        memberService.updatePassword(member, encodedPassword);
     }
 
     @Transactional
@@ -116,5 +109,13 @@ public class AuthFacade {
         Member member = memberService.getMemberById(memberId);
         memberService.withdraw(member);
         refreshTokenStoreService.delete(member.getMemberUuid());
+    }
+
+    @Transactional(readOnly = true)
+    public void checkHasPermission(final long memberId) {
+        Member member = memberService.getMemberById(memberId);
+        if (member.getRole() == MemberRole.PENDING_TEACHER) {
+            throw new AuthException(AuthErrorCode.FORBIDDEN_MEMBER);
+        }
     }
 }

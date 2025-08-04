@@ -1,6 +1,6 @@
 package com.edukit.core.studentrecord.facade;
 
-import com.edukit.core.studentrecord.entity.StudentRecord;
+import com.edukit.core.studentrecord.db.entity.StudentRecord;
 import com.edukit.core.studentrecord.facade.response.StudentRecordCreateResponse;
 import com.edukit.core.studentrecord.facade.response.StudentRecordTaskResponse;
 import com.edukit.core.studentrecord.service.StudentRecordService;

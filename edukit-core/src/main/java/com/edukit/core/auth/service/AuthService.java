@@ -1,14 +1,14 @@
 package com.edukit.core.auth.service;
 
-import com.edukit.core.auth.entity.ValidEmail;
+import com.edukit.core.auth.db.entity.ValidEmail;
+import com.edukit.core.auth.db.repository.ValidEmailRepository;
 import com.edukit.core.auth.exception.AuthErrorCode;
 import com.edukit.core.auth.exception.AuthException;
-import com.edukit.core.auth.repository.ValidEmailRepository;
-import com.edukit.core.member.repository.MemberRepository;
+import com.edukit.core.auth.util.PasswordValidator;
+import com.edukit.core.member.db.repository.MemberRepository;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -20,7 +20,8 @@ public class AuthService {
     private static final String EMAIL_SEPARATOR = "@";
     private static final boolean NOT_DELETED = false;
 
-    public void validateCondition(final String email, final String nickname) {
+    public void validateCondition(final String password, final String email, final String nickname) {
+        PasswordValidator.validatePasswordFormat(password);
         checkAlreadyRegistered(email);
         validateEmail(email);
         // 닉네임 중복 검사 유효성 검사 로직 작성

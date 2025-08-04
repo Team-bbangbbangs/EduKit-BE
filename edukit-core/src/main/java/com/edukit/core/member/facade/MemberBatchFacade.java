@@ -2,7 +2,7 @@ package com.edukit.core.member.facade;
 
 import com.edukit.core.auth.service.VerificationCodeService;
 import com.edukit.core.auth.service.dto.MemberVerificationData;
-import com.edukit.core.member.entity.Member;
+import com.edukit.core.member.db.entity.Member;
 import com.edukit.core.member.service.MemberBatchService;
 import com.edukit.external.aws.mail.EmailService;
 import java.util.List;

@@ -1,7 +1,7 @@
 package com.edukit.api.controller.notice;
 
 import com.edukit.api.common.EdukitResponse;
-import com.edukit.core.notice.enums.NoticeCategory;
+import com.edukit.core.notice.db.enums.NoticeCategory;
 import com.edukit.core.notice.facade.NoticeFacade;
 import com.edukit.core.notice.facade.response.NoticeGetResponse;
 import com.edukit.core.notice.facade.response.NoticesGetResponse;

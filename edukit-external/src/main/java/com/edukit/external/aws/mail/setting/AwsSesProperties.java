@@ -6,6 +6,8 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 public record AwsSesProperties(
         String senderEmail,
         String region,
-        String emailVerifyUrl
+        String emailVerifyUrl,
+        int singleRequestTimeout,
+        int totalCallTimeout
 ) {
 }

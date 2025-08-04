@@ -1,12 +1,12 @@
 package com.edukit.core.notice.service;
 
-import com.edukit.core.notice.entity.Notice;
-import com.edukit.core.notice.entity.NoticeFile;
-import com.edukit.core.notice.enums.NoticeCategory;
+import com.edukit.core.notice.db.entity.Notice;
+import com.edukit.core.notice.db.entity.NoticeFile;
+import com.edukit.core.notice.db.enums.NoticeCategory;
 import com.edukit.core.notice.exception.NoticeException;
 import com.edukit.core.notice.exception.NoticeErrorCode;
-import com.edukit.core.notice.repository.NoticeFileRepository;
-import com.edukit.core.notice.repository.NoticeRepository;
+import com.edukit.core.notice.db.repository.NoticeFileRepository;
+import com.edukit.core.notice.db.repository.NoticeRepository;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;

@@ -8,21 +8,19 @@ import com.edukit.api.controller.auth.request.MemberLoginRequest;
 import com.edukit.api.controller.auth.request.MemberSignUpRequest;
 import com.edukit.api.controller.auth.request.UpdatePasswordRequest;
 import com.edukit.api.security.handler.RefreshTokenCookieHandler;
-import com.edukit.api.security.util.PasswordValidator;
 import com.edukit.core.auth.facade.AuthFacade;
 import com.edukit.core.auth.facade.response.MemberLoginResponse;
 import com.edukit.core.auth.facade.response.MemberReissueResponse;
 import com.edukit.core.auth.facade.response.MemberSignUpResponse;
-import com.edukit.core.member.enums.School;
+import com.edukit.core.member.db.enums.School;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.CookieValue;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -36,18 +34,15 @@ import org.springframework.web.bind.annotation.RestController;
 public class AuthController {
 
     private final AuthFacade authFacade;
-    private final PasswordEncoder passwordEncoder;
     private final RefreshTokenCookieHandler cookieHandler;
 
     @PostMapping("/signup")
     public ResponseEntity<EdukitResponse<MemberSignUpResponse>> signUp(
             @RequestBody @Valid final MemberSignUpRequest request) {
 
-        PasswordValidator.validatePasswordFormat(request.password());
-        String encodedPassword = passwordEncoder.encode(request.password());
         School school = School.fromName(request.school());
 
-        MemberSignUpResponse response = authFacade.signUp(request.email(), encodedPassword, request.subject(),
+        MemberSignUpResponse response = authFacade.signUp(request.email(), request.password(), request.subject(),
                 request.nickname(), school);
 
         ResponseCookie refreshCookie = cookieHandler.createRefreshTokenCookie(response.refreshToken());
@@ -60,10 +55,10 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<EdukitResponse<MemberLoginResponse>> login(
             @RequestBody @Valid final MemberLoginRequest request) {
-        MemberLoginResponse loginResponse = authFacade.login(request.email().strip(), request.password().strip());
+        MemberLoginResponse loginResponse = authFacade.login(request.email(), request.password());
 
         ResponseCookie refreshTokenCookie = cookieHandler.createRefreshTokenCookie(loginResponse.refreshToken());
-        log.info("로그인 성공: email={}", request.email().strip());
+
         return ResponseEntity.ok()
                 .header(HttpHeaders.SET_COOKIE, refreshTokenCookie.toString())
                 .body(EdukitResponse.success(loginResponse));
@@ -92,8 +87,6 @@ public class AuthController {
         MemberReissueResponse reissueResponse = authFacade.reissue(refreshToken.strip());
 
         ResponseCookie refreshTokenCookie = cookieHandler.createRefreshTokenCookie(reissueResponse.refreshToken());
-        log.info("토큰 재발급 성공: refreshToken(앞 8자리)={}",
-                refreshToken.length() > 8 ? refreshToken.substring(0, 8) : refreshToken);
         return ResponseEntity.ok()
                 .header(HttpHeaders.SET_COOKIE, refreshTokenCookie.toString())
                 .body(EdukitResponse.success(reissueResponse));
@@ -102,10 +95,8 @@ public class AuthController {
     @PatchMapping("/password")
     public ResponseEntity<EdukitResponse<Void>> updatePassword(
             @RequestBody @Valid final UpdatePasswordRequest request) {
-        PasswordValidator.validatePasswordFormat(request.password());
-
-        authFacade.updatePassword(request.memberUuid().strip(), request.verificationCode().strip(),
-                request.password().strip(), request.confirmPassword().strip());
+        authFacade.updatePassword(request.memberUuid(), request.verificationCode(), request.password(),
+                request.confirmPassword());
         return ResponseEntity.ok(EdukitResponse.success());
     }
 }
