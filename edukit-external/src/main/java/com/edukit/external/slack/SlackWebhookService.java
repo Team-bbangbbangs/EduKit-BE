@@ -1,5 +1,8 @@
 package com.edukit.external.slack;
 
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
@@ -28,28 +31,17 @@ public class SlackWebhookService {
         String emoji = getEmojiByLevel(level);
         String color = getColorByLevel(level);
 
-        String payload = String.format("""
-                {
-                    "text": "%s %s",
-                    "attachments": [
-                        {
-                            "color": "%s",
-                            "fields": [
-                                {
-                                    "title": "Details",
-                                    "value": "%s",
-                                    "short": false
-                                },
-                                {
-                                    "title": "Time",
-                                    "value": "%s",
-                                    "short": true
-                                }
-                            ]
-                        }
-                    ]
-                }
-                """, emoji, title, color, message, java.time.LocalDateTime.now());
+        Map<String, Object> payload = Map.of(
+                "text", emoji + " " + title,
+                "attachments", List.of(
+                        Map.of(
+                                "color", color,
+                                "fields", List.of(
+                                        Map.of("title", "Message", "value", message, "short", false),
+                                        Map.of("title", "Time", "value", LocalDateTime.now().toString(), "short", true)
+                                )
+                        ))
+        );
 
         webClient.post()
                 .uri(webhookUrl)
