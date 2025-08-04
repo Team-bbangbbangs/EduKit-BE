@@ -1,4 +1,4 @@
-package com.edukit.api.security.util;
+package com.edukit.core.auth.util;
 
 import com.edukit.core.auth.exception.AuthErrorCode;
 import com.edukit.core.auth.exception.AuthException;
@@ -22,6 +22,25 @@ public class PasswordValidator {
 
         if (!VALID_PASSWORD_PATTERN.matcher(password).matches()) {
             throw new AuthException(AuthErrorCode.INVALID_PASSWORD_FORMAT);
+        }
+    }
+
+    public static void validatePasswordConditionForChange(final String newPassword, final String confirmedNewPassword,
+                                                          final String currentPassword) {
+        validatePasswordEquality(newPassword, confirmedNewPassword);
+        validatePasswordNotChange(newPassword, currentPassword);
+    }
+
+    private static void validatePasswordEquality(final String newPassword, final String confirmedNewPassword) {
+
+        if (!newPassword.equals(confirmedNewPassword)) {
+            throw new AuthException(AuthErrorCode.PASSWORD_CONFIRM_MISMATCH);
+        }
+    }
+
+    private static void validatePasswordNotChange(final String newPassword, final String currentPassword) {
+        if (PasswordHasher.matches(newPassword, currentPassword)) {
+            throw new AuthException(AuthErrorCode.SAME_PASSWORD);
         }
     }
 }
