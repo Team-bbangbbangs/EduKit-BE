@@ -1,4 +1,4 @@
-package com.edukit.core.member;
+package com.edukit.batch.auth.facade;
 
 import com.edukit.core.auth.service.VerificationCodeService;
 import com.edukit.core.auth.service.dto.MemberVerificationData;
