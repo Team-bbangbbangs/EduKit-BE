@@ -4,10 +4,12 @@ import com.edukit.core.auth.jwt.setting.JwtProperties;
 import com.edukit.external.redis.RedisStoreService;
 import java.time.Duration;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.annotation.Import;
 import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
+@Import(RedisStoreService.class)
 public class RefreshTokenStoreService {
 
     private final RedisStoreService redisStoreService;

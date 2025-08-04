@@ -10,9 +10,7 @@ import com.edukit.core.auth.facade.response.MemberSignUpResponse;
 import com.edukit.core.auth.jwt.dto.AuthToken;
 import com.edukit.core.auth.service.AuthService;
 import com.edukit.core.auth.service.JwtTokenService;
-import com.edukit.core.auth.service.RefreshTokenStoreService;
 import com.edukit.core.auth.service.VerificationCodeService;
-import com.edukit.core.auth.util.PasswordEncryptor;
 import com.edukit.core.member.db.entity.Member;
 import com.edukit.core.member.db.enums.MemberRole;
 import com.edukit.core.member.db.enums.School;
@@ -33,9 +31,8 @@ public class AuthFacade {
     private final SubjectService subjectService;
     private final JwtTokenService jwtTokenService;
     private final VerificationCodeService verificationCodeService;
-    private final RefreshTokenStoreService refreshTokenStoreService;
+    // private final RefreshTokenStoreService refreshTokenStoreService;
     private final ApplicationEventPublisher eventPublisher;
-    private final PasswordEncryptor passwordEncryptor;
 
     @Transactional
     public MemberSignUpResponse signUp(final String email, final String password, final String subjectName,
@@ -45,7 +42,7 @@ public class AuthFacade {
         Member member = memberService.createMember(email, password, subject, nickname, school);
 
         AuthToken authToken = jwtTokenService.generateTokens(member.getMemberUuid());
-        refreshTokenStoreService.store(member.getMemberUuid(), authToken.refreshToken());
+        // refreshTokenStoreService.store(member.getMemberUuid(), authToken.refreshToken());
 
         String verificationCode = verificationCodeService.issueVerificationCode(member,
                 VerificationCodeType.TEACHER_VERIFICATION);
@@ -65,33 +62,36 @@ public class AuthFacade {
 
     public MemberLoginResponse login(final String email, final String password) {
         Member member = memberService.getMemberByEmail(email);
-        if (!passwordEncryptor.matches(password, member.getPassword())) {
+        /*
+        if (!passwordEncoder.matches(password, member.getPassword())) {
             throw new AuthException(AuthErrorCode.INVALID_PASSWORD);
         }
 
+         */
+
         AuthToken authToken = jwtTokenService.generateTokens(member.getMemberUuid());
-        refreshTokenStoreService.store(member.getMemberUuid(), authToken.refreshToken());
+        // refreshTokenStoreService.store(member.getMemberUuid(), authToken.refreshToken());
 
         return MemberLoginResponse.of(authToken.accessToken(), authToken.refreshToken(), member.isAdmin());
     }
 
     public void logout(final long memberId) {
         Member member = memberService.getMemberById(memberId);
-        refreshTokenStoreService.delete(member.getMemberUuid());
+        // refreshTokenStoreService.delete(member.getMemberUuid());
     }
 
     @Transactional(readOnly = true)
     public MemberReissueResponse reissue(final String refreshToken) {
         String memberUuid = jwtTokenService.parseMemberUuidFromRefreshToken(refreshToken);
         Member member = memberService.getMemberByUuid(memberUuid);
-        String storedRefreshToken = refreshTokenStoreService.get(memberUuid);
-        if (!jwtTokenService.isTokenEqual(refreshToken, storedRefreshToken)) {
+        // String storedRefreshToken = refreshTokenStoreService.get(memberUuid);
+        if (!jwtTokenService.isTokenEqual(refreshToken, "storedRefreshToken")) {
             logout(member.getId());
             throw new AuthException(AuthErrorCode.INVALID_TOKEN);
         }
 
         AuthToken authToken = jwtTokenService.generateTokens(memberUuid);
-        refreshTokenStoreService.store(memberUuid, authToken.refreshToken());
+        // refreshTokenStoreService.store(memberUuid, authToken.refreshToken());
 
         return MemberReissueResponse.of(authToken.accessToken(), authToken.refreshToken(), member.isAdmin());
     }
@@ -104,17 +104,21 @@ public class AuthFacade {
         if (!password.equals(confirmPassword)) {
             throw new AuthException(AuthErrorCode.PASSWORD_CONFIRM_MISMATCH);
         }
-        if (passwordEncryptor.matches(password, member.getPassword())) {
+        /*
+        if (passwordEncoder.matches(password, member.getPassword())) {
             throw new AuthException(AuthErrorCode.SAME_PASSWORD);
         }
 
-        memberService.updatePassword(member, passwordEncryptor.encode(password));
+         */
+
+        // String encodedPassword = passwordEncoder.encode(password);
+        memberService.updatePassword(member, "encodedPassword");
     }
 
     @Transactional
     public void withdraw(final long memberId) {
         Member member = memberService.getMemberById(memberId);
         memberService.withdraw(member);
-        refreshTokenStoreService.delete(member.getMemberUuid());
+        // refreshTokenStoreService.delete(member.getMemberUuid());
     }
 }

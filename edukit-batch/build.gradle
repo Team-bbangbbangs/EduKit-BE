@@ -1,48 +1,47 @@
 // 배치 모듈 (실행 가능한 JAR)
 
 plugins {
-	id 'org.springframework.boot'
+    id 'org.springframework.boot'
 }
 
 dependencies {
-	implementation project(':edukit-core')
+    implementation project(':edukit-core')
 
-	// AWS Lambda
-	implementation 'com.amazonaws:aws-lambda-java-core:1.3.0'
-	implementation 'com.amazonaws:aws-lambda-java-events:3.16.1'
+    // AWS Lambda
+    implementation 'com.amazonaws:aws-lambda-java-core:1.3.0'
+    implementation 'com.amazonaws:aws-lambda-java-events:3.16.1'
 
-	// JSON 처리 (Lambda 이벤트 처리용)
-	implementation 'com.fasterxml.jackson.core:jackson-databind'
+    // JSON 처리 (Lambda 이벤트 처리용)
+    implementation 'com.fasterxml.jackson.core:jackson-databind'
 
-	// Database
-	implementation 'com.mysql:mysql-connector-j'
+    // Database
+    implementation 'com.mysql:mysql-connector-j'
 
-	// 배치에 불필요한 의존성 제외
-	configurations.configureEach {
-		exclude group: 'org.springframework.ai'      // OpenAI 관련
-		exclude group: 'org.springdoc'              // Swagger 제외
-		exclude group: 'software.amazon.awssdk', module: 's3'              // S3만 제외 (SES는 유지)
-	}
+    // 배치에 불필요한 의존성 제외
+    configurations.configureEach {
+        exclude group: 'org.springframework.ai'      // OpenAI 관련
+        exclude group: 'org.springdoc'              // Swagger 제외
+        exclude group: 'software.amazon.awssdk', module: 's3'              // S3만 제외 (SES는 유지)
+    }
 }
 
 // 실행 가능한 JAR 설정
 jar {
-	archiveBaseName = 'edukit-batch'
-	archiveVersion = project.version
-	enabled = false
+    archiveBaseName = 'edukit-batch'
+    archiveVersion = project.version
+    enabled = false
 }
 
 bootJar {
-	archiveBaseName = 'edukit-batch'
-	archiveVersion = project.version
+    archiveBaseName = 'edukit-batch'
+    archiveVersion = project.version
 
-	// 불필요한 패키지 제외
-	exclude '**/external/ai/**'        // OpenAI 관련
-	exclude '**/external/aws/s3/**'        // S3 관련
-	// mail과 config는 batch에서 필요하므로 제외하지 않음
+    exclude '**/external/ai/**'        // OpenAI 관련
+    exclude '**/external/aws/s3/**'        // S3 관련
+    exclude '**/external/redis/**'  // redis 관련
 
-	// 경량화 설정
-	launchScript {
-		enabled = false  // Lambda에서는 불필요
-	}
+    // 경량화 설정
+    launchScript {
+        enabled = false  // Lambda에서는 불필요
+    }
 } 
