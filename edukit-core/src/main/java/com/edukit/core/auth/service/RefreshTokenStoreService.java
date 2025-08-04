@@ -1,6 +1,6 @@
 package com.edukit.core.auth.service;
 
-import com.edukit.core.auth.jwt.setting.JwtProperties;
+import com.edukit.core.auth.service.jwt.setting.JwtProperties;
 import com.edukit.core.common.service.RedisService;
 import java.time.Duration;
 import lombok.RequiredArgsConstructor;

@@ -7,7 +7,7 @@ import com.edukit.core.auth.db.enums.VerificationCodeType;
 import com.edukit.core.auth.event.MemberSignedUpEvent;
 import com.edukit.core.auth.exception.AuthErrorCode;
 import com.edukit.core.auth.exception.AuthException;
-import com.edukit.core.auth.jwt.dto.AuthToken;
+import com.edukit.core.auth.service.jwt.dto.AuthToken;
 import com.edukit.core.auth.service.AuthService;
 import com.edukit.core.auth.service.JwtTokenService;
 import com.edukit.core.auth.service.RefreshTokenStoreService;

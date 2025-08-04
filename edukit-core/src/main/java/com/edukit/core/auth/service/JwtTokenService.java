@@ -1,10 +1,10 @@
 package com.edukit.core.auth.service;
 
-import com.edukit.core.auth.jwt.JwtGenerator;
-import com.edukit.core.auth.jwt.JwtParser;
-import com.edukit.core.auth.jwt.JwtValidator;
-import com.edukit.core.auth.jwt.dto.AuthToken;
-import com.edukit.core.auth.jwt.type.TokenType;
+import com.edukit.core.auth.service.jwt.JwtGenerator;
+import com.edukit.core.auth.service.jwt.JwtParser;
+import com.edukit.core.auth.service.jwt.JwtValidator;
+import com.edukit.core.auth.service.jwt.dto.AuthToken;
+import com.edukit.core.auth.service.jwt.type.TokenType;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import lombok.RequiredArgsConstructor;

@@ -1,4 +1,4 @@
-package com.edukit.core.auth.jwt.setting;
+package com.edukit.core.auth.service.jwt.setting;
 
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Configuration;

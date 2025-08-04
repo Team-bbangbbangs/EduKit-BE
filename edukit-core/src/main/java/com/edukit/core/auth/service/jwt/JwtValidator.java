@@ -1,8 +1,8 @@
-package com.edukit.core.auth.jwt;
+package com.edukit.core.auth.service.jwt;
 
 import com.edukit.core.auth.exception.AuthErrorCode;
 import com.edukit.core.auth.exception.AuthException;
-import com.edukit.core.auth.jwt.type.TokenType;
+import com.edukit.core.auth.service.jwt.type.TokenType;
 import io.jsonwebtoken.Claims;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

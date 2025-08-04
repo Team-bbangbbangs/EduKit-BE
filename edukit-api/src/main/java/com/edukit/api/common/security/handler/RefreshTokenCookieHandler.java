@@ -1,6 +1,6 @@
 package com.edukit.api.common.security.handler;
 
-import com.edukit.core.auth.jwt.setting.JwtProperties;
+import com.edukit.core.auth.service.jwt.setting.JwtProperties;
 import java.time.Duration;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseCookie;
