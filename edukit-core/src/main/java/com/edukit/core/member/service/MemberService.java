@@ -106,4 +106,15 @@ public class MemberService {
                     return member;
                 });
     }
+
+    @Transactional(readOnly = true)
+    public Member getMemberByEmail(final String email) {
+        return memberRepository.findByEmailAndIsDeleted(email, false)
+                .orElseThrow(() -> new MemberException(MemberErrorCode.MEMBER_NOT_FOUND));
+    }
+
+    @Transactional
+    public void updatePassword(final Member member, final String encodedPassword) {
+        member.updatePassword(encodedPassword);
+    }
 }

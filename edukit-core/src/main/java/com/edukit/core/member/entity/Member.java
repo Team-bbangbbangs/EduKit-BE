@@ -107,6 +107,14 @@ public class Member extends BaseTimeEntity {
         this.verifiedAt = null;
     }
 
+    public boolean isAdmin() {
+        return this.getRole() == MemberRole.ADMIN;
+    }
+
+    public void updatePassword(final String password) {
+        this.password = password;
+    }
+
     public boolean isVerifyTeacher() {
         return this.role != MemberRole.PENDING_TEACHER;
     }

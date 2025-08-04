@@ -5,6 +5,8 @@ import com.edukit.core.auth.jwt.JwtParser;
 import com.edukit.core.auth.jwt.JwtValidator;
 import com.edukit.core.auth.jwt.dto.AuthToken;
 import com.edukit.core.auth.jwt.type.TokenType;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -26,5 +28,21 @@ public class JwtTokenService {
         String token = jwtParser.resolveToken(accessToken);
         jwtValidator.validateToken(token, TokenType.ACCESS);
         return jwtParser.parseClaims(token).getSubject();
+    }
+
+    public String parseMemberUuidFromRefreshToken(final String refreshToken) {
+        jwtValidator.validateToken(refreshToken, TokenType.REFRESH);
+        return jwtParser.parseClaims(refreshToken).getSubject();
+    }
+
+    public boolean isTokenEqual(final String requestToken, final String storedToken) {
+        if (requestToken == null || storedToken == null) {
+            return false;
+        }
+
+        return MessageDigest.isEqual(
+                storedToken.getBytes(StandardCharsets.UTF_8),
+                requestToken.getBytes(StandardCharsets.UTF_8)
+        );
     }
 }
