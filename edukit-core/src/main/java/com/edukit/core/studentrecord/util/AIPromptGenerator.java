@@ -1,6 +1,6 @@
 package com.edukit.core.studentrecord.util;
 
-import com.edukit.core.studentrecord.enums.StudentRecordType;
+import com.edukit.core.studentrecord.db.enums.StudentRecordType;
 import lombok.experimental.UtilityClass;
 
 @UtilityClass

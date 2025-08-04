@@ -1,6 +1,6 @@
 package com.edukit.core.notice.facade.response;
 
-import com.edukit.core.notice.entity.NoticeFile;
+import com.edukit.core.notice.db.entity.NoticeFile;
 import com.edukit.external.aws.s3.response.UploadPresignedUrlResponse;
 import java.util.List;
 import java.util.Map;

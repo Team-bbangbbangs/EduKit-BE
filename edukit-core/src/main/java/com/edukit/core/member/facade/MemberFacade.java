@@ -1,11 +1,11 @@
 package com.edukit.core.member.facade;
 
-import com.edukit.core.member.entity.Member;
-import com.edukit.core.member.enums.School;
+import com.edukit.core.member.db.entity.Member;
+import com.edukit.core.member.db.enums.School;
 import com.edukit.core.member.facade.response.MemberNicknameValidationResponse;
 import com.edukit.core.member.facade.response.MemberProfileGetResponse;
 import com.edukit.core.member.service.MemberService;
-import com.edukit.core.subject.entity.Subject;
+import com.edukit.core.subject.db.entity.Subject;
 import com.edukit.core.subject.service.SubjectService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

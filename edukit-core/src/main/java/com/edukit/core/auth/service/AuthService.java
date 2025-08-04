@@ -1,14 +1,13 @@
 package com.edukit.core.auth.service;
 
-import com.edukit.core.auth.entity.ValidEmail;
+import com.edukit.core.auth.db.entity.ValidEmail;
 import com.edukit.core.auth.exception.AuthErrorCode;
 import com.edukit.core.auth.exception.AuthException;
-import com.edukit.core.auth.repository.ValidEmailRepository;
-import com.edukit.core.member.repository.MemberRepository;
+import com.edukit.core.auth.db.repository.ValidEmailRepository;
+import com.edukit.core.member.db.repository.MemberRepository;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor

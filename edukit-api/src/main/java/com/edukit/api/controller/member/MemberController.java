@@ -3,7 +3,7 @@ package com.edukit.api.controller.member;
 import com.edukit.api.common.EdukitResponse;
 import com.edukit.api.common.annotation.MemberId;
 import com.edukit.api.controller.member.request.MemberProfileUpdateRequest;
-import com.edukit.core.member.enums.School;
+import com.edukit.core.member.db.enums.School;
 import com.edukit.core.member.facade.MemberFacade;
 import com.edukit.core.member.facade.response.MemberNicknameValidationResponse;
 import com.edukit.core.member.facade.response.MemberProfileGetResponse;

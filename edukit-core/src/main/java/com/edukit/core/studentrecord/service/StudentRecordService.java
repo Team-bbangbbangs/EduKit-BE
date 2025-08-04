@@ -1,12 +1,12 @@
 package com.edukit.core.studentrecord.service;
 
-import com.edukit.core.studentrecord.entity.Student;
-import com.edukit.core.studentrecord.entity.StudentRecord;
-import com.edukit.core.studentrecord.entity.StudentRecordAITask;
+import com.edukit.core.studentrecord.db.entity.Student;
+import com.edukit.core.studentrecord.db.entity.StudentRecord;
+import com.edukit.core.studentrecord.db.entity.StudentRecordAITask;
 import com.edukit.core.studentrecord.exception.StudentRecordErrorCode;
 import com.edukit.core.studentrecord.exception.StudentRecordException;
-import com.edukit.core.studentrecord.repository.StudentRecordAITaskRepository;
-import com.edukit.core.studentrecord.repository.StudentRecordRepository;
+import com.edukit.core.studentrecord.db.repository.StudentRecordAITaskRepository;
+import com.edukit.core.studentrecord.db.repository.StudentRecordRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

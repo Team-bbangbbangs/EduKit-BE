@@ -1,8 +1,8 @@
 package com.edukit.core.member.service;
 
-import com.edukit.core.member.entity.Member;
-import com.edukit.core.member.enums.MemberRole;
-import com.edukit.core.member.repository.MemberRepository;
+import com.edukit.core.member.db.entity.Member;
+import com.edukit.core.member.db.enums.MemberRole;
+import com.edukit.core.member.db.repository.MemberRepository;
 import java.time.LocalDateTime;
 import java.util.List;
 import lombok.RequiredArgsConstructor;

@@ -1,7 +1,7 @@
 package com.edukit.api.security.authentication;
 
-import com.edukit.core.member.entity.Member;
-import com.edukit.core.member.enums.MemberRole;
+import com.edukit.core.member.db.entity.Member;
+import com.edukit.core.member.db.enums.MemberRole;
 import com.edukit.core.member.service.MemberService;
 import java.util.Collection;
 import lombok.RequiredArgsConstructor;

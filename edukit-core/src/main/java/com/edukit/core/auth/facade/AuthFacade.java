@@ -1,6 +1,6 @@
 package com.edukit.core.auth.facade;
 
-import com.edukit.core.auth.enums.VerificationCodeType;
+import com.edukit.core.auth.db.enums.VerificationCodeType;
 import com.edukit.core.auth.event.MemberSignedUpEvent;
 import com.edukit.core.auth.exception.AuthErrorCode;
 import com.edukit.core.auth.exception.AuthException;
@@ -13,11 +13,11 @@ import com.edukit.core.auth.service.JwtTokenService;
 import com.edukit.core.auth.service.RefreshTokenStoreService;
 import com.edukit.core.auth.service.VerificationCodeService;
 import com.edukit.core.auth.util.PasswordEncryptor;
-import com.edukit.core.member.entity.Member;
-import com.edukit.core.member.enums.MemberRole;
-import com.edukit.core.member.enums.School;
+import com.edukit.core.member.db.entity.Member;
+import com.edukit.core.member.db.enums.MemberRole;
+import com.edukit.core.member.db.enums.School;
 import com.edukit.core.member.service.MemberService;
-import com.edukit.core.subject.entity.Subject;
+import com.edukit.core.subject.db.entity.Subject;
 import com.edukit.core.subject.service.SubjectService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
