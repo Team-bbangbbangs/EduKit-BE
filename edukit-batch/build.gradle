@@ -33,8 +33,7 @@ jar {
 }
 
 bootJar {
-    archiveBaseName = 'edukit-batch'
-    archiveVersion = project.version
+    archiveFileName = 'app-batch.jar'  // 고정된 파일명으로 변경
 
     exclude '**/external/ai/**'        // OpenAI 관련
     exclude '**/external/aws/s3/**'        // S3 관련

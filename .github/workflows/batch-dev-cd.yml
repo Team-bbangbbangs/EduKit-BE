@@ -67,8 +67,8 @@ jobs:
       - name: Package and Deploy to Lambda
         run: |
           cd edukit-batch/build/libs
-          JAR_FILE=$(ls edukit-batch-*.jar | head -1)
-          echo "Found JAR file: $JAR_FILE"
+          JAR_FILE="app-batch.jar"
+          echo "Using JAR file: $JAR_FILE"
           
           # JAR를 ZIP으로 패키징
           zip lambda-deployment.zip $JAR_FILE
