@@ -1,4 +1,4 @@
-package com.edukit.core.notice.facade.response;
+package com.edukit.api.notice.facade.response;
 
 import com.edukit.core.common.service.response.UploadPresignedUrlResponse;
 import com.edukit.core.notice.db.entity.NoticeFile;

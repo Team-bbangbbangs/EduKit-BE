@@ -1,8 +1,8 @@
 package com.edukit.api.notice.controller;
 
 import com.edukit.api.common.EdukitResponse;
-import com.edukit.core.notice.facade.response.NoticeGetResponse;
-import com.edukit.core.notice.facade.response.NoticesGetResponse;
+import com.edukit.api.notice.facade.response.NoticeGetResponse;
+import com.edukit.api.notice.facade.response.NoticesGetResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;

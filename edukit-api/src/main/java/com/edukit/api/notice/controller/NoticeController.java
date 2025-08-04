@@ -2,9 +2,9 @@ package com.edukit.api.notice.controller;
 
 import com.edukit.api.common.EdukitResponse;
 import com.edukit.core.notice.db.enums.NoticeCategory;
-import com.edukit.core.notice.facade.NoticeFacade;
-import com.edukit.core.notice.facade.response.NoticeGetResponse;
-import com.edukit.core.notice.facade.response.NoticesGetResponse;
+import com.edukit.api.notice.facade.NoticeFacade;
+import com.edukit.api.notice.facade.response.NoticeGetResponse;
+import com.edukit.api.notice.facade.response.NoticesGetResponse;
 import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;

@@ -1,4 +1,4 @@
-package com.edukit.core.notice.facade.response;
+package com.edukit.api.notice.facade.response;
 
 import java.time.LocalDateTime;
 
