@@ -1,5 +1,6 @@
 package com.edukit.core.studentrecord.facade;
 
+import com.edukit.core.common.service.AIService;
 import com.edukit.core.studentrecord.db.entity.StudentRecord;
 import com.edukit.core.studentrecord.facade.response.StudentRecordCreateResponse;
 import com.edukit.core.studentrecord.facade.response.StudentRecordTaskResponse;
@@ -15,7 +16,7 @@ import reactor.core.publisher.Flux;
 
 @Service
 @RequiredArgsConstructor
-@ConditionalOnBean(OpenAIService.class)
+@ConditionalOnBean(AIService.class)
 public class StudentRecordAIFacade {
 
     private final StudentRecordService studentRecordService;

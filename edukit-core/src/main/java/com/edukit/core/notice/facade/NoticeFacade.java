@@ -1,5 +1,6 @@
 package com.edukit.core.notice.facade;
 
+import com.edukit.core.common.service.FileStorageService;
 import com.edukit.core.notice.db.entity.Notice;
 import com.edukit.core.notice.db.entity.NoticeFile;
 import com.edukit.core.notice.db.enums.NoticeCategory;
@@ -19,7 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
-@ConditionalOnBean(S3Service.class)
+@ConditionalOnBean(FileStorageService.class)
 public class NoticeFacade {
 
     private final NoticeService noticeService;

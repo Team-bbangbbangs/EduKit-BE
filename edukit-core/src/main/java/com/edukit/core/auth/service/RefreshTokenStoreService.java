@@ -1,15 +1,16 @@
 package com.edukit.core.auth.service;
 
 import com.edukit.core.auth.jwt.setting.JwtProperties;
+import com.edukit.core.common.service.CacheService;
 import com.edukit.external.redis.RedisStoreService;
 import java.time.Duration;
 import lombok.RequiredArgsConstructor;
-import org.springframework.context.annotation.Import;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
-@Import(RedisStoreService.class)
+@ConditionalOnBean(CacheService.class)
 public class RefreshTokenStoreService {
 
     private final RedisStoreService redisStoreService;

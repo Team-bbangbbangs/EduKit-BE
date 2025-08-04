@@ -4,6 +4,7 @@ import com.edukit.core.auth.event.MemberSignedUpEvent;
 import com.edukit.external.aws.mail.EmailService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.event.TransactionPhase;
@@ -12,6 +13,7 @@ import org.springframework.transaction.event.TransactionalEventListener;
 @Slf4j
 @Component
 @RequiredArgsConstructor
+@ConditionalOnBean(EmailService.class)
 public class EmailEventListener {
 
     private final EmailService emailService;
