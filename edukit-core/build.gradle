@@ -5,7 +5,7 @@ dependencies {
 	implementation project(':edukit-common')
 
 	// Hibernate
-	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+	api 'org.springframework.boot:spring-boot-starter-data-jpa'
 
 	// Jackson
 	implementation 'com.fasterxml.jackson.core:jackson-databind'
