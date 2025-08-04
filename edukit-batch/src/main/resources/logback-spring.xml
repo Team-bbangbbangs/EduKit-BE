@@ -6,7 +6,7 @@
 
     <!-- 패턴 정의 -->
     <property name="CONSOLE_LOG_PATTERN" value="[%clr(%-5level)] [%d{yyyy-MM-dd HH:mm:ss.SSS}] [%thread] %msg%n"/>
-    <property name="LOG_PATTERN" value="[%level] [%d{yyyy-MM-dd HH:mm:ss.SSS}] [%thread] %msg%n"/>
+    <property name="LOG_PATTERN" value='{"timestamp":"%d{yyyy-MM-dd HH:mm:ss.SSS}","level":"%level","thread":"%thread","logger":"%logger","module":"batch","environment":"${SPRING_PROFILES_ACTIVE:-local}","message":"%msg"}%n'/>
 
     <!-- Console Appender -->
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">

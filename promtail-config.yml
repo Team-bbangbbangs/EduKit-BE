@@ -21,11 +21,21 @@ scrape_configs:
           environment: ${ENVIRONMENT}
           __path__: /log/module-api/error/*.log
     pipeline_stages:
-      - regex:
-          expression: '^\[(?P<level>\w+)\] \[(?P<timestamp>\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d{3})\] \[(?P<thread>.*?)\] (?P<message>.*)'
+      - json:
+          expressions:
+            timestamp: timestamp
+            level: level
+            thread: thread
+            logger: logger
+            module: module
+            environment: environment
+            message: message
       - labels:
           level:
           thread:
+          logger:
+          module:
+          environment:
       - timestamp:
           source: timestamp
           format: "2006-01-02 15:04:05.000"
@@ -43,11 +53,21 @@ scrape_configs:
           environment: ${ENVIRONMENT}
           __path__: /log/module-api/info/*.log
     pipeline_stages:
-      - regex:
-          expression: '^\[(?P<level>\w+)\] \[(?P<timestamp>\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d{3})\] \[(?P<thread>.*?)\] (?P<message>.*)'
+      - json:
+          expressions:
+            timestamp: timestamp
+            level: level
+            thread: thread
+            logger: logger
+            module: module
+            environment: environment
+            message: message
       - labels:
           level:
           thread:
+          logger:
+          module:
+          environment:
       - timestamp:
           source: timestamp
           format: "2006-01-02 15:04:05.000"
@@ -65,11 +85,21 @@ scrape_configs:
           environment: ${ENVIRONMENT}
           __path__: /log/module-api/warn/*.log
     pipeline_stages:
-      - regex:
-          expression: '^\[(?P<level>\w+)\] \[(?P<timestamp>\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d{3})\] \[(?P<thread>.*?)\] (?P<message>.*)'
+      - json:
+          expressions:
+            timestamp: timestamp
+            level: level
+            thread: thread
+            logger: logger
+            module: module
+            environment: environment
+            message: message
       - labels:
           level:
           thread:
+          logger:
+          module:
+          environment:
       - timestamp:
           source: timestamp
           format: "2006-01-02 15:04:05.000"
@@ -87,11 +117,21 @@ scrape_configs:
           environment: ${ENVIRONMENT}
           __path__: /log/module-batch/error/*.log
     pipeline_stages:
-      - regex:
-          expression: '^\[(?P<level>\w+)\] \[(?P<timestamp>\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d{3})\] \[(?P<thread>.*?)\] (?P<message>.*)'
+      - json:
+          expressions:
+            timestamp: timestamp
+            level: level
+            thread: thread
+            logger: logger
+            module: module
+            environment: environment
+            message: message
       - labels:
           level:
           thread:
+          logger:
+          module:
+          environment:
       - timestamp:
           source: timestamp
           format: "2006-01-02 15:04:05.000"
@@ -109,11 +149,21 @@ scrape_configs:
           environment: ${ENVIRONMENT}
           __path__: /log/module-batch/info/*.log
     pipeline_stages:
-      - regex:
-          expression: '^\[(?P<level>\w+)\] \[(?P<timestamp>\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d{3})\] \[(?P<thread>.*?)\] (?P<message>.*)'
+      - json:
+          expressions:
+            timestamp: timestamp
+            level: level
+            thread: thread
+            logger: logger
+            module: module
+            environment: environment
+            message: message
       - labels:
           level:
           thread:
+          logger:
+          module:
+          environment:
       - timestamp:
           source: timestamp
           format: "2006-01-02 15:04:05.000"
@@ -131,11 +181,21 @@ scrape_configs:
           environment: ${ENVIRONMENT}
           __path__: /log/module-batch/warn/*.log
     pipeline_stages:
-      - regex:
-          expression: '^\[(?P<level>\w+)\] \[(?P<timestamp>\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d{3})\] \[(?P<thread>.*?)\] (?P<message>.*)'
+      - json:
+          expressions:
+            timestamp: timestamp
+            level: level
+            thread: thread
+            logger: logger
+            module: module
+            environment: environment
+            message: message
       - labels:
           level:
           thread:
+          logger:
+          module:
+          environment:
       - timestamp:
           source: timestamp
           format: "2006-01-02 15:04:05.000"
