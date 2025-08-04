@@ -18,8 +18,17 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-        #with:
-        # ref: develop # develop 브랜치에서 코드 체크아웃
+        with:
+          ref: develop # develop 브랜치에서 코드 체크아웃
+
+      - name: Check if running on develop branch
+        run: |
+          if [ "${{ github.ref }}" != "refs/heads/develop" ]; then
+            echo "❌ This workflow only runs on develop branch"
+            echo "Current branch: ${{ github.ref }}"
+            exit 1
+          fi
+          echo "✅ Running on develop branch - proceeding with batch execution"
 
       - name: Set up JDK 21
         uses: actions/setup-java@v4
