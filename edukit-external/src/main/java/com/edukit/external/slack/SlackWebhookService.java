@@ -25,44 +25,42 @@ public class SlackWebhookService {
             return;
         }
 
-        try {
-            String emoji = getEmojiByLevel(level);
-            String color = getColorByLevel(level);
+        String emoji = getEmojiByLevel(level);
+        String color = getColorByLevel(level);
 
-            String payload = String.format("""
-                    {
-                        "text": "%s %s",
-                        "attachments": [
-                            {
-                                "color": "%s",
-                                "fields": [
-                                    {
-                                        "title": "Details",
-                                        "value": "%s",
-                                        "short": false
-                                    },
-                                    {
-                                        "title": "Time",
-                                        "value": "%s",
-                                        "short": true
-                                    }
-                                ]
-                            }
-                        ]
-                    }
-                    """, emoji, title, color, message, java.time.LocalDateTime.now());
+        String payload = String.format("""
+                {
+                    "text": "%s %s",
+                    "attachments": [
+                        {
+                            "color": "%s",
+                            "fields": [
+                                {
+                                    "title": "Details",
+                                    "value": "%s",
+                                    "short": false
+                                },
+                                {
+                                    "title": "Time",
+                                    "value": "%s",
+                                    "short": true
+                                }
+                            ]
+                        }
+                    ]
+                }
+                """, emoji, title, color, message, java.time.LocalDateTime.now());
 
-            webClient.post()
-                    .uri(webhookUrl)
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .bodyValue(payload)
-                    .retrieve()
-                    .toBodilessEntity()
-                    .subscribe();
-
-        } catch (Exception e) {
-            log.error("Slack 알림 전송 실패: {}", e.getMessage(), e);
-        }
+        webClient.post()
+                .uri(webhookUrl)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(payload)
+                .retrieve()
+                .toBodilessEntity()
+                .subscribe(
+                        result -> log.debug("Slack 알림 전송 성공: {}", result.getStatusCode()),
+                        error -> log.error("Slack 알림 전송 실패: {}", error.getMessage(), error)
+                );
     }
 
     private String getEmojiByLevel(String level) {
