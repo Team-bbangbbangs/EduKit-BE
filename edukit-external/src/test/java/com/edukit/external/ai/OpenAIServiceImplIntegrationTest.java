@@ -3,7 +3,7 @@ package com.edukit.external.ai;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
-import com.edukit.external.ai.response.OpenAIVersionResponse;
+import com.edukit.core.common.service.response.OpenAIVersionResponse;
 import io.github.resilience4j.circuitbreaker.CircuitBreaker;
 import io.github.resilience4j.circuitbreaker.CircuitBreakerConfig;
 import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry;
@@ -15,7 +15,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 @DisplayName("서킷브레이커 실제 동작 시뮬레이션 테스트")
-class OpenAIServiceIntegrationTest {
+class OpenAIServiceImplIntegrationTest {
 
     private CircuitBreaker circuitBreaker;
 

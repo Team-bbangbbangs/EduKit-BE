@@ -1,6 +1,7 @@
 package com.edukit.core.notice.facade;
 
 import com.edukit.core.common.service.FileStorageService;
+import com.edukit.core.common.service.response.UploadPresignedUrlResponse;
 import com.edukit.core.notice.db.entity.Notice;
 import com.edukit.core.notice.db.entity.NoticeFile;
 import com.edukit.core.notice.db.enums.NoticeCategory;
@@ -9,8 +10,6 @@ import com.edukit.core.notice.facade.response.NoticeGetResponse;
 import com.edukit.core.notice.facade.response.NoticeResponse;
 import com.edukit.core.notice.facade.response.NoticesGetResponse;
 import com.edukit.core.notice.service.NoticeService;
-import com.edukit.external.aws.s3.S3Service;
-import com.edukit.external.aws.s3.response.UploadPresignedUrlResponse;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
@@ -24,7 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class NoticeFacade {
 
     private final NoticeService noticeService;
-    private final S3Service s3Service;
+    private final FileStorageService s3Service;
     private static final String NOTICE_FILE_PATH = "notices";
 
     public NoticesGetResponse getNotices(final NoticeCategory category, final int page) {

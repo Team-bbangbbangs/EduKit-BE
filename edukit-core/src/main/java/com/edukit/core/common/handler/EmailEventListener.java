@@ -1,7 +1,7 @@
 package com.edukit.core.common.handler;
 
 import com.edukit.core.auth.event.MemberSignedUpEvent;
-import com.edukit.external.aws.mail.EmailService;
+import com.edukit.core.common.service.EmailService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;

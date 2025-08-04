@@ -1,4 +1,4 @@
-package com.edukit.external.ai.response;
+package com.edukit.core.common.service.response;
 
 public record OpenAIVersionResponse(
         int versionNumber,

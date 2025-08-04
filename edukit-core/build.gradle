@@ -3,7 +3,6 @@
 dependencies {
 	// 내부 모듈 의존성
 	implementation project(':edukit-common')
-	implementation project(':edukit-external')
 
 	// Hibernate
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'

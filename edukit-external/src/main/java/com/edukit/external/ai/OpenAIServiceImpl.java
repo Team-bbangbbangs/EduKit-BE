@@ -1,8 +1,9 @@
 package com.edukit.external.ai;
 
+import com.edukit.core.common.service.AIService;
 import com.edukit.external.ai.exception.OpenAiErrorCode;
 import com.edukit.external.ai.exception.OpenAiException;
-import com.edukit.external.ai.response.OpenAIVersionResponse;
+import com.edukit.core.common.service.response.OpenAIVersionResponse;
 import io.github.resilience4j.circuitbreaker.CallNotPermittedException;
 import io.github.resilience4j.circuitbreaker.CircuitBreaker;
 import io.github.resilience4j.reactor.circuitbreaker.operator.CircuitBreakerOperator;
@@ -16,7 +17,7 @@ import reactor.core.publisher.Flux;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class OpenAIService {
+public class OpenAIServiceImpl implements AIService {
 
     private final ChatClient chatClient;
     private final CircuitBreaker openAiCircuitBreaker;

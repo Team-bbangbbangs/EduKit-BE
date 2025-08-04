@@ -1,5 +1,6 @@
 package com.edukit.external.aws.mail;
 
+import com.edukit.core.common.service.EmailService;
 import com.edukit.external.aws.mail.exception.MailErrorCode;
 import com.edukit.external.aws.mail.exception.MailException;
 import com.edukit.external.aws.mail.setting.AwsSesEmailMapper;
@@ -19,7 +20,7 @@ import software.amazon.awssdk.services.ses.model.SesException;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class EmailService {
+public class EmailServiceImpl implements EmailService {
 
     private final SesClient sesClient;
     private final AwsSesEmailMapper awsSesEmailMapper;

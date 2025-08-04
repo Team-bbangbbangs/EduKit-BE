@@ -4,7 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
-import com.edukit.external.ai.response.OpenAIVersionResponse;
+import com.edukit.core.common.service.response.OpenAIVersionResponse;
 import io.github.resilience4j.circuitbreaker.CallNotPermittedException;
 import io.github.resilience4j.circuitbreaker.CircuitBreaker;
 import io.github.resilience4j.circuitbreaker.CircuitBreakerConfig;
@@ -19,7 +19,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 @DisplayName("OpenAIService 서킷브레이커 테스트")
-class OpenAIServiceCircuitBreakerTest {
+class OpenAIServiceImplCircuitBreakerTest {
 
     private CircuitBreaker circuitBreaker;
 

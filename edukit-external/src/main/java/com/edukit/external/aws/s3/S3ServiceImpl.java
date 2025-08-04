@@ -1,8 +1,9 @@
 package com.edukit.external.aws.s3;
 
+import com.edukit.core.common.service.FileStorageService;
 import com.edukit.external.aws.s3.exception.S3ErrorCode;
 import com.edukit.external.aws.s3.exception.S3Exception;
-import com.edukit.external.aws.s3.response.UploadPresignedUrlResponse;
+import com.edukit.core.common.service.response.UploadPresignedUrlResponse;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -19,7 +20,7 @@ import software.amazon.awssdk.services.s3.presigner.model.PutObjectPresignReques
 
 @Service
 @RequiredArgsConstructor
-public class S3Service {
+public class S3ServiceImpl implements FileStorageService {
 
     private final S3Presigner s3Presigner;
     private final AwsS3Properties s3Properties;

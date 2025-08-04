@@ -1,4 +1,4 @@
-package com.edukit.external.aws.s3.response;
+package com.edukit.core.common.service.response;
 
 public record UploadPresignedUrlResponse(
         String presignedUrl,

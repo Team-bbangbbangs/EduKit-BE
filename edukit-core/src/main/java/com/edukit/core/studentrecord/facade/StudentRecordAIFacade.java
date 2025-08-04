@@ -1,13 +1,12 @@
 package com.edukit.core.studentrecord.facade;
 
 import com.edukit.core.common.service.AIService;
+import com.edukit.core.common.service.response.OpenAIVersionResponse;
 import com.edukit.core.studentrecord.db.entity.StudentRecord;
 import com.edukit.core.studentrecord.facade.response.StudentRecordCreateResponse;
 import com.edukit.core.studentrecord.facade.response.StudentRecordTaskResponse;
 import com.edukit.core.studentrecord.service.StudentRecordService;
 import com.edukit.core.studentrecord.util.AIPromptGenerator;
-import com.edukit.external.ai.OpenAIService;
-import com.edukit.external.ai.response.OpenAIVersionResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.stereotype.Service;
@@ -20,7 +19,7 @@ import reactor.core.publisher.Flux;
 public class StudentRecordAIFacade {
 
     private final StudentRecordService studentRecordService;
-    private final OpenAIService openAIService;
+    private final AIService aiService;
 
     @Transactional
     public StudentRecordTaskResponse getStreamingPrompt(final long memberId, final long recordId, final int byteCount,
@@ -34,12 +33,12 @@ public class StudentRecordAIFacade {
     }
 
     public Flux<StudentRecordCreateResponse> generateAIStudentRecordStream(final String prompt) {
-        return openAIService.getVersionedStreamingResponse(prompt)
-                .map(this::mapToStudentRecordCreateResponse);
+        return aiService.getVersionedStreamingResponse(prompt).map(this::mapToStudentRecordCreateResponse);
     }
 
     private StudentRecordCreateResponse mapToStudentRecordCreateResponse(final OpenAIVersionResponse response) {
-        return StudentRecordCreateResponse.of(response.versionNumber(), response.content(), response.isLast(), response.isFallback());
+        return StudentRecordCreateResponse.of(response.versionNumber(), response.content(), response.isLast(),
+                response.isFallback());
     }
 
     /* v1.0.0

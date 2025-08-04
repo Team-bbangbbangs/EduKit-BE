@@ -2,5 +2,5 @@ package com.edukit.core.common.service;
 
 public interface EmailService {
 
-    void sendEmail(final String emailReceiver, final String memberUuid, final String verificationCode);
+    void sendEmail(String emailReceiver, String memberUuid, String verificationCode);
 }
