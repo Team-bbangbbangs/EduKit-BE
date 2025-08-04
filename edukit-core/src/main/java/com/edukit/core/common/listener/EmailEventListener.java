@@ -1,4 +1,4 @@
-package com.edukit.core.common.handler;
+package com.edukit.core.common.listener;
 
 import com.edukit.core.auth.event.MemberSignedUpEvent;
 import com.edukit.core.common.service.EmailService;
