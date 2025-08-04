@@ -7,7 +7,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
         "com.edukit.batch",
         "com.edukit.core",
         "com.edukit.common",
-        "com.edukit.external.aws.mail", "com.edukit.external.config"
+        "com.edukit.external.aws.mail", "com.edukit.external.config", "com.edukit.external.slack"
 })
 public class EdukitBatchApplication {
 
