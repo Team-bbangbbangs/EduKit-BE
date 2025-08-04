@@ -8,7 +8,7 @@ dependencies {
 	// 내부 모듈 의존성 - Core 계층만 참조
 	implementation project(':edukit-core')
 	implementation project(':edukit-common')
-	implementation project(':edukit-external')  // External 모듈 의존성 추가
+	implementation project(':edukit-external')
 	
 	// Spring Boot Web
 	implementation 'org.springframework.boot:spring-boot-starter-web'
@@ -29,6 +29,10 @@ dependencies {
 	
 	// JSON 로깅 (안전한 JSON 직렬화)
 	implementation 'net.logstash.logback:logstash-logback-encoder:8.0'
+
+	// Transaction
+	implementation 'org.springframework:spring-tx'
+	implementation 'org.springframework:spring-aop'
 }
 
 // 실행 가능한 JAR 설정
