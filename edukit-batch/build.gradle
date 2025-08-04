@@ -39,9 +39,4 @@ bootJar {
     exclude '**/external/ai/**'        // OpenAI 관련
     exclude '**/external/aws/s3/**'        // S3 관련
     exclude '**/external/redis/**'  // redis 관련
-
-    // 경량화 설정
-    launchScript {
-        enabled = false  // Lambda에서는 불필요
-    }
 } 
