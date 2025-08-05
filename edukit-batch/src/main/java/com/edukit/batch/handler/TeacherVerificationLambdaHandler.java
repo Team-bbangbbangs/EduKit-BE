@@ -42,6 +42,8 @@ public class TeacherVerificationLambdaHandler implements RequestHandler<Schedule
         log.info("Initializing Spring context for Lambda");
         SpringApplication app = new SpringApplication(EdukitBatchApplication.class);
         app.setWebApplicationType(WebApplicationType.NONE);
+        app.setBannerMode(org.springframework.boot.Banner.Mode.OFF);
+        app.setRegisterShutdownHook(false);
         app.setLazyInitialization(true); // Lambda용 최적화
         this.applicationContext = app.run();
     }

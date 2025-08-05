@@ -17,9 +17,10 @@ public class EdukitBatchApplication {
     public static void main(String[] args) {
         SpringApplication app = new SpringApplication(EdukitBatchApplication.class);
         app.setWebApplicationType(WebApplicationType.NONE);
-        app.run(args);
         app.setBannerMode(org.springframework.boot.Banner.Mode.OFF);
         app.setRegisterShutdownHook(false);
+        app.setLazyInitialization(true); // Lambda 최적화
+        app.run(args);
     }
 
 }
