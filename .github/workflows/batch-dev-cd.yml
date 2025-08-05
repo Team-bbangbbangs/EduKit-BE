@@ -49,23 +49,4 @@ jobs:
           chmod +x scripts/deploy-lambda.sh
           LAMBDA_ROLE_ARN='${{ secrets.LAMBDA_EXECUTION_ROLE_ARN }}' \
           EXECUTE_BATCH='${{ inputs.execute_batch || true }}' \
-          SAVE_LAYER_ARNS=true \
           ./scripts/deploy-lambda.sh dev
-
-      - name: Check Layer ARNs file
-        run: |
-          if [[ -f "layer-arns-dev.json" ]]; then
-            echo "✅ layer-arns-dev.json 파일이 생성되었습니다."
-            cat layer-arns-dev.json
-          else
-            echo "⚠️ layer-arns-dev.json 파일이 생성되지 않았습니다."
-            echo '{"environment":"dev","region":"ap-northeast-2","layers":{}}' > layer-arns-dev.json
-          fi
-
-      - name: Upload Layer ARNs (artifact)
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: layer-arns-dev
-          path: layer-arns-dev.json
-          retention-days: 30
