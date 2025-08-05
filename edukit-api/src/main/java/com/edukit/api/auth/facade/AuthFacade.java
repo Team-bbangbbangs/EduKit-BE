@@ -7,11 +7,11 @@ import com.edukit.core.auth.db.enums.VerificationCodeType;
 import com.edukit.core.auth.event.MemberSignedUpEvent;
 import com.edukit.core.auth.exception.AuthErrorCode;
 import com.edukit.core.auth.exception.AuthException;
-import com.edukit.core.auth.service.jwt.dto.AuthToken;
 import com.edukit.core.auth.service.AuthService;
 import com.edukit.core.auth.service.JwtTokenService;
 import com.edukit.core.auth.service.RefreshTokenStoreService;
 import com.edukit.core.auth.service.VerificationCodeService;
+import com.edukit.core.auth.service.jwt.dto.AuthToken;
 import com.edukit.core.auth.util.PasswordValidator;
 import com.edukit.core.member.db.entity.Member;
 import com.edukit.core.member.db.enums.MemberRole;
@@ -92,16 +92,19 @@ public class AuthFacade {
     }
 
     @Transactional
-    public void updatePassword(final String memberUuid, final String verificationCode, final String password,
+    public void updatePassword(final String memberUuid, final String verificationCode, final String newPassword,
                                final String confirmPassword) {
-        PasswordValidator.validatePasswordFormat(password);
+        PasswordValidator.validatePasswordFormat(newPassword);
+        PasswordValidator.validatePasswordEquality(newPassword, confirmPassword);
 
         Member member = memberService.getMemberByUuid(memberUuid);
         verificationCodeService.verifyPasswordResetCode(member, verificationCode);
 
-        PasswordValidator.validatePasswordConditionForChange(password, confirmPassword, member.getPassword());
+        if (passwordEncoder.matches(newPassword, member.getPassword())) {
+            throw new AuthException(AuthErrorCode.SAME_PASSWORD);
+        }
 
-        String encodedPassword = passwordEncoder.encode(password);
+        String encodedPassword = passwordEncoder.encode(newPassword);
         memberService.updatePassword(member, encodedPassword);
     }
 

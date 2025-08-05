@@ -4,7 +4,6 @@ import com.edukit.api.common.security.filter.ExceptionHandlerFilter;
 import com.edukit.api.common.security.filter.JwtAuthenticationFilter;
 import com.edukit.api.common.security.handler.JwtAccessDeniedHandler;
 import com.edukit.api.common.security.handler.JwtAuthenticationEntryPoint;
-import com.edukit.api.common.security.util.CustomPasswordEncoder;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -13,6 +12,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
@@ -27,7 +27,8 @@ public class SecurityConfig {
     private final ExceptionHandlerFilter exceptionHandlerFilter;
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final JwtAccessDeniedHandler jwtAccessDeniedHandler;
-    private final CustomPasswordEncoder customPasswordEncoder;
+
+    private static final int STRENGTH = 12;
 
     @Bean
     public SecurityFilterChain filterChain(final HttpSecurity http) throws Exception {
@@ -58,6 +59,6 @@ public class SecurityConfig {
 
     @Bean
     public PasswordEncoder passwordEncoder() {
-        return customPasswordEncoder;
+        return new BCryptPasswordEncoder(STRENGTH);
     }
 }
