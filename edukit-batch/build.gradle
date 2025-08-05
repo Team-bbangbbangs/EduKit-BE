@@ -166,7 +166,7 @@ jar {
 
     manifest {
         attributes(
-                'Main-Class': 'com.edukit.batch.handler.TeacherVerificationHandler',
+                'Main-Class': 'com.edukit.batch.handler.TeacherVerificationLambdaHandler',
                 'Implementation-Title': 'EduKit Batch Lambda Function',
                 'Implementation-Version': project.version,
                 'Lambda-Compatible': 'true'
