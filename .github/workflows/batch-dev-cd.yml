@@ -47,7 +47,7 @@ jobs:
       - name: Deploy Lambda
         run: |
           chmod +x scripts/deploy-lambda.sh
-          LAMBDA_ROLE_ARN='${{ secrets.LAMBDA_EXECUTION_ROLE_ARN_DEV }}' \
+          LAMBDA_ROLE_ARN='${{ secrets.LAMBDA_EXECUTION_ROLE_ARN }}' \
           EXECUTE_BATCH='${{ inputs.execute_batch || true }}' \
           SAVE_LAYER_ARNS=true \
           ./scripts/deploy-lambda.sh dev
