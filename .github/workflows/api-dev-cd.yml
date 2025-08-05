@@ -104,6 +104,11 @@ jobs:
           MONITORING_INSTANCE=${{ secrets.MONITORING_INSTANCE }}
           EOF
 
+      - name: Login to AWS ECR
+        run: |
+          aws ecr get-login-password --region ${{ secrets.AWS_REGION }} | \
+            docker login --username AWS --password-stdin ${{ secrets.ECR_REGISTRY_URI }}
+
       - name: Determine current active app
         id: current
         run: |
