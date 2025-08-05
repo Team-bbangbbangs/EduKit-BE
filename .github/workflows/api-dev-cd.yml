@@ -65,7 +65,7 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: .
-          file: ./Dockerfile-dev
+          file: ./edukit-api/Dockerfile-dev
           push: true
           tags: ${{ secrets.ECR_REGISTRY_URI }}/${{ secrets.ECR_REPOSITORY_NAME }}:dev-${{ steps.datetime.outputs.datetime }}
           build-args: JAR_FILE=edukit-api/build/libs/app.jar
@@ -75,8 +75,8 @@ jobs:
         with:
           name: docker-configs
           path: |
-            ${{ github.workspace }}/docker-compose.dev.yml
-            ${{ github.workspace }}/promtail-config.yml
+            ${{ github.workspace }}/edukit-api/docker-compose.dev.yml
+            ${{ github.workspace }}/edukit-api/promtail-config.yml
 
     outputs:
       IMAGE_TAG: dev-${{ steps.datetime.outputs.datetime }}
