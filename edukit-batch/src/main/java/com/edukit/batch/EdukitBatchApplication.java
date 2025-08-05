@@ -18,6 +18,8 @@ public class EdukitBatchApplication {
         SpringApplication app = new SpringApplication(EdukitBatchApplication.class);
         app.setWebApplicationType(WebApplicationType.NONE);
         app.run(args);
+        app.setBannerMode(org.springframework.boot.Banner.Mode.OFF);
+        app.setRegisterShutdownHook(false);
     }
 
 }
