@@ -78,31 +78,15 @@ deploy_layer() {
     local layer_name="edukit-${layer_type}-layer-${ENVIRONMENT}"
     local zip_file="edukit-batch/build/distributions/layers/${layer_type}-layer.zip"
 
-    echo "  🔍 ${layer_type} Layer 배포 시도 중..."
-    echo "    Layer 이름: $layer_name"
-    echo "    ZIP 파일: $zip_file"
-
     if [[ ! -f "$zip_file" ]]; then
-        echo "    ❌ ZIP 파일을 찾을 수 없습니다"
         return 1
     fi
 
     local zip_size=$(stat -f%z "$zip_file" 2>/dev/null || stat -c%s "$zip_file")
-    local zip_size_mb=$((zip_size / 1024 / 1024))
-    echo "    📦 ZIP 파일 크기: ${zip_size_mb}MB"
-    
     if [[ $zip_size -eq 0 ]]; then
-        echo "    ❌ ZIP 파일이 비어있습니다"
         return 1
     fi
 
-    if [[ $zip_size_mb -gt 250 ]]; then
-        echo "    ❌ ZIP 파일이 250MB 제한을 초과했습니다"
-        return 1
-    fi
-
-    echo "    ☁️  AWS Lambda Layer 생성 중..."
-    local error_file=$(mktemp)
     local layer_arn=$(aws lambda publish-layer-version \
         --layer-name "$layer_name" \
         --description "$description" \
@@ -111,22 +95,12 @@ deploy_layer() {
         --compatible-architectures x86_64 \
         --region $AWS_REGION \
         --query 'LayerVersionArn' \
-        --output text 2>"$error_file")
+        --output text 2>/dev/null)
 
-    local exit_code=$?
-    
-    if [[ $exit_code -eq 0 && -n "$layer_arn" ]]; then
-        echo "    ✅ Layer 생성 성공: $layer_arn"
-        rm -f "$error_file"
+    if [[ $? -eq 0 && -n "$layer_arn" ]]; then
         echo "$layer_arn"
         return 0
     else
-        echo "    ❌ Layer 생성 실패 (exit code: $exit_code)"
-        if [[ -s "$error_file" ]]; then
-            echo "    🔴 AWS CLI 오류:"
-            cat "$error_file" | sed 's/^/      /'
-        fi
-        rm -f "$error_file"
         return 1
     fi
 }
@@ -144,37 +118,19 @@ for layer_type in "${!LAYERS[@]}"; do
 done
 
 if [[ $deployed_count -eq 0 ]]; then
-    echo "⚠️ 배포된 Layer가 없습니다. Fat JAR로 Lambda 함수를 배포합니다."
-    
-    # Fat JAR 빌드 (Layer 실패 시 대안)
-    echo "🔄 Fat JAR 빌드 중..."
-    ./gradlew :edukit-batch:bootJar --quiet 2>/dev/null || true
-    
-    fat_jar="edukit-batch/build/libs/app-batch.jar"
-    if [[ -f "$fat_jar" ]]; then
-        function_zip="edukit-batch/build/distributions/lambda-function-fat.zip"
-        echo "📦 Fat JAR ZIP 생성 중..."
-        (cd edukit-batch/build/libs && zip -q "../distributions/lambda-function-fat.zip" "app-batch.jar")
-        
-        if [[ -f "$function_zip" ]]; then
-            # 원본 function_zip 변수를 Fat JAR 버전으로 교체
-            sed -i.bak "s|lambda-function.zip|lambda-function-fat.zip|g" "$0"
-            echo "✅ Fat JAR ZIP 생성 완료: $(du -h "$function_zip" | cut -f1)"
-        fi
-    fi
-    
-    deployed_layers=()
-    layer_args=""
-else
-    # 배포된 Layer ARN 목록 생성
-    deployed_layers=()
-    for layer_type in "${!LAYER_ARNS[@]}"; do
-        deployed_layers+=("${LAYER_ARNS[$layer_type]}")
-    done
-    
-    layer_args=$(IFS=' '; echo "${deployed_layers[*]}")
-    echo "✅ ${deployed_count}개 Layer 배포 완료"
+    echo "❌ 배포된 Layer가 없습니다."
+    exit 1
 fi
+
+# 배포된 Layer ARN 목록 생성
+deployed_layers=()
+for layer_type in "${!LAYER_ARNS[@]}"; do
+    deployed_layers+=("${LAYER_ARNS[$layer_type]}")
+done
+
+layer_args=$(IFS=' '; echo "${deployed_layers[*]}")
+
+echo "✅ ${deployed_count}개 Layer 배포 완료"
 
 # Lambda 함수 배포
 echo "🔧 Lambda 함수 배포 중..."
@@ -188,20 +144,12 @@ fi
 # 함수 존재 여부 확인
 if aws lambda get-function --function-name "$FUNCTION_NAME" --region $AWS_REGION &>/dev/null; then
     # 기존 함수 업데이트
-    if [[ -n "$layer_args" ]]; then
-        aws lambda update-function-configuration \
-            --function-name "$FUNCTION_NAME" \
-            --layers $layer_args \
-            --memory-size $MEMORY_SIZE \
-            --timeout $TIMEOUT \
-            --region $AWS_REGION &>/dev/null
-    else
-        aws lambda update-function-configuration \
-            --function-name "$FUNCTION_NAME" \
-            --memory-size $MEMORY_SIZE \
-            --timeout $TIMEOUT \
-            --region $AWS_REGION &>/dev/null
-    fi
+    aws lambda update-function-configuration \
+        --function-name "$FUNCTION_NAME" \
+        --layers $layer_args \
+        --memory-size $MEMORY_SIZE \
+        --timeout $TIMEOUT \
+        --region $AWS_REGION &>/dev/null
 
     aws lambda wait function-updated \
         --function-name "$FUNCTION_NAME" \
@@ -213,30 +161,17 @@ if aws lambda get-function --function-name "$FUNCTION_NAME" --region $AWS_REGION
         --region $AWS_REGION &>/dev/null
 else
     # 새 함수 생성
-    if [[ -n "$layer_args" ]]; then
-        aws lambda create-function \
-            --function-name "$FUNCTION_NAME" \
-            --runtime java21 \
-            --role "$LAMBDA_ROLE_ARN" \
-            --handler "com.edukit.batch.handler.TeacherVerificationLambdaHandler::handleRequest" \
-            --zip-file "fileb://$function_zip" \
-            --layers $layer_args \
-            --timeout $TIMEOUT \
-            --memory-size $MEMORY_SIZE \
-            --environment Variables="{SPRING_PROFILES_ACTIVE=$ENVIRONMENT}" \
-            --region $AWS_REGION &>/dev/null
-    else
-        aws lambda create-function \
-            --function-name "$FUNCTION_NAME" \
-            --runtime java21 \
-            --role "$LAMBDA_ROLE_ARN" \
-            --handler "com.edukit.batch.handler.TeacherVerificationLambdaHandler::handleRequest" \
-            --zip-file "fileb://$function_zip" \
-            --timeout $TIMEOUT \
-            --memory-size $MEMORY_SIZE \
-            --environment Variables="{SPRING_PROFILES_ACTIVE=$ENVIRONMENT}" \
-            --region $AWS_REGION &>/dev/null
-    fi
+    aws lambda create-function \
+        --function-name "$FUNCTION_NAME" \
+        --runtime java21 \
+        --role "$LAMBDA_ROLE_ARN" \
+        --handler "com.edukit.batch.handler.TeacherVerificationLambdaHandler::handleRequest" \
+        --zip-file "fileb://$function_zip" \
+        --layers $layer_args \
+        --timeout $TIMEOUT \
+        --memory-size $MEMORY_SIZE \
+        --environment Variables="{SPRING_PROFILES_ACTIVE=$ENVIRONMENT}" \
+        --region $AWS_REGION &>/dev/null
 fi
 
 # 함수 업데이트 완료 대기
@@ -250,30 +185,23 @@ echo "✅ Lambda 함수 배포 완료"
 if [[ "${EXECUTE_BATCH:-false}" == "true" ]]; then
     echo "🚀 배치 실행 중..."
 
-    if aws lambda invoke \
+    aws lambda invoke \
         --function-name "$FUNCTION_NAME" \
         --payload '{}' \
         --cli-binary-format raw-in-base64-out \
         --region $AWS_REGION \
-        response.json &>/dev/null; then
-        
-        if [[ -f "response.json" ]]; then
-            if grep -q '"errorMessage"' response.json 2>/dev/null; then
-                echo "⚠️ 배치 실행 실패 (배포는 성공)"
-                echo "Response:"
-                cat response.json
-                rm -f response.json
-            else
-                echo "✅ 배치 실행 완료"
-                if [[ -s "response.json" ]]; then
-                    echo "Response:"
-                    cat response.json
-                fi
-                rm -f response.json
-            fi
+        response.json &>/dev/null
+
+    if [[ -f "response.json" ]]; then
+        if grep -q '"errorMessage"' response.json 2>/dev/null; then
+            echo "❌ 배치 실행 실패"
+            cat response.json
+            rm -f response.json
+            exit 1
+        else
+            echo "✅ 배치 실행 완료"
+            rm -f response.json
         fi
-    else
-        echo "⚠️ 배치 실행 실패 (Lambda 호출 오류, 배포는 성공)"
     fi
 fi
 
@@ -287,56 +215,18 @@ echo "Region: $AWS_REGION"
 
 # Layer ARN 정보를 파일로 저장 (선택사항)
 if [[ "${SAVE_LAYER_ARNS:-false}" == "true" ]]; then
-    echo "📄 Layer ARN 정보 저장 중..."
-    
-    # JSON 파일 생성 (더 안전한 방법)
-    json_file="layer-arns-${ENVIRONMENT}.json"
-    
-    # 기본 JSON 구조 생성
-    cat > "$json_file" << EOF
+    cat > "layer-arns-${ENVIRONMENT}.json" << EOF
 {
   "environment": "$ENVIRONMENT",
-  "region": "$AWS_REGION", 
+  "region": "$AWS_REGION",
   "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
-  "function_name": "$FUNCTION_NAME",
   "layers": {
-EOF
-    
-    # Layer ARN 정보 추가
-    if [[ ${#LAYER_ARNS[@]} -gt 0 ]]; then
-        layer_entries=()
-        for layer_type in "${!LAYER_ARNS[@]}"; do
-            layer_entries+=("    \"${layer_type}\": \"${LAYER_ARNS[$layer_type]}\"")
-        done
-        
-        # 마지막 항목을 제외하고 쉼표 추가
-        for ((i=0; i<${#layer_entries[@]}-1; i++)); do
-            echo "${layer_entries[i]}," >> "$json_file"
-        done
-        
-        # 마지막 항목은 쉼표 없이 추가
-        if [[ ${#layer_entries[@]} -gt 0 ]]; then
-            echo "${layer_entries[-1]}" >> "$json_file"
-        fi
-    fi
-    
-    # JSON 닫기
-    cat >> "$json_file" << EOF
+$(for layer_type in "${!LAYER_ARNS[@]}"; do
+    echo "    \"${layer_type}\": \"${LAYER_ARNS[$layer_type]}\""
+    [[ "$layer_type" != "${!LAYER_ARNS[@]: -1}" ]] && echo ","
+  done)
   }
 }
 EOF
-    
-    if [[ -f "$json_file" ]]; then
-        echo "✅ Layer ARN 정보가 $json_file에 저장되었습니다."
-        
-        # 파일 내용 검증 (jq가 있다면)
-        if command -v jq &> /dev/null && jq empty "$json_file" 2>/dev/null; then
-            echo "📋 JSON 파일 검증 완료"
-        else
-            echo "📄 생성된 JSON 파일:"
-            cat "$json_file"
-        fi
-    else
-        echo "❌ Layer ARN 파일 생성에 실패했습니다"
-    fi
+    echo "📄 Layer ARN 정보가 layer-arns-${ENVIRONMENT}.json에 저장되었습니다."
 fi
