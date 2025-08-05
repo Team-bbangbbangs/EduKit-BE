@@ -76,38 +76,65 @@ get_layer_description() {
     esac
 }
 
-# Layer 배포 함수
+# Layer 배포 함수 (재시도 로직 포함)
 deploy_layer() {
     local layer_type=$1
     local description=$2
     local layer_name="edukit-${layer_type}-layer-${ENVIRONMENT}"
     local zip_file="edukit-batch/build/distributions/layers/${layer_type}-layer.zip"
+    local max_retries=3
+    local retry_delay=10
 
     if [[ ! -f "$zip_file" ]]; then
+        echo "❌ Layer 파일 없음: $zip_file"
         return 1
     fi
 
     local zip_size=$(stat -f%z "$zip_file" 2>/dev/null || stat -c%s "$zip_file")
     if [[ $zip_size -eq 0 ]]; then
+        echo "❌ Layer 파일이 비어있음: $zip_file"
         return 1
     fi
 
-    local layer_arn=$(aws lambda publish-layer-version \
-        --layer-name "$layer_name" \
-        --description "$description" \
-        --zip-file "fileb://$zip_file" \
-        --compatible-runtimes java21 java17 \
-        --compatible-architectures x86_64 \
-        --region $AWS_REGION \
-        --query 'LayerVersionArn' \
-        --output text 2>/dev/null)
-
-    if [[ $? -eq 0 && -n "$layer_arn" ]]; then
-        echo "$layer_arn"
-        return 0
-    else
+    # Layer 크기 확인 (250MB = 262,144,000 bytes)
+    if [[ $zip_size -gt 262144000 ]]; then
+        echo "❌ Layer 크기 초과: $(($zip_size / 1024 / 1024))MB > 250MB"
         return 1
     fi
+
+    echo "📤 Layer 배포 시도: $layer_name ($(($zip_size / 1024 / 1024))MB)"
+    
+    for attempt in $(seq 1 $max_retries); do
+        echo "  🔄 시도 $attempt/$max_retries..."
+        
+        local layer_arn=$(aws lambda publish-layer-version \
+            --layer-name "$layer_name" \
+            --description "$description" \
+            --zip-file "fileb://$zip_file" \
+            --compatible-runtimes java21 java17 \
+            --compatible-architectures x86_64 \
+            --region $AWS_REGION \
+            --query 'LayerVersionArn' \
+            --output text 2>&1)
+
+        local exit_code=$?
+        
+        if [[ $exit_code -eq 0 && -n "$layer_arn" && ! "$layer_arn" =~ "error" ]]; then
+            echo "  ✅ Layer 배포 성공!"
+            echo "$layer_arn"
+            return 0
+        else
+            echo "  ⚠️  시도 $attempt 실패: $layer_arn"
+            if [[ $attempt -lt $max_retries ]]; then
+                echo "  ⏳ ${retry_delay}초 대기 후 재시도..."
+                sleep $retry_delay
+                retry_delay=$((retry_delay + 5)) # 점진적 지연 증가
+            fi
+        fi
+    done
+
+    echo "  ❌ 모든 재시도 실패"
+    return 1
 }
 
 # Layer 배포
@@ -162,7 +189,7 @@ for layer_type in "${LAYER_TYPES[@]}"; do
         echo "⏭️  ${layer_type} layer 건너뛰기 (파일 없음)"
         continue
     fi
-    
+
     echo "🚀 ${layer_type} layer 배포 시도 중..."
     description=$(get_layer_description "$layer_type")
     if layer_arn=$(deploy_layer "$layer_type" "$description"); then
