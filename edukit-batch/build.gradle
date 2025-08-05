@@ -129,7 +129,6 @@ tasks.register('buildInternalModules', Copy) {
 
 // 애플리케이션 전용 thin JAR 생성
 jar {
-    archiveBaseName = 'edukit-batch-app'
     archiveVersion = project.version
     enabled = true
 
@@ -164,7 +163,7 @@ tasks.register('buildLambdaAppJar', Jar) {
     // 3. AWS Lambda 런타임 라이브러리만 포함 (Layer 의존성 제외)
     from configurations.runtimeClasspath.findAll { file ->
         file.name.contains('aws-lambda-java-core') || 
-        file.name.contains('aws-lambda-java-events')
+        file.name.contains('aws-lambda-java-envets')
     }.collect { zipTree(it) }
 
     // 중복 파일 제거
@@ -181,13 +180,17 @@ tasks.register('buildLambdaAppJar', Jar) {
     }
 }
 
-// Lambda 배포용 ZIP 생성 (애플리케이션 JAR 사용)
+// Lambda 배포용 ZIP 생성 (JAR 내용을 직접 압축 해제하여 포함)
 tasks.register('buildLambdaFunctionZip', Zip) {
     dependsOn buildLambdaAppJar
     archiveFileName = 'lambda-function.zip'
     destinationDirectory = file('build/distributions')
 
-    from buildLambdaAppJar.archiveFile
+    // JAR 파일의 내용을 압축 해제하여 ZIP에 직접 포함
+    from zipTree(buildLambdaAppJar.archiveFile)
+    
+    // 중복 파일 제거
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 }
 
 // 전체 빌드 태스크
