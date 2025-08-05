@@ -8,7 +8,6 @@ dependencies {
     implementation(project(':edukit-core')) {
         exclude group: 'io.jsonwebtoken'
         exclude group: 'org.mindrot', module: 'jbcrypt'
-        exclude group: 'com.fasterxml.jackson.core', module: 'jackson-databind'
     }
 
     implementation(project(':edukit-external')) {
