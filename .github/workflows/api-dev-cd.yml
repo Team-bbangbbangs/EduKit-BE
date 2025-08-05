@@ -27,7 +27,7 @@ jobs:
           java-version: '21'
 
       - name: Gradle 캐시 구성
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: |
             ~/.gradle/caches
@@ -49,7 +49,7 @@ jobs:
         run: echo "datetime=$(date +'%Y%m%d%H%M%S')" >> "$GITHUB_OUTPUT"
 
       - name: Configure AWS credentials for ECR
-        uses: aws-actions/configure-aws-credentials@v3
+        uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{ secrets.AWS_ECR_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_ECR_SECRET_ACCESS_KEY }}
