@@ -68,7 +68,7 @@ jobs:
           file: ./edukit-api/Dockerfile-dev
           push: true
           tags: ${{ secrets.ECR_REGISTRY_URI }}/${{ secrets.ECR_REPOSITORY_NAME }}:dev-${{ steps.datetime.outputs.datetime }}
-          build-args: JAR_FILE=edukit-api/build/libs/app.jar
+          build-args: JAR_FILE=edukit-api/build/libs/edukit-api.jar
 
       - name: Upload docker-compose and promtail config
         uses: actions/upload-artifact@v4
