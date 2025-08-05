@@ -73,10 +73,10 @@ jobs:
       - name: Upload docker-compose and promtail config
         uses: actions/upload-artifact@v4
         with:
-          name: docker-configs
+          name: config-files
           path: |
             ${{ github.workspace }}/edukit-api/docker-compose.dev.yml
-            ${{ github.workspace }}/edukit-api/promtail-config.yml
+            ${{ github.workspace }}/promtail-config.yml
 
     outputs:
       IMAGE_TAG: dev-${{ steps.datetime.outputs.datetime }}
@@ -93,7 +93,7 @@ jobs:
       - name: Download docker configs
         uses: actions/download-artifact@v4
         with:
-          name: docker-configs
+          name: config-files
           path: ${{ github.workspace }}
           merge-multiple: true
 
