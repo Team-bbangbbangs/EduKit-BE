@@ -98,7 +98,7 @@ jobs:
 
       - name: Generate .env file
         run: |
-          cat <<EOF > .env
+          cat <<EOF > edukit-api/.env
           ECR_IMAGE_URI=${{ secrets.ECR_REGISTRY_URI }}/${{ secrets.ECR_REPOSITORY_NAME }}
           IMAGE_TAG=${{ needs.build.outputs.IMAGE_TAG }}
           MONITORING_INSTANCE=${{ secrets.MONITORING_INSTANCE }}
