@@ -6,9 +6,11 @@ import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.security.SecurityScheme;
+import io.swagger.v3.oas.models.servers.Server;
 import java.util.Arrays;
 import lombok.RequiredArgsConstructor;
 import org.springdoc.core.customizers.OperationCustomizer;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -16,12 +18,15 @@ import org.springframework.context.annotation.Configuration;
 @RequiredArgsConstructor
 public class SwaggerConfig {
 
+    @Value("${springdoc.server-url}")
+    private String serverUrl;
     private static final String AUTHORIZATION = "Authorization";
 
     @Bean
     public OpenAPI openAPI() {
         return new OpenAPI()
                 .info(info())
+                .addServersItem(server())
                 .addSecurityItem(securityRequirement())
                 .components(components());
     }
@@ -43,6 +48,10 @@ public class SwaggerConfig {
         info.title("Edukit API");
         info.description("Edukit API 명세서");
         return info;
+    }
+
+    private Server server() {
+        return new Server().url(serverUrl);
     }
 
     private SecurityRequirement securityRequirement() {
