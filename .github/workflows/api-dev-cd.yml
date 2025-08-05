@@ -76,7 +76,7 @@ jobs:
           name: docker-configs
           path: |
             ${{ github.workspace }}/edukit-api/docker-compose.dev.yml
-            ${{ github.workspace }}/promtail-config.yml
+            ${{ github.workspace }}/edukit-api/promtail-config.yml
 
     outputs:
       IMAGE_TAG: dev-${{ steps.datetime.outputs.datetime }}
