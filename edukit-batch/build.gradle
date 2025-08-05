@@ -22,41 +22,10 @@ dependencies {
     implementation 'com.amazonaws:aws-lambda-java-events:3.16.1'
 }
 
-// Layer별 의존성 구성 정의
-configurations {
-    // Spring Framework Layer
-    springLayer {
-        canBeConsumed = false
-        canBeResolved = true
-        extendsFrom implementation
-    }
-
-    // Database/Persistence Layer
-    databaseLayer {
-        canBeConsumed = false
-        canBeResolved = true
-        extendsFrom implementation
-    }
-
-    // External Integration Layer (AWS, etc.)
-    externalLayer {
-        canBeConsumed = false
-        canBeResolved = true
-        extendsFrom implementation
-    }
-
-    // Utilities Layer (JSON, Logging, etc.)
-    utilsLayer {
-        canBeConsumed = false
-        canBeResolved = true
-        extendsFrom implementation
-    }
-}
-
 // Layer별 의존성 분류 함수
 def classifyDependency = { fileName ->
     if (fileName.startsWith('edukit-') || fileName.contains('aws-lambda-java-')) {
-        return 'APPLICATION' // 애플리케이션과 함께 패키징
+        return 'APPLICATION'
     } else if (fileName.contains('spring-') || fileName.contains('springframework')) {
         return 'SPRING'
     } else if (fileName.contains('mysql') || fileName.contains('hibernate') ||
@@ -82,18 +51,12 @@ tasks.register('buildSpringLayer', Copy) {
     into 'build/layers/spring/java/lib'
 
     include { details ->
-        def category = classifyDependency(details.file.name)
-        return category == 'SPRING'
+        classifyDependency(details.file.name) == 'SPRING'
     }
 
     doFirst {
         delete 'build/layers/spring'
         mkdir 'build/layers/spring/java/lib'
-    }
-
-    doLast {
-        def layerSize = calculateLayerSize('build/layers/spring')
-        println "📦 Spring Layer: ${String.format('%.2f', layerSize)} MB"
     }
 }
 
@@ -103,18 +66,12 @@ tasks.register('buildDatabaseLayer', Copy) {
     into 'build/layers/database/java/lib'
 
     include { details ->
-        def category = classifyDependency(details.file.name)
-        return category == 'DATABASE'
+        classifyDependency(details.file.name) == 'DATABASE'
     }
 
     doFirst {
         delete 'build/layers/database'
         mkdir 'build/layers/database/java/lib'
-    }
-
-    doLast {
-        def layerSize = calculateLayerSize('build/layers/database')
-        println "📦 Database Layer: ${String.format('%.2f', layerSize)} MB"
     }
 }
 
@@ -124,18 +81,12 @@ tasks.register('buildExternalLayer', Copy) {
     into 'build/layers/external/java/lib'
 
     include { details ->
-        def category = classifyDependency(details.file.name)
-        return category == 'EXTERNAL'
+        classifyDependency(details.file.name) == 'EXTERNAL'
     }
 
     doFirst {
         delete 'build/layers/external'
         mkdir 'build/layers/external/java/lib'
-    }
-
-    doLast {
-        def layerSize = calculateLayerSize('build/layers/external')
-        println "📦 External Layer: ${String.format('%.2f', layerSize)} MB"
     }
 }
 
@@ -145,41 +96,18 @@ tasks.register('buildUtilsLayer', Copy) {
     into 'build/layers/utils/java/lib'
 
     include { details ->
-        def category = classifyDependency(details.file.name)
-        return category == 'UTILS'
+        classifyDependency(details.file.name) == 'UTILS'
     }
 
     doFirst {
         delete 'build/layers/utils'
         mkdir 'build/layers/utils/java/lib'
     }
-
-    doLast {
-        def layerSize = calculateLayerSize('build/layers/utils')
-        println "📦 Utils Layer: ${String.format('%.2f', layerSize)} MB"
-    }
 }
 
 // 모든 Layer 빌드
 tasks.register('buildAllLayers') {
     dependsOn buildSpringLayer, buildDatabaseLayer, buildExternalLayer, buildUtilsLayer
-
-    doLast {
-        println "\n=== Layer 빌드 완료 요약 ==="
-        ['spring', 'database', 'external', 'utils'].each { layerName ->
-            def layerSize = calculateLayerSize("build/layers/${layerName}")
-            printf "%-12s: %8.2f MB%n", layerName.toUpperCase(), layerSize
-        }
-
-        def totalSize = ['spring', 'database', 'external', 'utils'].sum { layerName ->
-            calculateLayerSize("build/layers/${layerName}")
-        }
-        printf "%-12s: %8.2f MB%n", "TOTAL", totalSize
-
-        if (totalSize > 250) {
-            logger.warn "⚠️ 전체 Layer 크기가 250MB에 근접했습니다. 추가 최적화를 고려하세요."
-        }
-    }
 }
 
 // Layer ZIP 파일들 생성
@@ -230,7 +158,7 @@ tasks.register('buildInternalModules', Copy) {
     }
 }
 
-// 애플리케이션 전용 thin JAR 생성 (Layer 의존성 제외)
+// 애플리케이션 전용 thin JAR 생성
 jar {
     archiveBaseName = 'edukit-batch-app'
     archiveVersion = project.version
@@ -244,78 +172,29 @@ jar {
                 'Lambda-Compatible': 'true'
         )
     }
-
-    doLast {
-        def jarFile = archiveFile.get().asFile
-        def sizeInMB = jarFile.length() / (1024 * 1024)
-        println "📦 Application JAR: ${String.format('%.2f', sizeInMB)} MB"
-    }
 }
 
-// Lambda 배포용 ZIP 생성 (애플리케이션 + 내부 모듈 + Lambda 런타임)
+// Lambda 배포용 ZIP 생성
 tasks.register('buildLambdaFunctionZip', Zip) {
     dependsOn jar, buildInternalModules
     archiveFileName = 'lambda-function.zip'
     destinationDirectory = file('build/distributions')
 
-    // 메인 애플리케이션 JAR
     from jar.archiveFile
 
-    // 내부 모듈 JAR들
     from('build/internal-modules') {
         into 'lib'
     }
 
-    // AWS Lambda 런타임만 포함 (나머지는 Layer에서 제공)
     into('lib') {
         from configurations.runtimeClasspath
         include '**/aws-lambda-java-*.jar'
-    }
-
-    doLast {
-        def zipFile = archiveFile.get().asFile
-        def sizeInMB = zipFile.length() / (1024 * 1024)
-        println "📦 Lambda Function ZIP: ${String.format('%.2f', sizeInMB)} MB"
-
-        if (sizeInMB > 50) {
-            logger.warn "⚠️ Function ZIP이 50MB를 초과했습니다: ${sizeInMB}MB"
-        } else {
-            println "✅ Function ZIP 크기 OK: ${sizeInMB}MB"
-        }
     }
 }
 
 // 전체 빌드 태스크
 tasks.register('buildLambda') {
     dependsOn buildLambdaFunctionZip, buildAllLayerZips
-
-    doLast {
-        println """
-========================================
-🚀 다중 Layer Lambda 빌드 완료!
-========================================
-📁 빌드 결과물:
-  Function ZIP: build/distributions/lambda-function.zip
-  
-  Layer ZIPs:
-  - build/distributions/layers/spring-layer.zip
-  - build/distributions/layers/database-layer.zip  
-  - build/distributions/layers/external-layer.zip
-  - build/distributions/layers/utils-layer.zip
-
-📋 배포 순서:
-  1. 모든 Layer ZIP 배포
-  2. Lambda Function 생성/업데이트 (모든 Layer 연결)
-  3. 함수 실행
-
-🔄 재사용 가능한 Layer:
-  - Spring Layer: 다른 Spring Lambda 함수에서 재사용
-  - Utils Layer: 로깅/JSON 처리하는 모든 함수에서 재사용
-  - Database Layer: DB 액세스하는 모든 함수에서 재사용
-  - External Layer: AWS 서비스 연동하는 함수에서 재사용
-========================================
-        """
-    }
 }
 
 // 빌드 정리 태스크
@@ -334,8 +213,12 @@ bootJar {
     enabled = false
 }
 
-// 의존성 분석 태스크 (Layer 분류 확인용)
+// === 디버깅용 태스크들 (개발 시에만 사용) ===
+
+// 의존성 분석 태스크 (로컬 개발 시에만 사용)
 tasks.register('analyzeDependencies') {
+    onlyIf { !System.getenv('CI') } // CI 환경에서는 실행하지 않음
+
     doLast {
         def categories = [:]
 
@@ -353,37 +236,44 @@ tasks.register('analyzeDependencies') {
         categories.each { category, files ->
             def totalSize = files.sum { it.size }
             println "\n📦 ${category} Layer (${String.format('%.2f', totalSize)} MB):"
-            files.sort { -it.size }.take(10).each { file ->
+            files.sort { -it.size }.take(5).each { file ->
                 printf "  %-8.2f MB  %s%n", file.size, file.name
             }
-            if (files.size() > 10) {
-                println "  ... and ${files.size() - 10} more files"
+            if (files.size() > 5) {
+                println "  ... and ${files.size() - 5} more files"
+            }
+        }
+    }
+}
+
+// Layer 크기 검증 태스크 (빌드 실패 방지용)
+tasks.register('validateLayerSizes') {
+    dependsOn buildAllLayerZips
+
+    doLast {
+        def totalSize = 0
+        def oversizedLayers = []
+
+        ['spring', 'database', 'external', 'utils'].each { layerName ->
+            def layerZip = file("build/distributions/layers/${layerName}-layer.zip")
+            if (layerZip.exists()) {
+                def layerSizeMB = layerZip.length() / (1024 * 1024)
+                totalSize += layerSizeMB
+
+                if (layerSizeMB > 250) {
+                    oversizedLayers << "${layerName}: ${String.format('%.1f', layerSizeMB)}MB"
+                }
             }
         }
 
-        def layerSizes = [
-                'SPRING'  : categories['SPRING']?.sum { it.size } ?: 0,
-                'DATABASE': categories['DATABASE']?.sum { it.size } ?: 0,
-                'EXTERNAL': categories['EXTERNAL']?.sum { it.size } ?: 0,
-                'UTILS'   : categories['UTILS']?.sum { it.size } ?: 0
-        ]
-
-        println "\n📊 예상 Layer 크기:"
-        layerSizes.each { name, size ->
-            printf "%-12s: %8.2f MB%n", name, size
+        if (oversizedLayers) {
+            throw new GradleException("Layer size limit exceeded: ${oversizedLayers.join(', ')}")
         }
-        printf "%-12s: %8.2f MB%n", "TOTAL LAYERS", layerSizes.values().sum()
+
+        if (totalSize > 1000) { // 전체 1GB 초과 시 경고
+            logger.warn "Total layer size is large: ${String.format('%.1f', totalSize)}MB"
+        }
     }
 }
 
-// Layer 크기 계산 헬퍼 함수
-def calculateLayerSize(String layerPath) {
-    def layerSize = 0
-    def layerDir = file(layerPath)
-    if (layerDir.exists()) {
-        layerDir.eachFileRecurse { file ->
-            if (file.isFile()) layerSize += file.length()
-        }
-    }
-    return layerSize / (1024 * 1024) // MB 단위로 반환
-}
+buildLambda.finalizedBy validateLayerSizes
