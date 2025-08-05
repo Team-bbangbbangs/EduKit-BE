@@ -155,18 +155,14 @@ tasks.register('buildLambdaAppJar', Jar) {
     from sourceSets.main.output
     
     // 2. 내부 모듈들을 압축 해제하여 포함
-    from('build/internal-modules') {
+    from fileTree('build/internal-modules/lib').matching {
         include '**/*.jar'
-        eachFile { file ->
-            from zipTree(file.file)
-        }
-        includeEmptyDirs = false
-    }
+    }.collect { zipTree(it) }
 
     // 3. AWS Lambda 런타임 라이브러리만 포함 (Layer 의존성 제외)
     from configurations.runtimeClasspath.findAll { file ->
         file.name.contains('aws-lambda-java-core') || 
-        file.name.contains('aws-lambda-java-envets')
+        file.name.contains('aws-lambda-java-events')  // 오타 수정: envets -> events
     }.collect { zipTree(it) }
 
     // 중복 파일 제거
