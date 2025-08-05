@@ -27,93 +27,97 @@ dependencies {
     runtimeOnly 'com.mysql:mysql-connector-j'
 }
 
-// Layer별 의존성 분류 함수 (크기 기반 최적화)
+// 의존성 그래프 기반 Layer 분류 함수 (계층적 구조)
 def classifyDependency = { fileName ->
-    if (fileName.startsWith('edukit-') || fileName.contains('aws-lambda-java-') || fileName.contains('mysql-connector')) {
-        // MySQL 드라이버는 APPLICATION에 포함 (Spring Boot auto-configuration을 위해)
+    // 1. APPLICATION: 우리 모듈과 Lambda 런타임 (최상위)
+    if (fileName.startsWith('edukit-') || fileName.contains('aws-lambda-java-')) {
         return 'APPLICATION'
-    } else if ((fileName.contains('aws-') && !fileName.contains('lambda')) || fileName.contains('ses') || fileName.contains('s3') || fileName.contains('sdk-core') || fileName.contains('apache-client') || fileName.contains('jmespath')) {
-        return 'EXTERNAL_SERVICES'
-    } else if (fileName.contains('hibernate') || fileName.contains('byte-buddy') || fileName.contains('aspectj')) {
-        // DB/ORM 관련 대용량 라이브러리들을 별도 Layer로 분리 (mysql-connector 제외)
-        return 'DATABASE_ORM'
-    } else {
-        // Spring Framework Core 및 기타 작은 유틸리티들
-        return 'COMMON_CORE'
+    }
+    // 2. EXTERNAL_LAYER: External 모듈이 직접 의존하는 것들
+    else if (fileName.contains('aws-') && !fileName.contains('lambda') || fileName.contains('ses') || fileName.contains('s3') || fileName.contains('sdk-core') || fileName.contains('apache-client') || fileName.contains('jmespath') || fileName.contains('mysql-connector')) {
+        return 'EXTERNAL_LAYER'
+    }
+    // 3. CORE_LAYER: Spring Boot, JPA/Hibernate 등 Core가 직접 의존하는 것들
+    else if (fileName.contains('spring-') || fileName.contains('hibernate') || fileName.contains('aspectj') || fileName.contains('byte-buddy') || fileName.contains('jpa') || fileName.contains('jdbc') || fileName.contains('logstash')) {
+        return 'CORE_LAYER'
+    }
+    // 4. BASE_LAYER: 최하단 공통 의존성들 (Jackson, Logback, 기타 유틸)
+    else {
+        return 'BASE_LAYER'
     }
 }
 
-// Common-Core Layer (Spring Framework 핵심) 생성
-tasks.register('buildCommonCoreLayer', Copy) {
+// Base Layer (최하단 공통 의존성) 생성
+tasks.register('buildBaseLayer', Copy) {
     from configurations.runtimeClasspath
-    into 'build/layers/common-core/java/lib'
+    into 'build/layers/base-layer/java/lib'
 
-    include { details -> classifyDependency(details.file.name) == 'COMMON_CORE'
+    include { details -> classifyDependency(details.file.name) == 'BASE_LAYER'
     }
 
     doFirst {
-        delete 'build/layers/common-core'
-        mkdir 'build/layers/common-core/java/lib'
+        delete 'build/layers/base-layer'
+        mkdir 'build/layers/base-layer/java/lib'
     }
 }
 
-// Database/ORM Layer (Hibernate, JPA 등) 생성
-tasks.register('buildDatabaseOrmLayer', Copy) {
+// Core Layer (Spring Framework, JPA/Hibernate) 생성
+tasks.register('buildCoreLayer', Copy) {
     from configurations.runtimeClasspath
-    into 'build/layers/database-orm/java/lib'
+    into 'build/layers/core-layer/java/lib'
 
-    include { details -> classifyDependency(details.file.name) == 'DATABASE_ORM'
+    include { details -> classifyDependency(details.file.name) == 'CORE_LAYER'
     }
 
     doFirst {
-        delete 'build/layers/database-orm'
-        mkdir 'build/layers/database-orm/java/lib'
+        delete 'build/layers/core-layer'
+        mkdir 'build/layers/core-layer/java/lib'
     }
 }
 
-// External-Services Layer 생성
-tasks.register('buildExternalServicesLayer', Copy) {
+// External Layer (AWS SDK, MySQL 등) 생성  
+tasks.register('buildExternalLayer', Copy) {
     from configurations.runtimeClasspath
-    into 'build/layers/external-services/java/lib'
+    into 'build/layers/external-layer/java/lib'
 
-    include { details -> classifyDependency(details.file.name) == 'EXTERNAL_SERVICES'
+    include { details -> classifyDependency(details.file.name) == 'EXTERNAL_LAYER'
     }
 
     doFirst {
-        delete 'build/layers/external-services'
-        mkdir 'build/layers/external-services/java/lib'
+        delete 'build/layers/external-layer'
+        mkdir 'build/layers/external-layer/java/lib'
     }
 }
 
-// 모든 Layer 빌드
+// 모든 Layer 빌드 (의존성 순서대로: Base -> Core -> External)
 tasks.register('buildAllLayers') {
-    dependsOn buildCommonCoreLayer, buildDatabaseOrmLayer, buildExternalServicesLayer
+    dependsOn buildBaseLayer, buildCoreLayer, buildExternalLayer
 }
 
-// Layer ZIP 파일들 생성
-tasks.register('buildCommonCoreLayerZip', Zip) {
-    dependsOn buildCommonCoreLayer
-    archiveFileName = 'common-core-layer.zip'
+// Layer ZIP 파일들 생성 (의존성 순서대로)
+tasks.register('buildBaseLayerZip', Zip) {
+    dependsOn buildBaseLayer
+    archiveFileName = 'base-layer.zip'
     destinationDirectory = file('build/distributions/layers')
-    from 'build/layers/common-core'
+    from 'build/layers/base-layer'
 }
 
-tasks.register('buildDatabaseOrmLayerZip', Zip) {
-    dependsOn buildDatabaseOrmLayer
-    archiveFileName = 'database-orm-layer.zip'
+tasks.register('buildCoreLayerZip', Zip) {
+    dependsOn buildCoreLayer
+    archiveFileName = 'core-layer.zip'
     destinationDirectory = file('build/distributions/layers')
-    from 'build/layers/database-orm'
+    from 'build/layers/core-layer'
 }
 
-tasks.register('buildExternalServicesLayerZip', Zip) {
-    dependsOn buildExternalServicesLayer
-    archiveFileName = 'external-services-layer.zip'
+tasks.register('buildExternalLayerZip', Zip) {
+    dependsOn buildExternalLayer
+    archiveFileName = 'external-layer.zip'
     destinationDirectory = file('build/distributions/layers')
-    from 'build/layers/external-services'
+    from 'build/layers/external-layer'
 }
 
 tasks.register('buildAllLayerZips') {
-    dependsOn buildCommonCoreLayerZip, buildDatabaseOrmLayerZip, buildExternalServicesLayerZip
+    dependsOn buildBaseLayerZip, buildCoreLayerZip, buildExternalLayerZip
 }
 
 // 내부 모듈들을 별도 디렉토리로 복사
@@ -254,7 +258,7 @@ tasks.register('validateLayerSizes') {
         def totalSize = 0
         def oversizedLayers = []
 
-        ['common-core', 'database-orm', 'external-services'].each { layerName ->
+        ['base', 'core', 'external'].each { layerName ->
             def layerZip = file("build/distributions/layers/${layerName}-layer.zip")
             if (layerZip.exists()) {
                 def layerSizeMB = layerZip.length() / (1024 * 1024)

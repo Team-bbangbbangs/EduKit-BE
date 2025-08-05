@@ -118,15 +118,15 @@ echo "Function: $FUNCTION_NAME"
 echo "🔨 Gradle 빌드 실행 중..."
 ./gradlew :edukit-batch:buildLambda --no-daemon --quiet
 
-# Layer 정의 (순서 보장을 위해 배열 사용)
-LAYER_TYPES=("common-core" "database-orm" "external-services")
+# Layer 정의 (의존성 순서대로 배열 사용: Base -> Core -> External)
+LAYER_TYPES=("base" "core" "external")
 
-# Bash 3.x 호환성을 위한 대체 함수
+# Bash 3.x 호환성을 위한 대체 함수  
 get_layer_description() {
     case "$1" in
-        "common-core") echo "Common-Core (Spring Framework) dependencies" ;;
-        "database-orm") echo "Database/ORM (Hibernate, JPA) dependencies" ;;
-        "external-services") echo "External service integrations (AWS, etc)" ;;
+        "base") echo "Base dependencies (Common utilities, Jackson, Logback)" ;;
+        "core") echo "Core dependencies (Spring Framework, JPA/Hibernate)" ;;
+        "external") echo "External dependencies (AWS SDK, MySQL driver)" ;;
         *) echo "Unknown layer: $1" ;;
     esac
 }
@@ -197,10 +197,10 @@ deploy_layer() {
 echo "📦 Layer 배포 중..."
 deployed_count=0
 
-# Layer ARN 저장을 위한 변수들 초기화
-COMMON_CORE_ARN=""
-DATABASE_ORM_ARN=""
-EXTERNAL_SERVICES_ARN=""
+# Layer ARN 저장을 위한 변수들 초기화 (의존성 순서대로)
+BASE_LAYER_ARN=""
+CORE_LAYER_ARN=""
+EXTERNAL_LAYER_ARN=""
 
 # Layer 파일들 존재 여부 및 크기 확인
 echo "🔍 Layer 파일 상태 확인:"
@@ -358,17 +358,17 @@ for i in "${!VALIDATED_LAYERS[@]}"; do
         
         # Bash 3.x 호환성을 위해 associative array 대신 변수 사용
         case "$layer_type" in
-            "common-core") 
-                COMMON_CORE_ARN="$layer_arn"
-                echo "  💾 COMMON_CORE_ARN 저장 완료"
+            "base") 
+                BASE_LAYER_ARN="$layer_arn"
+                echo "  💾 BASE_LAYER_ARN 저장 완료"
                 ;;
-            "database-orm") 
-                DATABASE_ORM_ARN="$layer_arn"
-                echo "  💾 DATABASE_ORM_ARN 저장 완료"
+            "core") 
+                CORE_LAYER_ARN="$layer_arn"
+                echo "  💾 CORE_LAYER_ARN 저장 완료"
                 ;;
-            "external-services") 
-                EXTERNAL_SERVICES_ARN="$layer_arn"
-                echo "  💾 EXTERNAL_SERVICES_ARN 저장 완료"
+            "external") 
+                EXTERNAL_LAYER_ARN="$layer_arn"
+                echo "  💾 EXTERNAL_LAYER_ARN 저장 완료"
                 ;;
         esac
         
@@ -422,11 +422,11 @@ if [[ $deployed_count -eq 0 ]]; then
 else
     echo "✅ ${deployed_count}개 Layer 배포 완료"
     
-    # 배포된 Layer ARN 목록 생성 (순서대로)
+    # 배포된 Layer ARN 목록 생성 (의존성 순서대로: Base -> Core -> External)
     deployed_layers=()
-    [[ -n "$COMMON_CORE_ARN" ]] && deployed_layers+=("$COMMON_CORE_ARN")
-    [[ -n "$DATABASE_ORM_ARN" ]] && deployed_layers+=("$DATABASE_ORM_ARN")
-    [[ -n "$EXTERNAL_SERVICES_ARN" ]] && deployed_layers+=("$EXTERNAL_SERVICES_ARN")
+    [[ -n "$BASE_LAYER_ARN" ]] && deployed_layers+=("$BASE_LAYER_ARN")
+    [[ -n "$CORE_LAYER_ARN" ]] && deployed_layers+=("$CORE_LAYER_ARN")
+    [[ -n "$EXTERNAL_LAYER_ARN" ]] && deployed_layers+=("$EXTERNAL_LAYER_ARN")
     
     layer_args=$(IFS=' '; echo "${deployed_layers[*]}")
 fi
@@ -682,11 +682,11 @@ echo "Region: $AWS_REGION"
 
 # Layer ARN 정보를 파일로 저장 (선택사항)
 if [[ "${SAVE_LAYER_ARNS:-false}" == "true" ]]; then
-    # JSON 생성을 위한 배열 구성
+    # JSON 생성을 위한 배열 구성 (의존성 순서대로)
     layer_json_parts=()
-    [[ -n "$COMMON_CORE_ARN" ]] && layer_json_parts+=("    \"common-core\": \"$COMMON_CORE_ARN\"")
-    [[ -n "$DATABASE_ORM_ARN" ]] && layer_json_parts+=("    \"database-orm\": \"$DATABASE_ORM_ARN\"")
-    [[ -n "$EXTERNAL_SERVICES_ARN" ]] && layer_json_parts+=("    \"external-services\": \"$EXTERNAL_SERVICES_ARN\"")
+    [[ -n "$BASE_LAYER_ARN" ]] && layer_json_parts+=("    \"base-layer\": \"$BASE_LAYER_ARN\"")
+    [[ -n "$CORE_LAYER_ARN" ]] && layer_json_parts+=("    \"core-layer\": \"$CORE_LAYER_ARN\"")
+    [[ -n "$EXTERNAL_LAYER_ARN" ]] && layer_json_parts+=("    \"external-layer\": \"$EXTERNAL_LAYER_ARN\"")
     
     # 마지막 요소를 제외하고 쉼표 추가
     layer_json=""
