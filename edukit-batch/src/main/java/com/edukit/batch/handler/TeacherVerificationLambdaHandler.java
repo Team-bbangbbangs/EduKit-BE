@@ -59,8 +59,21 @@ public class TeacherVerificationLambdaHandler implements RequestHandler<Schedule
     private void initializeSpringContext() {
         log.info("=== Spring 컨텍스트 초기화 시작 ===");
         log.info("Java 버전: {}", System.getProperty("java.version"));
-        log.info("환경 변수 SPRING_PROFILES_ACTIVE: {}", System.getenv("SPRING_PROFILES_ACTIVE"));
-        log.info("시스템 프로퍼티 spring.profiles.active: {}", System.getProperty("spring.profiles.active"));
+        
+        // Lambda 환경 변수를 시스템 프로퍼티로 설정
+        String springProfilesActive = System.getenv("SPRING_PROFILES_ACTIVE");
+        log.info("환경 변수 SPRING_PROFILES_ACTIVE: {}", springProfilesActive);
+        
+        if (springProfilesActive != null && !springProfilesActive.trim().isEmpty()) {
+            System.setProperty("spring.profiles.active", springProfilesActive);
+            log.info("시스템 프로퍼티로 설정된 spring.profiles.active: {}", springProfilesActive);
+        } else {
+            // 기본값으로 dev 설정
+            System.setProperty("spring.profiles.active", "dev");
+            log.warn("SPRING_PROFILES_ACTIVE 환경 변수가 없어서 기본값 'dev'로 설정");
+        }
+        
+        log.info("최종 시스템 프로퍼티 spring.profiles.active: {}", System.getProperty("spring.profiles.active"));
         
         try {
             SpringApplication app = new SpringApplication(EdukitBatchApplication.class);
