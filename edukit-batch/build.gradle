@@ -3,7 +3,6 @@ plugins {
 }
 
 dependencies {
-    // 내부 모듈 의존성 (최소화)
     implementation(project(':edukit-core')) {
         exclude group: 'io.jsonwebtoken'
         exclude group: 'org.mindrot', module: 'jbcrypt'
@@ -14,19 +13,18 @@ dependencies {
         exclude group: 'software.amazon.awssdk', module: 's3'
         exclude group: 'io.github.resilience4j'
         exclude group: 'org.springframework.boot', module: 'spring-boot-starter-data-redis'
-        // exclude group: 'io.projectreactor.netty', module: 'reactor-netty-http' // Slack Webhook에 필요하므로 제거
-        exclude group: 'org.springframework.boot', module: 'spring-boot-starter-thymeleaf' // 배치에서는 불필요
+        exclude group: 'io.projectreactor.netty', module: 'reactor-netty-http'
     }
 
-    // AWS Lambda 핵심 (애플리케이션과 함께 패키징)
+    // AWS Lambda
     implementation 'com.amazonaws:aws-lambda-java-core:1.3.0'
     implementation 'com.amazonaws:aws-lambda-java-events:3.16.1'
 
-    // 런타임에만 필요한 의존성
+    // MySQL Connector
     runtimeOnly 'com.mysql:mysql-connector-j'
 }
 
-// Layer별 의존성 분류 함수
+// Layer별 의존성 분류 함수 (크기 기반 최적화)
 def classifyDependency = { fileName ->
     if (fileName.startsWith('edukit-') || fileName.contains('aws-lambda-java-')) {
         return 'APPLICATION'
@@ -37,13 +35,21 @@ def classifyDependency = { fileName ->
         fileName.contains('apache-client') || fileName.contains('jmespath')
     ) {
         return 'EXTERNAL_SERVICES'
+    } else if (
+        fileName.contains('hibernate') || 
+        fileName.contains('byte-buddy') ||
+        fileName.contains('aspectj') ||
+        fileName.contains('mysql-connector')
+    ) {
+        // DB/ORM 관련 대용량 라이브러리들을 별도 Layer로 분리
+        return 'DATABASE_ORM'
     } else {
-        // 기본값으로 COMMON_CORE Layer에 포함
+        // Spring Framework Core 및 기타 작은 유틸리티들
         return 'COMMON_CORE'
     }
 }
 
-// Common-Core Layer (Spring + DB + Utils) 생성
+// Common-Core Layer (Spring Framework 핵심) 생성
 tasks.register('buildCommonCoreLayer', Copy) {
     from configurations.runtimeClasspath
     into 'build/layers/common-core/java/lib'
@@ -55,6 +61,21 @@ tasks.register('buildCommonCoreLayer', Copy) {
     doFirst {
         delete 'build/layers/common-core'
         mkdir 'build/layers/common-core/java/lib'
+    }
+}
+
+// Database/ORM Layer (Hibernate, JPA 등) 생성
+tasks.register('buildDatabaseOrmLayer', Copy) {
+    from configurations.runtimeClasspath
+    into 'build/layers/database-orm/java/lib'
+
+    include { details ->
+        classifyDependency(details.file.name) == 'DATABASE_ORM'
+    }
+
+    doFirst {
+        delete 'build/layers/database-orm'
+        mkdir 'build/layers/database-orm/java/lib'
     }
 }
 
@@ -75,7 +96,7 @@ tasks.register('buildExternalServicesLayer', Copy) {
 
 // 모든 Layer 빌드
 tasks.register('buildAllLayers') {
-    dependsOn buildCommonCoreLayer, buildExternalServicesLayer
+    dependsOn buildCommonCoreLayer, buildDatabaseOrmLayer, buildExternalServicesLayer
 }
 
 // Layer ZIP 파일들 생성
@@ -86,6 +107,13 @@ tasks.register('buildCommonCoreLayerZip', Zip) {
     from 'build/layers/common-core'
 }
 
+tasks.register('buildDatabaseOrmLayerZip', Zip) {
+    dependsOn buildDatabaseOrmLayer
+    archiveFileName = 'database-orm-layer.zip'
+    destinationDirectory = file('build/distributions/layers')
+    from 'build/layers/database-orm'
+}
+
 tasks.register('buildExternalServicesLayerZip', Zip) {
     dependsOn buildExternalServicesLayer
     archiveFileName = 'external-services-layer.zip'
@@ -94,7 +122,7 @@ tasks.register('buildExternalServicesLayerZip', Zip) {
 }
 
 tasks.register('buildAllLayerZips') {
-    dependsOn buildCommonCoreLayerZip, buildExternalServicesLayerZip
+    dependsOn buildCommonCoreLayerZip, buildDatabaseOrmLayerZip, buildExternalServicesLayerZip
 }
 
 // 내부 모듈들을 별도 디렉토리로 복사
@@ -208,17 +236,21 @@ tasks.register('validateLayerSizes') {
         def totalSize = 0
         def oversizedLayers = []
 
-        ['common-core', 'external-services'].each { layerName ->
+        ['common-core', 'database-orm', 'external-services'].each { layerName ->
             def layerZip = file("build/distributions/layers/${layerName}-layer.zip")
             if (layerZip.exists()) {
                 def layerSizeMB = layerZip.length() / (1024 * 1024)
                 totalSize += layerSizeMB
+                
+                println "📦 ${layerName}-layer.zip: ${String.format('%.1f', layerSizeMB)} MB"
 
                 if (layerSizeMB > 250) {
                     oversizedLayers << "${layerName}: ${String.format('%.1f', layerSizeMB)}MB"
                 }
             }
         }
+
+        println "📊 Total layers size: ${String.format('%.1f', totalSize)} MB"
 
         if (oversizedLayers) {
             throw new GradleException("Layer size limit exceeded: ${oversizedLayers.join(', ')}")

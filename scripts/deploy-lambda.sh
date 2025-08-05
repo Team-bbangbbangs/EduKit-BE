@@ -65,7 +65,8 @@ echo "🔨 Gradle 빌드 실행 중..."
 
 # Layer 정의
 declare -A LAYERS=(
-    ["common-core"]="Common-Core (Spring, DB, Utils) dependencies"
+    ["common-core"]="Common-Core (Spring Framework) dependencies"
+    ["database-orm"]="Database/ORM (Hibernate, JPA) dependencies"  
     ["external-services"]="External service integrations (AWS, etc)"
 )
 

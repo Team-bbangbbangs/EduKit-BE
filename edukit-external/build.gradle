@@ -9,6 +9,9 @@ dependencies {
 	implementation project(':edukit-common')
 	implementation project(':edukit-core')
 
+	// WebClient for reactive HTTP calls
+	implementation 'org.springframework:spring-webflux'
+
 	// Spring AI
 	implementation 'org.springframework.ai:spring-ai-starter-model-openai:1.0.0-M7'
 
