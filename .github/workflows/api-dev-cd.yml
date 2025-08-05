@@ -40,7 +40,7 @@ jobs:
       - name: Setup application.yml
         run: |
           mkdir -p edukit-api/src/main/resources
-          echo "${{ secrets.APPLICATION_YML }}" > edukit-api/src/main/resources/application-dev.yml
+          echo "${{ secrets.API_APPLICATION_YML }}" > edukit-api/src/main/resources/application-dev.yml
 
       - name: Build Spring Boot Jar
         run: ./gradlew :edukit-api:bootJar
