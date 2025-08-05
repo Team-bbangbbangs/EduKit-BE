@@ -7,9 +7,14 @@ repositories {
 dependencies {
 	// 내부 모듈 의존성
 	implementation project(':edukit-common')
+	implementation project(':edukit-core')
 
 	// Spring AI
 	implementation 'org.springframework.ai:spring-ai-starter-model-openai:1.0.0-M7'
+
+	// Reactor Netty
+	implementation platform('io.projectreactor:reactor-bom:2024.0.3')
+	implementation 'io.projectreactor.netty:reactor-netty-http'
 
 	// AWS
 	implementation platform('software.amazon.awssdk:bom:2.25.28')
@@ -28,9 +33,6 @@ dependencies {
 	implementation 'io.github.resilience4j:resilience4j-spring-boot3:2.2.0'
 	implementation 'io.github.resilience4j:resilience4j-reactor:2.2.0'
 	implementation 'io.github.resilience4j:resilience4j-circuitbreaker:2.2.0'
-
-	// Spring aop
-	implementation 'org.springframework.boot:spring-boot-starter-aop'
 
 	// REDIS
 	implementation 'org.springframework.boot:spring-boot-starter-data-redis'

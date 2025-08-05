@@ -27,25 +27,13 @@ public class PasswordValidator {
         }
     }
 
-    public static void validatePasswordConditionForChange(final String newPassword, final String confirmedNewPassword,
-                                                          final String currentPassword) {
-        validatePasswordEquality(newPassword, confirmedNewPassword);
-        validatePasswordNotChange(newPassword, currentPassword);
-    }
-
-    private static void validatePasswordEquality(final String newPassword, final String confirmedNewPassword) {
+    public static void validatePasswordEquality(final String newPassword, final String confirmedNewPassword) {
 
         if (!MessageDigest.isEqual(
                 newPassword.getBytes(StandardCharsets.UTF_8),
                 confirmedNewPassword.getBytes(StandardCharsets.UTF_8))
         ) {
             throw new AuthException(AuthErrorCode.PASSWORD_CONFIRM_MISMATCH);
-        }
-    }
-
-    private static void validatePasswordNotChange(final String newPassword, final String currentPassword) {
-        if (PasswordHasher.matches(newPassword, currentPassword)) {
-            throw new AuthException(AuthErrorCode.SAME_PASSWORD);
         }
     }
 }

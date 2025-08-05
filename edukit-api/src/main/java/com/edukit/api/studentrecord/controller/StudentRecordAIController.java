@@ -1,0 +1,77 @@
+package com.edukit.api.studentrecord.controller;
+
+import com.edukit.api.common.annotation.MemberId;
+import com.edukit.api.studentrecord.controller.request.StudentRecordPromptRequest;
+import com.edukit.api.auth.facade.AuthFacade;
+import com.edukit.api.studentrecord.facade.StudentRecordAIFacade;
+import com.edukit.api.studentrecord.facade.response.StudentRecordCreateResponse;
+import com.edukit.api.studentrecord.facade.response.StudentRecordTaskResponse;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
+import org.springframework.http.codec.ServerSentEvent;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+import reactor.core.publisher.Flux;
+
+@RestController
+@RequestMapping("/api/v2/student-records")
+@RequiredArgsConstructor
+public class StudentRecordAIController {
+
+    private final StudentRecordAIFacade studentRecordAIFacade;
+    private final AuthFacade authFacade;
+
+    /* v1.0.0
+    @PostMapping("/ai-generate/{recordId}")
+    public ResponseEntity<EdukitResponse<StudentRecordCreateResponse>> aiGenerateStudentRecord(
+            @MemberId final long memberId,
+            @PathVariable final long recordId,
+            @RequestBody @Valid final StudentRecordPromptRequest request
+    ) {
+        StudentRecordTaskResponse promptResponse = studentRecordAIFacade.getPrompt(memberId, recordId,
+                request.byteCount(), request.prompt());
+        StudentRecordCreateResponse response = studentRecordAIFacade.generateAIStudentRecord(
+                promptResponse.inputPrompt());
+        return ResponseEntity.ok(EdukitResponse.success(response));
+    }
+     */
+
+    @PostMapping(value = "/ai-generate/{recordId}/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public Flux<ServerSentEvent<StudentRecordCreateResponse>> aiGenerateStudentRecordStream(
+            @MemberId final long memberId,
+            @PathVariable final long recordId,
+            @RequestBody @Valid final StudentRecordPromptRequest request
+    ) {
+        authFacade.checkHasPermission(memberId);
+        StudentRecordTaskResponse promptResponse = studentRecordAIFacade.getStreamingPrompt(memberId, recordId,
+                request.byteCount(), request.prompt());
+
+        return studentRecordAIFacade.generateAIStudentRecordStream(promptResponse.inputPrompt())
+                .map(response -> {
+                    if (response.isFallback()) {
+                        // fallback 응답인 경우 특별한 이벤트 타입 사용
+                        return ServerSentEvent.<StudentRecordCreateResponse>builder()
+                                .id(String.valueOf(response.versionNumber()))
+                                .event("student-record-fallback")
+                                .data(response)
+                                .comment("AI 서비스 일시 장애로 인한 대체 응답입니다.")
+                                .build();
+                    } else {
+                        // 정상 응답인 경우
+                        return ServerSentEvent.<StudentRecordCreateResponse>builder()
+                                .id(String.valueOf(response.versionNumber()))
+                                .event("student-record-created")
+                                .data(response)
+                                .build();
+                    }
+                })
+                .onErrorResume(throwable -> Flux.just(ServerSentEvent.<StudentRecordCreateResponse>builder()
+                        .event("error")
+                        .comment("스트리밍 중 오류가 발생했습니다: " + throwable.getMessage())
+                        .build()));
+    }
+}

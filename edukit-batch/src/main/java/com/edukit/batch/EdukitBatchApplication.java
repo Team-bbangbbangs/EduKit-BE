@@ -1,6 +1,7 @@
 package com.edukit.batch;
 
 import org.springframework.boot.SpringApplication;
+import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication(
@@ -8,13 +9,15 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
                 "com.edukit.batch",
                 "com.edukit.core",
                 "com.edukit.common",
-                "com.edukit.external.aws.mail", "com.edukit.external.config", "com.edukit.external.slack"
+                "com.edukit.external.slack", "com.edukit.external.aws.mail", "com.edukit.external.config"
         }
 )
 public class EdukitBatchApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(EdukitBatchApplication.class, args);
+        SpringApplication app = new SpringApplication(EdukitBatchApplication.class);
+        app.setWebApplicationType(WebApplicationType.NONE);
+        app.run(args);
     }
 
 }

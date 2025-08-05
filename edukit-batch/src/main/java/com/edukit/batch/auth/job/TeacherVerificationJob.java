@@ -1,7 +1,7 @@
 package com.edukit.batch.auth.job;
 
 import com.edukit.core.auth.service.dto.MemberVerificationData;
-import com.edukit.core.member.facade.MemberBatchFacade;
+import com.edukit.batch.auth.facade.MemberBatchFacade;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
