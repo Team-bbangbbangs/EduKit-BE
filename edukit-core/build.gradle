@@ -1,27 +1,24 @@
 // 핵심 비즈니스 로직 / 유스케이스 모듈
 
 dependencies {
-	// 내부 모듈 의존성
-	implementation project(':edukit-common')
+    // 내부 모듈 의존성
+    implementation project(':edukit-common')
 
-	// Hibernate
-	api 'org.springframework.boot:spring-boot-starter-data-jpa'
+    // Hibernate
+    api 'org.springframework.boot:spring-boot-starter-data-jpa'
 
-	// Jackson
-	implementation 'com.fasterxml.jackson.core:jackson-databind'
+    // Jackson
+    implementation 'com.fasterxml.jackson.core:jackson-databind'
 
-	// JWT
-	implementation 'io.jsonwebtoken:jjwt-api:0.11.5'
-	implementation 'io.jsonwebtoken:jjwt-impl:0.11.5'
-	implementation 'io.jsonwebtoken:jjwt-jackson:0.11.5'
-
-	// JBCrypt
-	implementation 'org.mindrot:jbcrypt:0.4'
+    // JWT
+    implementation 'io.jsonwebtoken:jjwt-api:0.11.5'
+    implementation 'io.jsonwebtoken:jjwt-impl:0.11.5'
+    implementation 'io.jsonwebtoken:jjwt-jackson:0.11.5'
 }
 
 // 라이브러리 JAR 생성
 jar {
-	archiveBaseName = 'edukit-core'
-	archiveVersion = project.version
-	enabled = true
+    archiveBaseName = 'edukit-core'
+    archiveVersion = project.version
+    enabled = true
 } 
