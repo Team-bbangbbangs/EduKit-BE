@@ -380,11 +380,11 @@ for i in "${!VALIDATED_LAYERS[@]}"; do
         if [[ $i -lt $((${#VALIDATED_LAYERS[@]} - 1)) ]]; then
             next_index=$((i + 1))
             next_layer="${VALIDATED_LAYERS[$next_index]}"
-            echo "  ⏳ AWS API 제한 회피를 위해 10초 대기..."
+            echo "  ⏳ AWS API 제한 회피를 위해 2초 대기..."
             echo "  💭 대기 시작: $(date '+%H:%M:%S')"
             echo "  🔮 다음 배포 예정: $next_layer ($((next_index + 1))/${#VALIDATED_LAYERS[@]})"
             
-            sleep 10 || {
+            sleep 2 || {
                 echo "  ⚠️ sleep 명령 실패 - 계속 진행" >&2
             }
             
