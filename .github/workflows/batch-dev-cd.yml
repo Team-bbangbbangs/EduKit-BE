@@ -1,17 +1,15 @@
-name: Teacher Verification Batch - Dev
+name: Batch Deploy - DEV
 
 on:
   schedule:
-    - cron: '0 15 1 3,9 *'
-  workflow_dispatch:
+    - cron: '0 15 1 3,9 *'  # 매년 3월 1일, 9월 1일 자정 (KST)
+  workflow_dispatch:  # 수동 트리거 가능
 
 env:
   AWS_REGION: ap-northeast-2
-  LAMBDA_FUNCTION_NAME: edukit-batch-teacher-verification-dev
-  ENVIRONMENT: dev
 
 jobs:
-  deploy-and-execute:
+  deploy:
     runs-on: ubuntu-latest
     environment: dev
 
@@ -33,17 +31,11 @@ jobs:
             ~/.gradle/caches
             ~/.gradle/wrapper
           key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*') }}
-          restore-keys: ${{ runner.os }}-gradle-
 
       - name: Setup application config
         run: |
           mkdir -p edukit-batch/src/main/resources
           echo '${{ secrets.BATCH_APPLICATION_YML }}' > edukit-batch/src/main/resources/application-dev.yml
-
-      - name: Build Lambda
-        run: |
-          chmod +x ./gradlew
-          ./gradlew :edukit-batch:buildLambda --no-daemon --quiet
 
       - name: Configure AWS
         uses: aws-actions/configure-aws-credentials@v4
@@ -54,11 +46,16 @@ jobs:
 
       - name: Deploy Lambda
         run: |
-          chmod +x scripts/deploy-lambda-minimal.sh
-          LAMBDA_ROLE_ARN='${{ secrets.LAMBDA_EXECUTION_ROLE_ARN }}' \
-          EXECUTE_BATCH=true \
-          ./scripts/deploy-lambda-minimal.sh
+          chmod +x scripts/deploy-lambda.sh
+          LAMBDA_ROLE_ARN='${{ secrets.LAMBDA_EXECUTION_ROLE_ARN_DEV }}' \
+          EXECUTE_BATCH='${{ inputs.execute_batch || true }}' \
+          SAVE_LAYER_ARNS=true \
+          ./scripts/deploy-lambda.sh dev
 
-      - name: Cleanup
+      - name: Upload Layer ARNs (artifact)
         if: always()
-        run: ./gradlew :edukit-batch:cleanLambda --quiet || true
+        uses: actions/upload-artifact@v4
+        with:
+          name: layer-arns-dev
+          path: layer-arns-dev.json
+          retention-days: 30
