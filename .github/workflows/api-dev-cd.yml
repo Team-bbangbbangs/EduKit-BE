@@ -101,7 +101,7 @@ jobs:
           cat <<EOF > .env
           ECR_IMAGE_URI=${{ secrets.ECR_REGISTRY_URI }}/${{ secrets.ECR_REPOSITORY_NAME }}
           IMAGE_TAG=${{ needs.build.outputs.IMAGE_TAG }}
-          MONITORING_INSTANCE_LOKI=${{ secrets.MONITORING_INSTANCE_LOKI }}
+          MONITORING_INSTANCE=${{ secrets.MONITORING_INSTANCE }}
           EOF
 
       - name: Determine current active app
