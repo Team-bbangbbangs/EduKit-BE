@@ -144,28 +144,28 @@ jar {
 // Lambda용 애플리케이션 JAR 생성 (Layer 시스템 사용)
 tasks.register('buildLambdaAppJar', Jar) {
     dependsOn buildInternalModules
-    archiveClassifier = 'lambda'
+    archiveBaseName = 'lambda-app'           // 고정된 파일명
+    archiveVersion = ''                      // 버전 제거
+    archiveClassifier = ''                   // classifier 제거
     destinationDirectory = file('build/distributions')
 
-    // 애플리케이션 클래스들만 포함
+    // 1. 애플리케이션 클래스들 포함
     from sourceSets.main.output
-
-    // 내부 모듈들 (jar 파일 자체가 아닌 압축 해제된 클래스들)
+    
+    // 2. 내부 모듈들을 압축 해제하여 포함
     from('build/internal-modules') {
         include '**/*.jar'
-        eachFile { fileCopyDetails ->
-            // jar 파일을 압축 해제해서 클래스들을 직접 포함
-            from zipTree(fileCopyDetails.file)
+        eachFile { file ->
+            from zipTree(file.file)
         }
         includeEmptyDirs = false
     }
 
-    // AWS Lambda 런타임 관련 필수 라이브러리만 포함 (나머지는 Layer에서 제공)
-    from configurations.runtimeClasspath.collect { file ->
-        if (file.name.contains('aws-lambda-java-core') || file.name.contains('aws-lambda-java-events')) {
-            zipTree(file)
-        }
-    }
+    // 3. AWS Lambda 런타임 라이브러리만 포함 (Layer 의존성 제외)
+    from configurations.runtimeClasspath.findAll { file ->
+        file.name.contains('aws-lambda-java-core') || 
+        file.name.contains('aws-lambda-java-events')
+    }.collect { zipTree(it) }
 
     // 중복 파일 제거
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
