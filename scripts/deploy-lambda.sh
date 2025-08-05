@@ -78,15 +78,31 @@ deploy_layer() {
     local layer_name="edukit-${layer_type}-layer-${ENVIRONMENT}"
     local zip_file="edukit-batch/build/distributions/layers/${layer_type}-layer.zip"
 
+    echo "  🔍 ${layer_type} Layer 배포 시도 중..."
+    echo "    Layer 이름: $layer_name"
+    echo "    ZIP 파일: $zip_file"
+
     if [[ ! -f "$zip_file" ]]; then
+        echo "    ❌ ZIP 파일을 찾을 수 없습니다"
         return 1
     fi
 
     local zip_size=$(stat -f%z "$zip_file" 2>/dev/null || stat -c%s "$zip_file")
+    local zip_size_mb=$((zip_size / 1024 / 1024))
+    echo "    📦 ZIP 파일 크기: ${zip_size_mb}MB"
+    
     if [[ $zip_size -eq 0 ]]; then
+        echo "    ❌ ZIP 파일이 비어있습니다"
         return 1
     fi
 
+    if [[ $zip_size_mb -gt 250 ]]; then
+        echo "    ❌ ZIP 파일이 250MB 제한을 초과했습니다"
+        return 1
+    fi
+
+    echo "    ☁️  AWS Lambda Layer 생성 중..."
+    local error_file=$(mktemp)
     local layer_arn=$(aws lambda publish-layer-version \
         --layer-name "$layer_name" \
         --description "$description" \
@@ -95,12 +111,22 @@ deploy_layer() {
         --compatible-architectures x86_64 \
         --region $AWS_REGION \
         --query 'LayerVersionArn' \
-        --output text 2>/dev/null)
+        --output text 2>"$error_file")
 
-    if [[ $? -eq 0 && -n "$layer_arn" ]]; then
+    local exit_code=$?
+    
+    if [[ $exit_code -eq 0 && -n "$layer_arn" ]]; then
+        echo "    ✅ Layer 생성 성공: $layer_arn"
+        rm -f "$error_file"
         echo "$layer_arn"
         return 0
     else
+        echo "    ❌ Layer 생성 실패 (exit code: $exit_code)"
+        if [[ -s "$error_file" ]]; then
+            echo "    🔴 AWS CLI 오류:"
+            cat "$error_file" | sed 's/^/      /'
+        fi
+        rm -f "$error_file"
         return 1
     fi
 }
@@ -118,7 +144,25 @@ for layer_type in "${!LAYERS[@]}"; do
 done
 
 if [[ $deployed_count -eq 0 ]]; then
-    echo "⚠️ 배포된 Layer가 없습니다. Lambda 함수만 배포합니다."
+    echo "⚠️ 배포된 Layer가 없습니다. Fat JAR로 Lambda 함수를 배포합니다."
+    
+    # Fat JAR 빌드 (Layer 실패 시 대안)
+    echo "🔄 Fat JAR 빌드 중..."
+    ./gradlew :edukit-batch:bootJar --quiet 2>/dev/null || true
+    
+    fat_jar="edukit-batch/build/libs/app-batch.jar"
+    if [[ -f "$fat_jar" ]]; then
+        function_zip="edukit-batch/build/distributions/lambda-function-fat.zip"
+        echo "📦 Fat JAR ZIP 생성 중..."
+        (cd edukit-batch/build/libs && zip -q "../distributions/lambda-function-fat.zip" "app-batch.jar")
+        
+        if [[ -f "$function_zip" ]]; then
+            # 원본 function_zip 변수를 Fat JAR 버전으로 교체
+            sed -i.bak "s|lambda-function.zip|lambda-function-fat.zip|g" "$0"
+            echo "✅ Fat JAR ZIP 생성 완료: $(du -h "$function_zip" | cut -f1)"
+        fi
+    fi
+    
     deployed_layers=()
     layer_args=""
 else
