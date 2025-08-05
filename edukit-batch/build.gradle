@@ -29,12 +29,19 @@ dependencies {
 
 // 의존성 그래프 기반 Layer 분류 함수 (계층적 구조)
 def classifyDependency = { fileName ->
-    // 1. APPLICATION: 우리 모듈과 Lambda 런타임 (최상위)
-    if (fileName.startsWith('edukit-') || fileName.contains('aws-lambda-java-')) {
+    // 1. APPLICATION: 우리 모듈과 Lambda 런타임, MySQL 드라이버 (최상위)
+    if (fileName.startsWith('edukit-') ||
+            fileName.contains('aws-lambda-java-') ||
+            fileName.contains('mysql-connector')) {
         return 'APPLICATION'
     }
     // 2. EXTERNAL_LAYER: External 모듈이 직접 의존하는 것들
-    else if (fileName.contains('aws-') && !fileName.contains('lambda') || fileName.contains('ses') || fileName.contains('s3') || fileName.contains('sdk-core') || fileName.contains('apache-client') || fileName.contains('jmespath') || fileName.contains('mysql-connector')) {
+    else if (fileName.contains('aws-') && !fileName.contains('lambda') ||
+            fileName.contains('ses') ||
+            fileName.contains('s3') ||
+            fileName.contains('sdk-core') ||
+            fileName.contains('apache-client') ||
+            fileName.contains('jmespath')) {  // mysql-connector 제거
         return 'EXTERNAL_LAYER'
     }
     // 3. CORE_LAYER: Spring Boot, JPA/Hibernate 등 Core가 직접 의존하는 것들
@@ -158,7 +165,7 @@ tasks.register('buildLambdaAppJar', Jar) {
 
     // 1. 애플리케이션 클래스들 포함
     from sourceSets.main.output
-    
+
     // 2. 내부 모듈들을 압축 해제하여 포함
     from fileTree('build/internal-modules/lib').matching {
         include '**/*.jar'
@@ -191,7 +198,7 @@ tasks.register('buildLambdaFunctionZip', Zip) {
 
     // JAR 파일의 내용을 압축 해제하여 ZIP에 직접 포함
     from zipTree(buildLambdaAppJar.archiveFile)
-    
+
     // 중복 파일 제거
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 }
