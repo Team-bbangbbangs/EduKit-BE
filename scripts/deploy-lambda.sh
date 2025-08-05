@@ -595,10 +595,25 @@ if [[ -n "$layer_args" ]]; then
     echo "  📦 적용된 Layer: $(echo $layer_args | wc -w)개"
 fi
 
+# CloudWatch 로그 그룹 확인
+echo ""
+echo "📊 CloudWatch 로그 설정 확인..."
+LOG_GROUP_NAME="/aws/lambda/$FUNCTION_NAME"
+
+if aws logs describe-log-groups --log-group-name-prefix "$LOG_GROUP_NAME" --region $AWS_REGION --query 'logGroups[0].logGroupName' --output text 2>/dev/null | grep -q "$LOG_GROUP_NAME"; then
+    echo "  ✅ CloudWatch 로그 그룹 존재: $LOG_GROUP_NAME"
+else
+    echo "  ⚠️  CloudWatch 로그 그룹이 아직 생성되지 않았습니다"
+    echo "  💡 첫 번째 Lambda 실행 시 자동으로 생성됩니다"
+fi
+
 # 배치 실행 (옵션)
 if [[ "${EXECUTE_BATCH:-false}" == "true" ]]; then
-    echo "🚀 배치 실행 중..."
+    echo ""
+    echo "🚀 배치 테스트 실행 중..."
 
+    # Lambda 함수 비동기 호출
+    INVOKE_TIME=$(date -u +%Y-%m-%dT%H:%M:%S)
     aws lambda invoke \
         --function-name "$FUNCTION_NAME" \
         --payload '{}' \
@@ -607,15 +622,53 @@ if [[ "${EXECUTE_BATCH:-false}" == "true" ]]; then
         response.json &>/dev/null
 
     if [[ -f "response.json" ]]; then
+        echo "📄 Lambda 응답:"
+        cat response.json
+        echo ""
+        
         if grep -q '"errorMessage"' response.json 2>/dev/null; then
             echo "❌ 배치 실행 실패"
-            cat response.json
+            
+            # CloudWatch 로그 확인 시도
+            echo "🔍 CloudWatch 로그 확인 중..."
+            sleep 5  # 로그가 CloudWatch에 전송될 시간 대기
+            
+            # 최근 로그 이벤트 확인
+            if aws logs describe-log-streams --log-group-name "$LOG_GROUP_NAME" --region $AWS_REGION --query 'logStreams[0].logStreamName' --output text 2>/dev/null | grep -q "."; then
+                LATEST_STREAM=$(aws logs describe-log-streams --log-group-name "$LOG_GROUP_NAME" --region $AWS_REGION --order-by LastEventTime --descending --limit 1 --query 'logStreams[0].logStreamName' --output text)
+                echo "  📋 최신 로그 스트림: $LATEST_STREAM"
+                
+                echo "  📝 최근 로그 이벤트 (최대 10개):"
+                aws logs get-log-events \
+                    --log-group-name "$LOG_GROUP_NAME" \
+                    --log-stream-name "$LATEST_STREAM" \
+                    --region $AWS_REGION \
+                    --limit 10 \
+                    --query 'events[*].[timestamp,message]' \
+                    --output table 2>/dev/null || echo "  ⚠️  로그 이벤트를 가져올 수 없습니다"
+            else
+                echo "  ⚠️  로그 스트림을 찾을 수 없습니다"
+            fi
+            
             rm -f response.json
             exit 1
         else
             echo "✅ 배치 실행 완료"
+            
+            # 성공한 경우에도 로그 확인
+            echo "🔍 실행 로그 확인 중..."
+            sleep 3
+            
+            if aws logs describe-log-streams --log-group-name "$LOG_GROUP_NAME" --region $AWS_REGION --query 'logStreams[0].logStreamName' --output text 2>/dev/null | grep -q "."; then
+                LATEST_STREAM=$(aws logs describe-log-streams --log-group-name "$LOG_GROUP_NAME" --region $AWS_REGION --order-by LastEventTime --descending --limit 1 --query 'logStreams[0].logStreamName' --output text)
+                echo "  📋 로그 확인: https://console.aws.amazon.com/cloudwatch/home?region=$AWS_REGION#logsV2:log-groups/log-group/$(echo "$LOG_GROUP_NAME" | sed 's/\//%252F/g')/log-events/$(echo "$LATEST_STREAM" | sed 's/\//%252F/g')"
+            fi
+            
             rm -f response.json
         fi
+    else
+        echo "❌ Lambda 응답 파일을 찾을 수 없습니다"
+        exit 1
     fi
 fi
 
