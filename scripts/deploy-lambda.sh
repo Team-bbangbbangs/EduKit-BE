@@ -1,6 +1,26 @@
 #!/bin/bash
 
 set -e
+set -o pipefail
+
+# 디버깅 모드 (선택적)
+if [[ "${DEBUG:-false}" == "true" ]]; then
+    set -x
+fi
+
+# 예상치 못한 종료 감지
+cleanup_on_exit() {
+    local exit_code=$?
+    if [[ $exit_code -ne 0 ]]; then
+        echo "" >&2
+        echo "🚨 스크립트가 예상치 못하게 종료되었습니다 (exit code: $exit_code)" >&2
+        echo "⏰ 종료 시간: $(date '+%Y-%m-%d %H:%M:%S')" >&2
+        echo "📍 마지막 실행 위치를 확인해주세요" >&2
+        echo "" >&2
+    fi
+}
+
+trap cleanup_on_exit EXIT
 
 # 스크립트 디렉토리 확인 (프로젝트 루트에서 실행되었는지 체크)
 if [[ ! -f "gradlew" || ! -f "settings.gradle" ]]; then
@@ -184,42 +204,180 @@ if [[ ${#missing_layers[@]} -gt 0 ]]; then
     echo "⚠️  누락된 Layer: ${missing_layers[*]}"
 fi
 
-for i in "${!LAYER_TYPES[@]}"; do
-    layer_type="${LAYER_TYPES[$i]}"
-    
-    # 해당 Layer 파일이 존재하는 경우에만 배포 시도
+# ================================
+# 📋 배포 전 전체 검증 단계
+# ================================
+echo ""
+echo "🔍 배포 전 전체 검증 시작..."
+
+# 1. 필수 환경 변수 확인
+echo "📋 1. 환경 변수 검증:"
+validation_failed=false
+
+if [[ -z "$AWS_REGION" ]]; then
+    echo "  ❌ AWS_REGION이 설정되지 않았습니다"
+    validation_failed=true
+else
+    echo "  ✅ AWS_REGION: $AWS_REGION"
+fi
+
+if [[ -z "$ENVIRONMENT" ]]; then
+    echo "  ❌ ENVIRONMENT가 설정되지 않았습니다"
+    validation_failed=true
+else
+    echo "  ✅ ENVIRONMENT: $ENVIRONMENT"
+fi
+
+# 2. Layer ZIP 파일 전체 검증
+echo "📋 2. Layer ZIP 파일 전체 검증:"
+valid_layers=()
+invalid_layers=()
+
+for layer_type in "${LAYER_TYPES[@]}"; do
     zip_file="edukit-batch/build/distributions/layers/${layer_type}-layer.zip"
+    layer_name="edukit-${layer_type}-layer-${ENVIRONMENT}"
+    
+    # ZIP 파일 존재 여부
     if [[ ! -f "$zip_file" ]]; then
-        echo "⏭️  ${layer_type} layer 건너뛰기 (파일 없음)"
+        echo "  ❌ ${layer_type}: ZIP 파일 없음 ($zip_file)"
+        invalid_layers+=("$layer_type")
         continue
     fi
+    
+    # ZIP 파일 크기 확인
+    file_size=$(stat -f%z "$zip_file" 2>/dev/null || stat -c%s "$zip_file")
+    if [[ $file_size -eq 0 ]]; then
+        echo "  ❌ ${layer_type}: ZIP 파일이 비어있음 ($zip_file)"
+        invalid_layers+=("$layer_type")
+        continue
+    fi
+    
+    # Layer 이름 검증
+    if [[ -z "$layer_name" ]]; then
+        echo "  ❌ ${layer_type}: Layer 이름이 비어있음"
+        invalid_layers+=("$layer_type")
+        continue
+    fi
+    
+    # Layer 설명 검증
+    description=$(get_layer_description "$layer_type")
+    if [[ -z "$description" ]]; then
+        echo "  ❌ ${layer_type}: Layer 설명이 비어있음"
+        invalid_layers+=("$layer_type")
+        continue
+    fi
+    
+    file_size_mb=$((file_size / 1024 / 1024))
+    echo "  ✅ ${layer_type}: ${file_size_mb}MB, Layer명: $layer_name"
+    valid_layers+=("$layer_type")
+done
+
+# 3. AWS CLI 접근 권한 확인
+echo "📋 3. AWS CLI 접근 권한 확인:"
+if ! aws sts get-caller-identity --region "$AWS_REGION" > /dev/null 2>&1; then
+    echo "  ❌ AWS CLI 인증 실패 - AWS 권한을 확인해주세요"
+    validation_failed=true
+else
+    echo "  ✅ AWS CLI 인증 성공"
+fi
+
+# 4. 검증 결과 요약
+echo ""
+echo "📊 검증 결과 요약:"
+echo "  ✅ 유효한 Layer: ${#valid_layers[@]}개 (${valid_layers[*]})"
+if [[ ${#invalid_layers[@]} -gt 0 ]]; then
+    echo "  ❌ 무효한 Layer: ${#invalid_layers[@]}개 (${invalid_layers[*]})"
+fi
+
+# 5. 검증 실패 시 스크립트 중단
+if [[ "$validation_failed" == "true" || ${#valid_layers[@]} -eq 0 ]]; then
+    echo ""
+    echo "🚨 검증 실패! 배포를 중단합니다."
+    echo "💡 위의 문제들을 해결한 후 다시 시도해주세요."
+    exit 1
+fi
+
+echo ""
+echo "✅ 모든 검증 통과! 배포를 시작합니다."
+echo "🔄 총 ${#valid_layers[@]}개 Layer 순차 배포 시작..."
+
+# 검증된 Layer만 배포 대상으로 설정
+VALIDATED_LAYERS=("${valid_layers[@]}")
+
+for i in "${!VALIDATED_LAYERS[@]}"; do
+    layer_type="${VALIDATED_LAYERS[$i]}"
+    
+    echo ""
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    echo "📋 Layer $((i+1))/${#VALIDATED_LAYERS[@]}: $layer_type"
+    echo "⏰ 시작 시간: $(date '+%Y-%m-%d %H:%M:%S')"
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    
+    # 검증된 Layer이므로 파일 존재 확인 불필요 (이미 검증됨)
+    zip_file="edukit-batch/build/distributions/layers/${layer_type}-layer.zip"
 
     echo "🚀 ${layer_type} layer 배포 시도 중..."
     description=$(get_layer_description "$layer_type")
     if layer_arn=$(deploy_layer "$layer_type" "$description"); then
         echo "  ✅ ${layer_type} layer 배포 성공: $layer_arn"
+        echo "  📝 Layer ARN을 변수에 저장 중..."
+        
         # Bash 3.x 호환성을 위해 associative array 대신 변수 사용
         case "$layer_type" in
-            "common-core") COMMON_CORE_ARN="$layer_arn" ;;
-            "database-orm") DATABASE_ORM_ARN="$layer_arn" ;;
-            "external-services") EXTERNAL_SERVICES_ARN="$layer_arn" ;;
+            "common-core") 
+                COMMON_CORE_ARN="$layer_arn"
+                echo "  💾 COMMON_CORE_ARN 저장 완료"
+                ;;
+            "database-orm") 
+                DATABASE_ORM_ARN="$layer_arn"
+                echo "  💾 DATABASE_ORM_ARN 저장 완료"
+                ;;
+            "external-services") 
+                EXTERNAL_SERVICES_ARN="$layer_arn"
+                echo "  💾 EXTERNAL_SERVICES_ARN 저장 완료"
+                ;;
         esac
-        ((deployed_count++))
+        
+        # 카운터 증가 (안전하게)
+        deployed_count=$((deployed_count + 1))
+        echo "  📊 배포 완료된 Layer 수: $deployed_count/${#VALIDATED_LAYERS[@]}"
         
         # 다음 Layer 배포 전 대기 (마지막 Layer 제외, AWS API rate limiting 회피)
-        if [[ $i -lt $((${#LAYER_TYPES[@]} - 1)) ]]; then
+        if [[ $i -lt $((${#VALIDATED_LAYERS[@]} - 1)) ]]; then
+            next_index=$((i + 1))
+            next_layer="${VALIDATED_LAYERS[$next_index]}"
             echo "  ⏳ AWS API 제한 회피를 위해 10초 대기..."
-            sleep 10
+            echo "  💭 대기 시작: $(date '+%H:%M:%S')"
+            echo "  🔮 다음 배포 예정: $next_layer ($((next_index + 1))/${#VALIDATED_LAYERS[@]})"
+            
+            sleep 10 || {
+                echo "  ⚠️ sleep 명령 실패 - 계속 진행" >&2
+            }
+            
+            echo "  💭 대기 완료: $(date '+%H:%M:%S')"
+            echo "  🔄 $next_layer Layer 배포 준비 완료!"
+        else
+            echo "  🎯 마지막 Layer 배포 완료 - 대기 없음"
         fi
     else
         echo "  ❌ ${layer_type} layer 배포 실패 (계속 진행)"
         # 실패해도 다음 Layer를 위해 짧은 대기
-        if [[ $i -lt $((${#LAYER_TYPES[@]} - 1)) ]]; then
+        if [[ $i -lt $((${#VALIDATED_LAYERS[@]} - 1)) ]]; then
             echo "  ⏳ 3초 대기 후 다음 Layer 시도..."
-            sleep 3
+            sleep 3 || {
+                echo "  ⚠️ sleep 명령 실패 - 계속 진행" >&2
+            }
         fi
     fi
+    
+    echo "✅ Layer $((i+1))/${#VALIDATED_LAYERS[@]} ($layer_type) 처리 완료"
+    echo "⏰ 완료 시간: $(date '+%Y-%m-%d %H:%M:%S')"
 done
+
+echo ""
+echo "🏁 모든 Layer 배포 시도 완료!"
+echo "📊 최종 결과: $deployed_count/${#VALIDATED_LAYERS[@]} Layer 배포 성공"
+echo "⏰ 전체 완료 시간: $(date '+%Y-%m-%d %H:%M:%S')"
 
 if [[ $deployed_count -eq 0 ]]; then
     echo "⚠️ 배포된 Layer가 없습니다. Layer 없이 함수만 배포합니다."
