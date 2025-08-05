@@ -28,19 +28,9 @@ dependencies {
 def classifyDependency = { fileName ->
     if (fileName.startsWith('edukit-') || fileName.contains('aws-lambda-java-')) {
         return 'APPLICATION'
-    } else if (
-        (fileName.contains('aws-') && !fileName.contains('lambda')) ||
-        fileName.contains('ses') || fileName.contains('s3') ||
-        fileName.contains('sdk-core') ||
-        fileName.contains('apache-client') || fileName.contains('jmespath')
-    ) {
+    } else if ((fileName.contains('aws-') && !fileName.contains('lambda')) || fileName.contains('ses') || fileName.contains('s3') || fileName.contains('sdk-core') || fileName.contains('apache-client') || fileName.contains('jmespath')) {
         return 'EXTERNAL_SERVICES'
-    } else if (
-        fileName.contains('hibernate') || 
-        fileName.contains('byte-buddy') ||
-        fileName.contains('aspectj') ||
-        fileName.contains('mysql-connector')
-    ) {
+    } else if (fileName.contains('hibernate') || fileName.contains('byte-buddy') || fileName.contains('aspectj') || fileName.contains('mysql-connector')) {
         // DB/ORM 관련 대용량 라이브러리들을 별도 Layer로 분리
         return 'DATABASE_ORM'
     } else {
@@ -54,8 +44,7 @@ tasks.register('buildCommonCoreLayer', Copy) {
     from configurations.runtimeClasspath
     into 'build/layers/common-core/java/lib'
 
-    include { details ->
-        classifyDependency(details.file.name) == 'COMMON_CORE'
+    include { details -> classifyDependency(details.file.name) == 'COMMON_CORE'
     }
 
     doFirst {
@@ -69,8 +58,7 @@ tasks.register('buildDatabaseOrmLayer', Copy) {
     from configurations.runtimeClasspath
     into 'build/layers/database-orm/java/lib'
 
-    include { details ->
-        classifyDependency(details.file.name) == 'DATABASE_ORM'
+    include { details -> classifyDependency(details.file.name) == 'DATABASE_ORM'
     }
 
     doFirst {
@@ -84,8 +72,7 @@ tasks.register('buildExternalServicesLayer', Copy) {
     from configurations.runtimeClasspath
     into 'build/layers/external-services/java/lib'
 
-    include { details ->
-        classifyDependency(details.file.name) == 'EXTERNAL_SERVICES'
+    include { details -> classifyDependency(details.file.name) == 'EXTERNAL_SERVICES'
     }
 
     doFirst {
@@ -147,12 +134,10 @@ jar {
     enabled = true
 
     manifest {
-        attributes(
-                'Main-Class': 'com.edukit.batch.handler.TeacherVerificationLambdaHandler',
+        attributes('Main-Class': 'com.edukit.batch.handler.TeacherVerificationLambdaHandler',
                 'Implementation-Title': 'EduKit Batch Lambda Function',
                 'Implementation-Version': project.version,
-                'Lambda-Compatible': 'true'
-        )
+                'Lambda-Compatible': 'true')
     }
 }
 
@@ -161,10 +146,10 @@ tasks.register('buildLambdaAppJar', Jar) {
     dependsOn buildInternalModules
     archiveClassifier = 'lambda'
     destinationDirectory = file('build/distributions')
-    
+
     // 애플리케이션 클래스들만 포함
     from sourceSets.main.output
-    
+
     // 내부 모듈들 (jar 파일 자체가 아닌 압축 해제된 클래스들)
     from('build/internal-modules') {
         include '**/*.jar'
@@ -174,28 +159,25 @@ tasks.register('buildLambdaAppJar', Jar) {
         }
         includeEmptyDirs = false
     }
-    
+
     // AWS Lambda 런타임 관련 필수 라이브러리만 포함 (나머지는 Layer에서 제공)
     from configurations.runtimeClasspath.collect { file ->
-        if (file.name.contains('aws-lambda-java-core') || 
-            file.name.contains('aws-lambda-java-events')) {
+        if (file.name.contains('aws-lambda-java-core') || file.name.contains('aws-lambda-java-events')) {
             zipTree(file)
         }
     }
-    
+
     // 중복 파일 제거
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-    
+
     // META-INF 정리
     exclude 'META-INF/*.SF'
-    exclude 'META-INF/*.DSA' 
+    exclude 'META-INF/*.DSA'
     exclude 'META-INF/*.RSA'
-    
+
     // 메인 클래스 설정 (Lambda에서는 핸들러를 사용하므로 불필요하지만 명시)
     manifest {
-        attributes(
-            'Lambda-Handler': 'com.edukit.batch.handler.TeacherVerificationLambdaHandler::handleRequest'
-        )
+        attributes('Lambda-Handler': 'com.edukit.batch.handler.TeacherVerificationLambdaHandler::handleRequest')
     }
 }
 
@@ -226,6 +208,7 @@ clean.dependsOn cleanLambda
 
 // Spring Boot JAR는 비활성화
 bootJar {
+    archiveFileName = 'edukit-batch.jar'
     enabled = false
 }
 
@@ -252,8 +235,7 @@ tasks.register('analyzeDependencies') {
         categories.each { category, files ->
             def totalSize = files.sum { it.size }
             println "\n📦 ${category} Layer (${String.format('%.2f', totalSize)} MB):"
-            files.sort { -it.size }.take(5).each { file ->
-                printf "  %-8.2f MB  %s%n", file.size, file.name
+            files.sort { -it.size }.take(5).each { file -> printf "  %-8.2f MB  %s%n", file.size, file.name
             }
             if (files.size() > 5) {
                 println "  ... and ${files.size() - 5} more files"
@@ -275,7 +257,7 @@ tasks.register('validateLayerSizes') {
             if (layerZip.exists()) {
                 def layerSizeMB = layerZip.length() / (1024 * 1024)
                 totalSize += layerSizeMB
-                
+
                 println "📦 ${layerName}-layer.zip: ${String.format('%.1f', layerSizeMB)} MB"
 
                 if (layerSizeMB > 250) {
