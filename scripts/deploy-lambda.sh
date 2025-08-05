@@ -42,11 +42,8 @@ cleanup_on_exit() {
 
 trap cleanup_on_exit EXIT
 
-# 스크립트 실행 권한 자가 진단
-echo "🔍 스크립트 실행 환경 진단..."
-script_path="$0"
-script_permissions=$(ls -la "$script_path" | awk '{print $1}')
-echo "📋 스크립트 권한: $script_path ($script_permissions)"
+# 간소화된 시작 메시지
+echo "🚀 Lambda 배포 시작..."
 
 if [[ ! -x "$script_path" ]]; then
     echo "⚠️  스크립트에 실행 권한이 없습니다. 자동으로 권한을 부여합니다."
@@ -341,77 +338,48 @@ VALIDATED_LAYERS=("${valid_layers[@]}")
 for i in "${!VALIDATED_LAYERS[@]}"; do
     layer_type="${VALIDATED_LAYERS[$i]}"
     
-    echo ""
-    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-    echo "📋 Layer $((i+1))/${#VALIDATED_LAYERS[@]}: $layer_type"
-    echo "⏰ 시작 시간: $(date '+%Y-%m-%d %H:%M:%S')"
-    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    echo "📦 $((i+1))/${#VALIDATED_LAYERS[@]} ${layer_type} layer 배포 중..."
     
     # 검증된 Layer이므로 파일 존재 확인 불필요 (이미 검증됨)
     zip_file="edukit-batch/build/distributions/layers/${layer_type}-layer.zip"
-
-    echo "🚀 ${layer_type} layer 배포 시도 중..."
     description=$(get_layer_description "$layer_type")
     if layer_arn=$(deploy_layer "$layer_type" "$description"); then
-        echo "  ✅ ${layer_type} layer 배포 성공: $layer_arn"
-        echo "  📝 Layer ARN을 변수에 저장 중..."
+        echo "  ✅ ${layer_type} layer 배포 성공"
         
         # Bash 3.x 호환성을 위해 associative array 대신 변수 사용
         case "$layer_type" in
             "base") 
                 BASE_LAYER_ARN="$layer_arn"
-                echo "  💾 BASE_LAYER_ARN 저장 완료"
                 ;;
             "core") 
                 CORE_LAYER_ARN="$layer_arn"
-                echo "  💾 CORE_LAYER_ARN 저장 완료"
                 ;;
             "external") 
                 EXTERNAL_LAYER_ARN="$layer_arn"
-                echo "  💾 EXTERNAL_LAYER_ARN 저장 완료"
                 ;;
         esac
         
         # 카운터 증가 (안전하게)
         deployed_count=$((deployed_count + 1))
-        echo "  📊 배포 완료된 Layer 수: $deployed_count/${#VALIDATED_LAYERS[@]}"
         
         # 다음 Layer 배포 전 대기 (마지막 Layer 제외, AWS API rate limiting 회피)
         if [[ $i -lt $((${#VALIDATED_LAYERS[@]} - 1)) ]]; then
-            next_index=$((i + 1))
-            next_layer="${VALIDATED_LAYERS[$next_index]}"
-            echo "  ⏳ AWS API 제한 회피를 위해 2초 대기..."
-            echo "  💭 대기 시작: $(date '+%H:%M:%S')"
-            echo "  🔮 다음 배포 예정: $next_layer ($((next_index + 1))/${#VALIDATED_LAYERS[@]})"
-            
             sleep 2 || {
                 echo "  ⚠️ sleep 명령 실패 - 계속 진행" >&2
             }
-            
-            echo "  💭 대기 완료: $(date '+%H:%M:%S')"
-            echo "  🔄 $next_layer Layer 배포 준비 완료!"
-        else
-            echo "  🎯 마지막 Layer 배포 완료 - 대기 없음"
         fi
     else
-        echo "  ❌ ${layer_type} layer 배포 실패 (계속 진행)"
+        echo "  ❌ ${layer_type} layer 배포 실패"
         # 실패해도 다음 Layer를 위해 짧은 대기
         if [[ $i -lt $((${#VALIDATED_LAYERS[@]} - 1)) ]]; then
-            echo "  ⏳ 3초 대기 후 다음 Layer 시도..."
             sleep 3 || {
                 echo "  ⚠️ sleep 명령 실패 - 계속 진행" >&2
             }
         fi
     fi
-    
-    echo "✅ Layer $((i+1))/${#VALIDATED_LAYERS[@]} ($layer_type) 처리 완료"
-    echo "⏰ 완료 시간: $(date '+%Y-%m-%d %H:%M:%S')"
 done
 
-echo ""
-echo "🏁 모든 Layer 배포 시도 완료!"
-echo "📊 최종 결과: $deployed_count/${#VALIDATED_LAYERS[@]} Layer 배포 성공"
-echo "⏰ 전체 완료 시간: $(date '+%Y-%m-%d %H:%M:%S')"
+echo "🏁 Layer 배포 완료: $deployed_count/${#VALIDATED_LAYERS[@]} 성공"
 
 if [[ $deployed_count -eq 0 ]]; then
     echo "⚠️ 배포된 Layer가 없습니다. Layer 없이 함수만 배포합니다."
@@ -434,74 +402,41 @@ fi
 # ================================
 # 🔧 Lambda 함수 배포
 # ================================
-echo ""
-echo "🔧 Lambda 함수 배포 중..."
-
-# 1. Lambda 함수 ZIP 파일 검증
-echo "📋 Lambda 함수 ZIP 파일 검증:"
 function_zip="edukit-batch/build/distributions/lambda-function.zip"
 
-if [[ ! -f "$function_zip" ]]; then
-    echo "  ❌ Lambda 함수 ZIP 파일을 찾을 수 없습니다: $function_zip"
-    echo "  💡 Gradle 빌드가 완료되었는지 확인해주세요:"
-    echo "     ./gradlew :edukit-batch:buildFunctionZip"
+# ZIP 파일 확인
+if [[ ! -f "$function_zip" ]] || [[ ! -s "$function_zip" ]]; then
+    echo "❌ Lambda 함수 ZIP 파일 문제: $function_zip"
     exit 1
 fi
 
-# ZIP 파일 크기 및 권한 확인
-file_size=$(stat -f%z "$function_zip" 2>/dev/null || stat -c%s "$function_zip")
-file_size_mb=$((file_size / 1024 / 1024))
-file_permissions=$(ls -la "$function_zip" | awk '{print $1}')
+# 필수 변수 확인
+[[ -z "$FUNCTION_NAME" || -z "$LAMBDA_ROLE_ARN" ]] && { echo "❌ 필수 환경변수 누락"; exit 1; }
 
-if [[ $file_size -eq 0 ]]; then
-    echo "  ❌ Lambda 함수 ZIP 파일이 비어있습니다: $function_zip"
-    exit 1
-fi
-
-echo "  ✅ Lambda 함수 ZIP: ${file_size_mb}MB ($file_permissions)"
-
-# 2. 필수 변수 재검증
-echo "📋 Lambda 함수 배포 변수 검증:"
-echo "  ✅ FUNCTION_NAME: $FUNCTION_NAME"
-echo "  ✅ LAMBDA_ROLE_ARN: $LAMBDA_ROLE_ARN"
-echo "  ✅ MEMORY_SIZE: ${MEMORY_SIZE}MB"
-echo "  ✅ TIMEOUT: ${TIMEOUT}초"
-
-# 3. AWS CLI 실행 권한 재확인
-echo "📋 AWS CLI 명령어 실행 가능성 검증:"
+# AWS CLI 확인
 aws_cli_path=$(which aws)
 if [[ -z "$aws_cli_path" ]]; then
-    echo "  ❌ AWS CLI를 찾을 수 없습니다"
+    echo "❌ AWS CLI를 찾을 수 없습니다"
     exit 1
 fi
-
-aws_permissions=$(ls -la "$aws_cli_path" | awk '{print $1}')
-echo "  ✅ AWS CLI: $aws_cli_path ($aws_permissions)"
-
-echo ""
-echo "🚀 Lambda 함수 배포 시작..."
+echo "🚀 Lambda 함수 배포 중..."
 
 # 함수 존재 여부 확인
-echo "🔍 기존 Lambda 함수 확인 중..."
 if aws lambda get-function --function-name "$FUNCTION_NAME" --region $AWS_REGION >/dev/null 2>&1; then
-    echo "  📍 기존 함수 발견 - 업데이트 모드"
+    echo "  🔧 기존 함수 업데이트 중..."
     
     # 기존 함수 구성 업데이트
-    echo "  🔧 함수 구성 업데이트 중..."
     if [[ -n "$layer_args" ]]; then
-        echo "    📦 Layer 적용: $layer_args"
         if ! aws lambda update-function-configuration \
             --function-name "$FUNCTION_NAME" \
             --layers $layer_args \
             --memory-size $MEMORY_SIZE \
             --timeout $TIMEOUT \
             --region $AWS_REGION >/dev/null 2>&1; then
-            echo "  ❌ 함수 구성 업데이트 실패 (Layer 포함)"
-            echo "  💡 Layer ARN이 유효한지 확인해주세요"
+            echo "  ❌ 함수 구성 업데이트 실패"
             exit 1
         fi
     else
-        echo "    📦 Layer 없이 구성 업데이트"
         if ! aws lambda update-function-configuration \
             --function-name "$FUNCTION_NAME" \
             --memory-size $MEMORY_SIZE \
@@ -511,34 +446,29 @@ if aws lambda get-function --function-name "$FUNCTION_NAME" --region $AWS_REGION
             exit 1
         fi
     fi
-    echo "  ✅ 함수 구성 업데이트 완료"
 
-    echo "  ⏳ 함수 구성 업데이트 완료 대기 중..."
+    # 함수 구성 업데이트 완료 대기
     if ! aws lambda wait function-updated \
         --function-name "$FUNCTION_NAME" \
         --region $AWS_REGION; then
         echo "  ❌ 함수 구성 업데이트 대기 실패"
         exit 1
     fi
-    echo "  ✅ 함수 구성 업데이트 완료 확인"
 
-    echo "  📂 함수 코드 업데이트 중..."
+    # 함수 코드 업데이트
     if ! aws lambda update-function-code \
         --function-name "$FUNCTION_NAME" \
         --zip-file "fileb://$function_zip" \
         --region $AWS_REGION >/dev/null 2>&1; then
         echo "  ❌ 함수 코드 업데이트 실패"
-        echo "  💡 ZIP 파일이 손상되었거나 너무 클 수 있습니다"
         exit 1
     fi
-    echo "  ✅ 함수 코드 업데이트 완료"
+    echo "  ✅ 함수 업데이트 완료"
 else
-    echo "  🆕 새 함수 생성 모드"
+    echo "  🆕 새 함수 생성 중..."
     
     # 새 함수 생성
-    echo "  🔧 새 Lambda 함수 생성 중..."
     if [[ -n "$layer_args" ]]; then
-        echo "    📦 Layer 포함: $layer_args"
         if ! aws lambda create-function \
             --function-name "$FUNCTION_NAME" \
             --runtime java21 \
@@ -584,28 +514,10 @@ if ! aws lambda wait function-updated \
     exit 1
 fi
 
-echo ""
-echo "✅ Lambda 함수 배포 완료!"
-echo "📋 배포된 함수 정보:"
-echo "  🎯 함수명: $FUNCTION_NAME"
-echo "  🏷️  런타임: java21"
-echo "  💾 메모리: ${MEMORY_SIZE}MB"
-echo "  ⏱️  타임아웃: ${TIMEOUT}초"
-if [[ -n "$layer_args" ]]; then
-    echo "  📦 적용된 Layer: $(echo $layer_args | wc -w)개"
-fi
+echo "✅ Lambda 함수 배포 완료: $FUNCTION_NAME"
 
-# CloudWatch 로그 그룹 확인
-echo ""
-echo "📊 CloudWatch 로그 설정 확인..."
+# CloudWatch 로그 그룹 설정
 LOG_GROUP_NAME="/aws/lambda/$FUNCTION_NAME"
-
-if aws logs describe-log-groups --log-group-name-prefix "$LOG_GROUP_NAME" --region $AWS_REGION --query 'logGroups[0].logGroupName' --output text 2>/dev/null | grep -q "$LOG_GROUP_NAME"; then
-    echo "  ✅ CloudWatch 로그 그룹 존재: $LOG_GROUP_NAME"
-else
-    echo "  ⚠️  CloudWatch 로그 그룹이 아직 생성되지 않았습니다"
-    echo "  💡 첫 번째 Lambda 실행 시 자동으로 생성됩니다"
-fi
 
 # 배치 실행 (옵션)
 if [[ "${EXECUTE_BATCH:-false}" == "true" ]]; then
@@ -622,47 +534,15 @@ if [[ "${EXECUTE_BATCH:-false}" == "true" ]]; then
         response.json &>/dev/null
 
     if [[ -f "response.json" ]]; then
-        echo "📄 Lambda 응답:"
-        cat response.json
-        echo ""
-        
         if grep -q '"errorMessage"' response.json 2>/dev/null; then
             echo "❌ 배치 실행 실패"
-            
-            # CloudWatch 로그 확인 시도
-            echo "🔍 CloudWatch 로그 확인 중..."
-            sleep 5  # 로그가 CloudWatch에 전송될 시간 대기
-            
-            # 최근 로그 이벤트 확인
-            if aws logs describe-log-streams --log-group-name "$LOG_GROUP_NAME" --region $AWS_REGION --query 'logStreams[0].logStreamName' --output text 2>/dev/null | grep -q "."; then
-                LATEST_STREAM=$(aws logs describe-log-streams --log-group-name "$LOG_GROUP_NAME" --region $AWS_REGION --order-by LastEventTime --descending --limit 1 --query 'logStreams[0].logStreamName' --output text)
-                echo "  📋 최신 로그 스트림: $LATEST_STREAM"
-                
-                echo "  📝 최근 로그 이벤트 (최대 10개):"
-                aws logs get-log-events \
-                    --log-group-name "$LOG_GROUP_NAME" \
-                    --log-stream-name "$LATEST_STREAM" \
-                    --region $AWS_REGION \
-                    --limit 10 \
-                    --query 'events[*].[timestamp,message]' \
-                    --output table 2>/dev/null || echo "  ⚠️  로그 이벤트를 가져올 수 없습니다"
-            else
-                echo "  ⚠️  로그 스트림을 찾을 수 없습니다"
-            fi
+            echo "📋 CloudWatch 로그: https://console.aws.amazon.com/cloudwatch/home?region=$AWS_REGION#logsV2:log-groups/log-group/$(echo "$LOG_GROUP_NAME" | sed 's/\//%252F/g')"
             
             rm -f response.json
             exit 1
         else
             echo "✅ 배치 실행 완료"
-            
-            # 성공한 경우에도 로그 확인
-            echo "🔍 실행 로그 확인 중..."
-            sleep 3
-            
-            if aws logs describe-log-streams --log-group-name "$LOG_GROUP_NAME" --region $AWS_REGION --query 'logStreams[0].logStreamName' --output text 2>/dev/null | grep -q "."; then
-                LATEST_STREAM=$(aws logs describe-log-streams --log-group-name "$LOG_GROUP_NAME" --region $AWS_REGION --order-by LastEventTime --descending --limit 1 --query 'logStreams[0].logStreamName' --output text)
-                echo "  📋 로그 확인: https://console.aws.amazon.com/cloudwatch/home?region=$AWS_REGION#logsV2:log-groups/log-group/$(echo "$LOG_GROUP_NAME" | sed 's/\//%252F/g')/log-events/$(echo "$LATEST_STREAM" | sed 's/\//%252F/g')"
-            fi
+            echo "📋 CloudWatch 로그: https://console.aws.amazon.com/cloudwatch/home?region=$AWS_REGION#logsV2:log-groups/log-group/$(echo "$LOG_GROUP_NAME" | sed 's/\//%252F/g')"
             
             rm -f response.json
         fi
@@ -675,10 +555,7 @@ fi
 # 정리
 ./gradlew :edukit-batch:cleanLambda --quiet 2>/dev/null || true
 
-echo "🎉 배포 완료!"
-echo "Function: $FUNCTION_NAME"
-echo "Layers: ${deployed_count}개"
-echo "Region: $AWS_REGION"
+echo "🎉 배포 완료! ($FUNCTION_NAME, Layers: ${deployed_count}개)"
 
 # Layer ARN 정보를 파일로 저장 (선택사항)
 if [[ "${SAVE_LAYER_ARNS:-false}" == "true" ]]; then
