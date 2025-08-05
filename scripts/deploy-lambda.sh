@@ -133,30 +133,34 @@ deploy_layer() {
         return 1
     fi
 
+    # shellcheck disable=SC2155
     local zip_size=$(stat -f%z "$zip_file" 2>/dev/null || stat -c%s "$zip_file")
     if [[ $zip_size -eq 0 ]]; then
         echo "❌ Layer 파일이 비어있음: $zip_file" >&2
         return 1
     fi
 
-    # Layer 크기 확인 (250MB = 262,144,000 bytes)
-    if [[ $zip_size -gt 262144000 ]]; then
-        echo "❌ Layer 크기 초과: $(($zip_size / 1024 / 1024))MB > 250MB" >&2
+    # Layer 크기 확인
+    if [[ $zip_size -gt 52428800 ]]; then
+        # shellcheck disable=SC2004
+        echo "❌ Layer 크기 초과: $(($zip_size / 1024 / 1024))MB > 50MB" >&2
         return 1
     fi
 
+    # shellcheck disable=SC2004
     echo "📤 Layer 배포 시도: $layer_name ($(($zip_size / 1024 / 1024))MB)" >&2
     
     for attempt in $(seq 1 $max_retries); do
         echo "  🔄 시도 $attempt/$max_retries..." >&2
         
+        # shellcheck disable=SC2155
         local layer_arn=$(aws lambda publish-layer-version \
             --layer-name "$layer_name" \
             --description "$description" \
             --zip-file "fileb://$zip_file" \
             --compatible-runtimes java21 \
             --compatible-architectures x86_64 \
-            --region $AWS_REGION \
+            --region "$AWS_REGION" \
             --query 'LayerVersionArn' \
             --output text 2>&1)
 
@@ -413,26 +417,26 @@ fi
 echo "🚀 Lambda 함수 배포 중..."
 
 # 함수 존재 여부 확인
-if aws lambda get-function --function-name "$FUNCTION_NAME" --region $AWS_REGION >/dev/null 2>&1; then
+if aws lambda get-function --function-name "$FUNCTION_NAME" --region "$AWS_REGION" >/dev/null 2>&1; then
     echo "  🔧 기존 함수 업데이트 중..."
     
     # 기존 함수 구성 업데이트
     if [[ -n "$layer_args" ]]; then
         if ! aws lambda update-function-configuration \
             --function-name "$FUNCTION_NAME" \
-            --layers $layer_args \
-            --memory-size $MEMORY_SIZE \
-            --timeout $TIMEOUT \
-            --region $AWS_REGION >/dev/null 2>&1; then
+            --layers "$layer_args" \
+            --memory-size "$MEMORY_SIZE" \
+            --timeout "$TIMEOUT" \
+            --region "$AWS_REGION" >/dev/null 2>&1; then
             echo "  ❌ 함수 구성 업데이트 실패"
             exit 1
         fi
     else
         if ! aws lambda update-function-configuration \
             --function-name "$FUNCTION_NAME" \
-            --memory-size $MEMORY_SIZE \
-            --timeout $TIMEOUT \
-            --region $AWS_REGION >/dev/null 2>&1; then
+            --memory-size "$MEMORY_SIZE" \
+            --timeout "$TIMEOUT" \
+            --region "$AWS_REGION" >/dev/null 2>&1; then
             echo "  ❌ 함수 구성 업데이트 실패"
             exit 1
         fi
@@ -441,7 +445,7 @@ if aws lambda get-function --function-name "$FUNCTION_NAME" --region $AWS_REGION
     # 함수 구성 업데이트 완료 대기
     if ! aws lambda wait function-updated \
         --function-name "$FUNCTION_NAME" \
-        --region $AWS_REGION; then
+        --region "$AWS_REGION"; then
         echo "  ❌ 함수 구성 업데이트 대기 실패"
         exit 1
     fi
@@ -450,7 +454,7 @@ if aws lambda get-function --function-name "$FUNCTION_NAME" --region $AWS_REGION
     if ! aws lambda update-function-code \
         --function-name "$FUNCTION_NAME" \
         --zip-file "fileb://$function_zip" \
-        --region $AWS_REGION >/dev/null 2>&1; then
+        --region "$AWS_REGION" >/dev/null 2>&1; then
         echo "  ❌ 함수 코드 업데이트 실패"
         exit 1
     fi
@@ -466,11 +470,11 @@ else
             --role "$LAMBDA_ROLE_ARN" \
             --handler "com.edukit.batch.handler.TeacherVerificationLambdaHandler::handleRequest" \
             --zip-file "fileb://$function_zip" \
-            --layers $layer_args \
-            --timeout $TIMEOUT \
-            --memory-size $MEMORY_SIZE \
+            --layers "$layer_args" \
+            --timeout "$TIMEOUT" \
+            --memory-size "$MEMORY_SIZE" \
             --environment Variables="{SPRING_PROFILES_ACTIVE=$ENVIRONMENT}" \
-            --region $AWS_REGION >/dev/null 2>&1; then
+            --region "$AWS_REGION" >/dev/null 2>&1; then
             echo "  ❌ 새 함수 생성 실패 (Layer 포함)"
             echo "  💡 IAM 역할이나 Layer ARN을 확인해주세요"
             exit 1
@@ -483,10 +487,10 @@ else
             --role "$LAMBDA_ROLE_ARN" \
             --handler "com.edukit.batch.handler.TeacherVerificationLambdaHandler::handleRequest" \
             --zip-file "fileb://$function_zip" \
-            --timeout $TIMEOUT \
-            --memory-size $MEMORY_SIZE \
+            --timeout "$TIMEOUT" \
+            --memory-size "$MEMORY_SIZE" \
             --environment Variables="{SPRING_PROFILES_ACTIVE=$ENVIRONMENT}" \
-            --region $AWS_REGION >/dev/null 2>&1; then
+            --region "$AWS_REGION" >/dev/null 2>&1; then
             echo "  ❌ 새 함수 생성 실패"
             echo "  💡 IAM 역할이나 ZIP 파일을 확인해주세요"
             exit 1
@@ -499,7 +503,7 @@ fi
 echo "⏳ 최종 함수 상태 확인 중..."
 if ! aws lambda wait function-updated \
     --function-name "$FUNCTION_NAME" \
-    --region $AWS_REGION; then
+    --region "$AWS_REGION"; then
     echo "❌ 함수 상태 확인 실패"
     echo "💡 함수가 부분적으로 생성되었을 수 있습니다. AWS 콘솔에서 확인해주세요"
     exit 1
@@ -516,12 +520,13 @@ if [[ "${EXECUTE_BATCH:-false}" == "true" ]]; then
     echo "🚀 배치 테스트 실행 중..."
 
     # Lambda 함수 비동기 호출
+    # shellcheck disable=SC2034
     INVOKE_TIME=$(date -u +%Y-%m-%dT%H:%M:%S)
     aws lambda invoke \
         --function-name "$FUNCTION_NAME" \
         --payload '{}' \
         --cli-binary-format raw-in-base64-out \
-        --region $AWS_REGION \
+        --region "$AWS_REGION" \
         response.json &>/dev/null
 
     if [[ -f "response.json" ]]; then
