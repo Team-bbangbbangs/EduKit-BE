@@ -95,6 +95,7 @@ jobs:
         with:
           name: docker-configs
           path: ${{ github.workspace }}
+          merge-multiple: true
 
       - name: Generate .env file
         run: |
