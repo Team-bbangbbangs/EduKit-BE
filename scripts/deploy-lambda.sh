@@ -86,54 +86,56 @@ deploy_layer() {
     local retry_delay=10
 
     if [[ ! -f "$zip_file" ]]; then
-        echo "❌ Layer 파일 없음: $zip_file"
+        echo "❌ Layer 파일 없음: $zip_file" >&2
         return 1
     fi
 
     local zip_size=$(stat -f%z "$zip_file" 2>/dev/null || stat -c%s "$zip_file")
     if [[ $zip_size -eq 0 ]]; then
-        echo "❌ Layer 파일이 비어있음: $zip_file"
+        echo "❌ Layer 파일이 비어있음: $zip_file" >&2
         return 1
     fi
 
     # Layer 크기 확인 (250MB = 262,144,000 bytes)
     if [[ $zip_size -gt 262144000 ]]; then
-        echo "❌ Layer 크기 초과: $(($zip_size / 1024 / 1024))MB > 250MB"
+        echo "❌ Layer 크기 초과: $(($zip_size / 1024 / 1024))MB > 250MB" >&2
         return 1
     fi
 
-    echo "📤 Layer 배포 시도: $layer_name ($(($zip_size / 1024 / 1024))MB)"
+    echo "📤 Layer 배포 시도: $layer_name ($(($zip_size / 1024 / 1024))MB)" >&2
     
     for attempt in $(seq 1 $max_retries); do
-        echo "  🔄 시도 $attempt/$max_retries..."
+        echo "  🔄 시도 $attempt/$max_retries..." >&2
         
         local layer_arn=$(aws lambda publish-layer-version \
             --layer-name "$layer_name" \
             --description "$description" \
             --zip-file "fileb://$zip_file" \
-            --compatible-runtimes java21 java17 \
+            --compatible-runtimes java21 \
             --compatible-architectures x86_64 \
             --region $AWS_REGION \
             --query 'LayerVersionArn' \
-            --output text 2>&1)
+            --output text \
+            --debug 2>&1)
+
 
         local exit_code=$?
         
         if [[ $exit_code -eq 0 && -n "$layer_arn" && ! "$layer_arn" =~ "error" ]]; then
-            echo "  ✅ Layer 배포 성공!"
-            echo "$layer_arn"
+            echo "  ✅ Layer 배포 성공!" >&2
+            echo "$layer_arn"  # ARN만 stdout으로 출력
             return 0
         else
-            echo "  ⚠️  시도 $attempt 실패: $layer_arn"
+            echo "  ⚠️  시도 $attempt 실패: $layer_arn" >&2
             if [[ $attempt -lt $max_retries ]]; then
-                echo "  ⏳ ${retry_delay}초 대기 후 재시도..."
+                echo "  ⏳ ${retry_delay}초 대기 후 재시도..." >&2
                 sleep $retry_delay
                 retry_delay=$((retry_delay + 5)) # 점진적 지연 증가
             fi
         fi
     done
 
-    echo "  ❌ 모든 재시도 실패"
+    echo "  ❌ 모든 재시도 실패" >&2
     return 1
 }
 
@@ -182,7 +184,9 @@ if [[ ${#missing_layers[@]} -gt 0 ]]; then
     echo "⚠️  누락된 Layer: ${missing_layers[*]}"
 fi
 
-for layer_type in "${LAYER_TYPES[@]}"; do
+for i in "${!LAYER_TYPES[@]}"; do
+    layer_type="${LAYER_TYPES[$i]}"
+    
     # 해당 Layer 파일이 존재하는 경우에만 배포 시도
     zip_file="edukit-batch/build/distributions/layers/${layer_type}-layer.zip"
     if [[ ! -f "$zip_file" ]]; then
@@ -201,8 +205,19 @@ for layer_type in "${LAYER_TYPES[@]}"; do
             "external-services") EXTERNAL_SERVICES_ARN="$layer_arn" ;;
         esac
         ((deployed_count++))
+        
+        # 다음 Layer 배포 전 대기 (마지막 Layer 제외, AWS API rate limiting 회피)
+        if [[ $i -lt $((${#LAYER_TYPES[@]} - 1)) ]]; then
+            echo "  ⏳ AWS API 제한 회피를 위해 10초 대기..."
+            sleep 10
+        fi
     else
         echo "  ❌ ${layer_type} layer 배포 실패 (계속 진행)"
+        # 실패해도 다음 Layer를 위해 짧은 대기
+        if [[ $i -lt $((${#LAYER_TYPES[@]} - 1)) ]]; then
+            echo "  ⏳ 3초 대기 후 다음 Layer 시도..."
+            sleep 3
+        fi
     fi
 done
 
