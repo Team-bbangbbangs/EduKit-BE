@@ -65,10 +65,8 @@ echo "🔨 Gradle 빌드 실행 중..."
 
 # Layer 정의
 declare -A LAYERS=(
-    ["spring"]="Spring Framework core dependencies"
-    ["database"]="Database and JPA dependencies"
-    ["external"]="External service integrations"
-    ["utils"]="Utilities (JSON, Logging)"
+    ["common-core"]="Common-Core (Spring, DB, Utils) dependencies"
+    ["external-services"]="External service integrations (AWS, etc)"
 )
 
 # Layer 배포 함수
@@ -110,27 +108,46 @@ echo "📦 Layer 배포 중..."
 declare -A LAYER_ARNS
 deployed_count=0
 
+# Layer 파일들 존재 여부 먼저 확인
+echo "🔍 Layer 파일 상태 확인:"
 for layer_type in "${!LAYERS[@]}"; do
+    zip_file="edukit-batch/build/distributions/layers/${layer_type}-layer.zip"
+    if [[ -f "$zip_file" ]]; then
+        file_size=$(stat -f%z "$zip_file" 2>/dev/null || stat -c%s "$zip_file")
+        echo "  ✅ ${layer_type}-layer.zip: ${file_size} bytes"
+    else
+        echo "  ❌ ${layer_type}-layer.zip: 파일 없음"
+    fi
+done
+
+for layer_type in "${!LAYERS[@]}"; do
+    echo "🚀 ${layer_type} layer 배포 시도 중..."
     if layer_arn=$(deploy_layer "$layer_type" "${LAYERS[$layer_type]}"); then
+        echo "  ✅ ${layer_type} layer 배포 성공: $layer_arn"
         LAYER_ARNS[$layer_type]=$layer_arn
         ((deployed_count++))
+    else
+        echo "  ❌ ${layer_type} layer 배포 실패"
     fi
 done
 
 if [[ $deployed_count -eq 0 ]]; then
-    echo "❌ 배포된 Layer가 없습니다."
-    exit 1
+    echo "⚠️ 배포된 Layer가 없습니다. Layer 없이 함수만 배포합니다."
+    echo "💡 의존성이 모두 exclude 되었거나 layer 분류에 문제가 있을 수 있습니다."
+    # Layer 없이 배포하기 위해 빈 배열 설정
+    deployed_layers=()
+    layer_args=""
+else
+    echo "✅ ${deployed_count}개 Layer 배포 완료"
+    
+    # 배포된 Layer ARN 목록 생성
+    deployed_layers=()
+    for layer_type in "${!LAYER_ARNS[@]}"; do
+        deployed_layers+=("${LAYER_ARNS[$layer_type]}")
+    done
+    
+    layer_args=$(IFS=' '; echo "${deployed_layers[*]}")
 fi
-
-# 배포된 Layer ARN 목록 생성
-deployed_layers=()
-for layer_type in "${!LAYER_ARNS[@]}"; do
-    deployed_layers+=("${LAYER_ARNS[$layer_type]}")
-done
-
-layer_args=$(IFS=' '; echo "${deployed_layers[*]}")
-
-echo "✅ ${deployed_count}개 Layer 배포 완료"
 
 # Lambda 함수 배포
 echo "🔧 Lambda 함수 배포 중..."
@@ -144,12 +161,20 @@ fi
 # 함수 존재 여부 확인
 if aws lambda get-function --function-name "$FUNCTION_NAME" --region $AWS_REGION &>/dev/null; then
     # 기존 함수 업데이트
-    aws lambda update-function-configuration \
-        --function-name "$FUNCTION_NAME" \
-        --layers $layer_args \
-        --memory-size $MEMORY_SIZE \
-        --timeout $TIMEOUT \
-        --region $AWS_REGION &>/dev/null
+    if [[ -n "$layer_args" ]]; then
+        aws lambda update-function-configuration \
+            --function-name "$FUNCTION_NAME" \
+            --layers $layer_args \
+            --memory-size $MEMORY_SIZE \
+            --timeout $TIMEOUT \
+            --region $AWS_REGION &>/dev/null
+    else
+        aws lambda update-function-configuration \
+            --function-name "$FUNCTION_NAME" \
+            --memory-size $MEMORY_SIZE \
+            --timeout $TIMEOUT \
+            --region $AWS_REGION &>/dev/null
+    fi
 
     aws lambda wait function-updated \
         --function-name "$FUNCTION_NAME" \
@@ -161,17 +186,30 @@ if aws lambda get-function --function-name "$FUNCTION_NAME" --region $AWS_REGION
         --region $AWS_REGION &>/dev/null
 else
     # 새 함수 생성
-    aws lambda create-function \
-        --function-name "$FUNCTION_NAME" \
-        --runtime java21 \
-        --role "$LAMBDA_ROLE_ARN" \
-        --handler "com.edukit.batch.handler.TeacherVerificationLambdaHandler::handleRequest" \
-        --zip-file "fileb://$function_zip" \
-        --layers $layer_args \
-        --timeout $TIMEOUT \
-        --memory-size $MEMORY_SIZE \
-        --environment Variables="{SPRING_PROFILES_ACTIVE=$ENVIRONMENT}" \
-        --region $AWS_REGION &>/dev/null
+    if [[ -n "$layer_args" ]]; then
+        aws lambda create-function \
+            --function-name "$FUNCTION_NAME" \
+            --runtime java21 \
+            --role "$LAMBDA_ROLE_ARN" \
+            --handler "com.edukit.batch.handler.TeacherVerificationLambdaHandler::handleRequest" \
+            --zip-file "fileb://$function_zip" \
+            --layers $layer_args \
+            --timeout $TIMEOUT \
+            --memory-size $MEMORY_SIZE \
+            --environment Variables="{SPRING_PROFILES_ACTIVE=$ENVIRONMENT}" \
+            --region $AWS_REGION &>/dev/null
+    else
+        aws lambda create-function \
+            --function-name "$FUNCTION_NAME" \
+            --runtime java21 \
+            --role "$LAMBDA_ROLE_ARN" \
+            --handler "com.edukit.batch.handler.TeacherVerificationLambdaHandler::handleRequest" \
+            --zip-file "fileb://$function_zip" \
+            --timeout $TIMEOUT \
+            --memory-size $MEMORY_SIZE \
+            --environment Variables="{SPRING_PROFILES_ACTIVE=$ENVIRONMENT}" \
+            --region $AWS_REGION &>/dev/null
+    fi
 fi
 
 # 함수 업데이트 완료 대기
