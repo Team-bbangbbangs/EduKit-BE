@@ -273,7 +273,7 @@ tasks.register('validateLayerSizes') {
 
                 println "📦 ${layerName}-layer.zip: ${String.format('%.1f', layerSizeMB)} MB"
 
-                if (layerSizeMB > 250) {
+                if (layerSizeMB > 50) {
                     oversizedLayers << "${layerName}: ${String.format('%.1f', layerSizeMB)}MB"
                 }
             }
@@ -285,7 +285,7 @@ tasks.register('validateLayerSizes') {
             throw new GradleException("Layer size limit exceeded: ${oversizedLayers.join(', ')}")
         }
 
-        if (totalSize > 1000) { // 전체 1GB 초과 시 경고
+        if (totalSize > 250) {
             logger.warn "Total layer size is large: ${String.format('%.1f', totalSize)}MB"
         }
     }

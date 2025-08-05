@@ -45,15 +45,6 @@ trap cleanup_on_exit EXIT
 # 간소화된 시작 메시지
 echo "🚀 Lambda 배포 시작..."
 
-if [[ ! -x "$script_path" ]]; then
-    echo "⚠️  스크립트에 실행 권한이 없습니다. 자동으로 권한을 부여합니다."
-    chmod +x "$script_path" || {
-        echo "❌ 실행 권한 부여 실패"
-        exit 1
-    }
-    echo "✅ 실행 권한 부여 완료"
-fi
-
 # 스크립트 디렉토리 확인 (프로젝트 루트에서 실행되었는지 체크)
 if [[ ! -f "gradlew" || ! -f "settings.gradle" ]]; then
     echo "❌ 프로젝트 루트 디렉토리에서 실행해주세요."
