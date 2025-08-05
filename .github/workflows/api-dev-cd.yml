@@ -112,7 +112,7 @@ jobs:
       - name: Determine current active app
         id: current
         run: |
-          if sudo docker ps | grep -q app-blue; then
+          if docker ps | grep -q app-blue; then
             echo "CURRENT=blue" >> "$GITHUB_OUTPUT"
           else
             echo "CURRENT=green" >> "$GITHUB_OUTPUT"
@@ -132,7 +132,7 @@ jobs:
           echo "TARGET=$TARGET" >> "$GITHUB_OUTPUT"
           echo "PORT=$PORT" >> "$GITHUB_OUTPUT"
 
-          sudo docker-compose -f docker-compose.dev.yml up -d app-$TARGET
+          docker-compose -f docker-compose.dev.yml up -d app-$TARGET
 
       - name: Health check on new container
         run: |
@@ -153,7 +153,7 @@ jobs:
             NEW_TARGET="app-blue:8080"
           fi
 
-          sudo docker exec nginx bash -c \
+          docker exec nginx bash -c \
             "echo 'set \$service_url $NEW_TARGET;' > /etc/nginx/conf.d/service-url.inc && nginx -t && nginx -s reload"
 
       - name: Stop and remove old container
@@ -167,13 +167,13 @@ jobs:
           fi
 
           if [ "$OLD" != "none" ]; then
-            sudo docker-compose -f docker-compose.dev.yml stop app-$OLD
-            sudo docker-compose -f docker-compose.dev.yml rm -f app-$OLD
+            docker-compose -f docker-compose.dev.yml stop app-$OLD
+            docker-compose -f docker-compose.dev.yml rm -f app-$OLD
           fi
 
       - name: Restart promtail
         run: |
-          sudo docker-compose -f docker-compose.dev.yml up -d --force-recreate promtail
+          docker-compose -f docker-compose.dev.yml up -d --force-recreate promtail
 
       - name: Remove unused Docker images
-        run: sudo docker image prune -a -f
+        run: docker image prune -a -f
