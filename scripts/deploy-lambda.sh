@@ -63,12 +63,18 @@ echo "Function: $FUNCTION_NAME"
 echo "🔨 Gradle 빌드 실행 중..."
 ./gradlew :edukit-batch:buildLambda --no-daemon --quiet
 
-# Layer 정의
-declare -A LAYERS=(
-    ["common-core"]="Common-Core (Spring Framework) dependencies"
-    ["database-orm"]="Database/ORM (Hibernate, JPA) dependencies"  
-    ["external-services"]="External service integrations (AWS, etc)"
-)
+# Layer 정의 (순서 보장을 위해 배열 사용)
+LAYER_TYPES=("common-core" "database-orm" "external-services")
+
+# Bash 3.x 호환성을 위한 대체 함수
+get_layer_description() {
+    case "$1" in
+        "common-core") echo "Common-Core (Spring Framework) dependencies" ;;
+        "database-orm") echo "Database/ORM (Hibernate, JPA) dependencies" ;;
+        "external-services") echo "External service integrations (AWS, etc)" ;;
+        *) echo "Unknown layer: $1" ;;
+    esac
+}
 
 # Layer 배포 함수
 deploy_layer() {
@@ -106,13 +112,19 @@ deploy_layer() {
 
 # Layer 배포
 echo "📦 Layer 배포 중..."
-declare -A LAYER_ARNS
 deployed_count=0
+
+# Layer ARN 저장을 위한 변수들 초기화
+COMMON_CORE_ARN=""
+DATABASE_ORM_ARN=""
+EXTERNAL_SERVICES_ARN=""
 
 # Layer 파일들 존재 여부 및 크기 확인
 echo "🔍 Layer 파일 상태 확인:"
 total_layer_size=0
-for layer_type in "${!LAYERS[@]}"; do
+missing_layers=()
+
+for layer_type in "${LAYER_TYPES[@]}"; do
     zip_file="edukit-batch/build/distributions/layers/${layer_type}-layer.zip"
     if [[ -f "$zip_file" ]]; then
         file_size=$(stat -f%z "$zip_file" 2>/dev/null || stat -c%s "$zip_file")
@@ -127,24 +139,43 @@ for layer_type in "${!LAYERS[@]}"; do
         fi
     else
         echo "  ❌ ${layer_type}-layer.zip: 파일 없음"
+        missing_layers+=("$layer_type")
     fi
 done
 
 # 전체 Layer 크기 경고
-if [[ $total_layer_size -gt 100 ]]; then
+if [[ $total_layer_size -gt 250 ]]; then
     echo "⚠️  전체 Layer 크기가 큽니다: ${total_layer_size}MB (최적화 권장)"
 else
     echo "✅ 전체 Layer 크기: ${total_layer_size}MB"
 fi
 
-for layer_type in "${!LAYERS[@]}"; do
+# 누락된 Layer가 있으면 경고
+if [[ ${#missing_layers[@]} -gt 0 ]]; then
+    echo "⚠️  누락된 Layer: ${missing_layers[*]}"
+fi
+
+for layer_type in "${LAYER_TYPES[@]}"; do
+    # 해당 Layer 파일이 존재하는 경우에만 배포 시도
+    zip_file="edukit-batch/build/distributions/layers/${layer_type}-layer.zip"
+    if [[ ! -f "$zip_file" ]]; then
+        echo "⏭️  ${layer_type} layer 건너뛰기 (파일 없음)"
+        continue
+    fi
+    
     echo "🚀 ${layer_type} layer 배포 시도 중..."
-    if layer_arn=$(deploy_layer "$layer_type" "${LAYERS[$layer_type]}"); then
+    description=$(get_layer_description "$layer_type")
+    if layer_arn=$(deploy_layer "$layer_type" "$description"); then
         echo "  ✅ ${layer_type} layer 배포 성공: $layer_arn"
-        LAYER_ARNS[$layer_type]=$layer_arn
+        # Bash 3.x 호환성을 위해 associative array 대신 변수 사용
+        case "$layer_type" in
+            "common-core") COMMON_CORE_ARN="$layer_arn" ;;
+            "database-orm") DATABASE_ORM_ARN="$layer_arn" ;;
+            "external-services") EXTERNAL_SERVICES_ARN="$layer_arn" ;;
+        esac
         ((deployed_count++))
     else
-        echo "  ❌ ${layer_type} layer 배포 실패"
+        echo "  ❌ ${layer_type} layer 배포 실패 (계속 진행)"
     fi
 done
 
@@ -157,11 +188,11 @@ if [[ $deployed_count -eq 0 ]]; then
 else
     echo "✅ ${deployed_count}개 Layer 배포 완료"
     
-    # 배포된 Layer ARN 목록 생성
+    # 배포된 Layer ARN 목록 생성 (순서대로)
     deployed_layers=()
-    for layer_type in "${!LAYER_ARNS[@]}"; do
-        deployed_layers+=("${LAYER_ARNS[$layer_type]}")
-    done
+    [[ -n "$COMMON_CORE_ARN" ]] && deployed_layers+=("$COMMON_CORE_ARN")
+    [[ -n "$DATABASE_ORM_ARN" ]] && deployed_layers+=("$DATABASE_ORM_ARN")
+    [[ -n "$EXTERNAL_SERVICES_ARN" ]] && deployed_layers+=("$EXTERNAL_SERVICES_ARN")
     
     layer_args=$(IFS=' '; echo "${deployed_layers[*]}")
 fi
@@ -270,17 +301,29 @@ echo "Region: $AWS_REGION"
 
 # Layer ARN 정보를 파일로 저장 (선택사항)
 if [[ "${SAVE_LAYER_ARNS:-false}" == "true" ]]; then
+    # JSON 생성을 위한 배열 구성
+    layer_json_parts=()
+    [[ -n "$COMMON_CORE_ARN" ]] && layer_json_parts+=("    \"common-core\": \"$COMMON_CORE_ARN\"")
+    [[ -n "$DATABASE_ORM_ARN" ]] && layer_json_parts+=("    \"database-orm\": \"$DATABASE_ORM_ARN\"")
+    [[ -n "$EXTERNAL_SERVICES_ARN" ]] && layer_json_parts+=("    \"external-services\": \"$EXTERNAL_SERVICES_ARN\"")
+    
+    # 마지막 요소를 제외하고 쉼표 추가
+    layer_json=""
+    for i in "${!layer_json_parts[@]}"; do
+        layer_json+="${layer_json_parts[$i]}"
+        if [[ $i -lt $((${#layer_json_parts[@]} - 1)) ]]; then
+            layer_json+=","
+        fi
+        layer_json+=$'\n'
+    done
+    
     cat > "layer-arns-${ENVIRONMENT}.json" << EOF
 {
   "environment": "$ENVIRONMENT",
   "region": "$AWS_REGION",
   "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
   "layers": {
-$(for layer_type in "${!LAYER_ARNS[@]}"; do
-    echo "    \"${layer_type}\": \"${LAYER_ARNS[$layer_type]}\""
-    [[ "$layer_type" != "${!LAYER_ARNS[@]: -1}" ]] && echo ","
-  done)
-  }
+${layer_json}  }
 }
 EOF
     echo "📄 Layer ARN 정보가 layer-arns-${ENVIRONMENT}.json에 저장되었습니다."
