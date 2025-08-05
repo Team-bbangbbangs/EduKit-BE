@@ -14,13 +14,48 @@ cleanup_on_exit() {
     if [[ $exit_code -ne 0 ]]; then
         echo "" >&2
         echo "🚨 스크립트가 예상치 못하게 종료되었습니다 (exit code: $exit_code)" >&2
+        
+        # Exit code 해석
+        case $exit_code in
+            126) 
+                echo "❗ Exit code 126: 실행 권한 문제 또는 명령어 실행 불가" >&2
+                echo "💡 해결 방법:" >&2
+                echo "   - 스크립트 실행 권한: chmod +x $0" >&2
+                echo "   - AWS CLI 실행 권한 확인" >&2
+                echo "   - 필요한 바이너리가 PATH에 있는지 확인" >&2
+                ;;
+            127)
+                echo "❗ Exit code 127: 명령어를 찾을 수 없음" >&2
+                echo "💡 AWS CLI가 설치되어 있고 PATH에 있는지 확인해주세요" >&2
+                ;;
+            1)
+                echo "❗ Exit code 1: 일반적인 에러" >&2
+                echo "💡 위의 에러 메시지를 참고해주세요" >&2
+                ;;
+        esac
+        
         echo "⏰ 종료 시간: $(date '+%Y-%m-%d %H:%M:%S')" >&2
-        echo "📍 마지막 실행 위치를 확인해주세요" >&2
+        echo "📍 문제 해결 후 다시 시도해주세요" >&2
         echo "" >&2
     fi
 }
 
 trap cleanup_on_exit EXIT
+
+# 스크립트 실행 권한 자가 진단
+echo "🔍 스크립트 실행 환경 진단..."
+script_path="$0"
+script_permissions=$(ls -la "$script_path" | awk '{print $1}')
+echo "📋 스크립트 권한: $script_path ($script_permissions)"
+
+if [[ ! -x "$script_path" ]]; then
+    echo "⚠️  스크립트에 실행 권한이 없습니다. 자동으로 권한을 부여합니다."
+    chmod +x "$script_path" || {
+        echo "❌ 실행 권한 부여 실패"
+        exit 1
+    }
+    echo "✅ 실행 권한 부여 완료"
+fi
 
 # 스크립트 디렉토리 확인 (프로젝트 루트에서 실행되었는지 체크)
 if [[ ! -f "gradlew" || ! -f "settings.gradle" ]]; then
@@ -135,8 +170,7 @@ deploy_layer() {
             --compatible-architectures x86_64 \
             --region $AWS_REGION \
             --query 'LayerVersionArn' \
-            --output text \
-            --debug 2>&1)
+            --output text 2>&1)
 
 
         local exit_code=$?
@@ -397,45 +431,115 @@ else
     layer_args=$(IFS=' '; echo "${deployed_layers[*]}")
 fi
 
-# Lambda 함수 배포
+# ================================
+# 🔧 Lambda 함수 배포
+# ================================
+echo ""
 echo "🔧 Lambda 함수 배포 중..."
 
+# 1. Lambda 함수 ZIP 파일 검증
+echo "📋 Lambda 함수 ZIP 파일 검증:"
 function_zip="edukit-batch/build/distributions/lambda-function.zip"
+
 if [[ ! -f "$function_zip" ]]; then
-    echo "❌ Lambda 함수 ZIP 파일을 찾을 수 없습니다: $function_zip"
+    echo "  ❌ Lambda 함수 ZIP 파일을 찾을 수 없습니다: $function_zip"
+    echo "  💡 Gradle 빌드가 완료되었는지 확인해주세요:"
+    echo "     ./gradlew :edukit-batch:buildFunctionZip"
     exit 1
 fi
 
+# ZIP 파일 크기 및 권한 확인
+file_size=$(stat -f%z "$function_zip" 2>/dev/null || stat -c%s "$function_zip")
+file_size_mb=$((file_size / 1024 / 1024))
+file_permissions=$(ls -la "$function_zip" | awk '{print $1}')
+
+if [[ $file_size -eq 0 ]]; then
+    echo "  ❌ Lambda 함수 ZIP 파일이 비어있습니다: $function_zip"
+    exit 1
+fi
+
+echo "  ✅ Lambda 함수 ZIP: ${file_size_mb}MB ($file_permissions)"
+
+# 2. 필수 변수 재검증
+echo "📋 Lambda 함수 배포 변수 검증:"
+echo "  ✅ FUNCTION_NAME: $FUNCTION_NAME"
+echo "  ✅ LAMBDA_ROLE_ARN: $LAMBDA_ROLE_ARN"
+echo "  ✅ MEMORY_SIZE: ${MEMORY_SIZE}MB"
+echo "  ✅ TIMEOUT: ${TIMEOUT}초"
+
+# 3. AWS CLI 실행 권한 재확인
+echo "📋 AWS CLI 명령어 실행 가능성 검증:"
+aws_cli_path=$(which aws)
+if [[ -z "$aws_cli_path" ]]; then
+    echo "  ❌ AWS CLI를 찾을 수 없습니다"
+    exit 1
+fi
+
+aws_permissions=$(ls -la "$aws_cli_path" | awk '{print $1}')
+echo "  ✅ AWS CLI: $aws_cli_path ($aws_permissions)"
+
+echo ""
+echo "🚀 Lambda 함수 배포 시작..."
+
 # 함수 존재 여부 확인
-if aws lambda get-function --function-name "$FUNCTION_NAME" --region $AWS_REGION &>/dev/null; then
-    # 기존 함수 업데이트
+echo "🔍 기존 Lambda 함수 확인 중..."
+if aws lambda get-function --function-name "$FUNCTION_NAME" --region $AWS_REGION >/dev/null 2>&1; then
+    echo "  📍 기존 함수 발견 - 업데이트 모드"
+    
+    # 기존 함수 구성 업데이트
+    echo "  🔧 함수 구성 업데이트 중..."
     if [[ -n "$layer_args" ]]; then
-        aws lambda update-function-configuration \
+        echo "    📦 Layer 적용: $layer_args"
+        if ! aws lambda update-function-configuration \
             --function-name "$FUNCTION_NAME" \
             --layers $layer_args \
             --memory-size $MEMORY_SIZE \
             --timeout $TIMEOUT \
-            --region $AWS_REGION &>/dev/null
+            --region $AWS_REGION >/dev/null 2>&1; then
+            echo "  ❌ 함수 구성 업데이트 실패 (Layer 포함)"
+            echo "  💡 Layer ARN이 유효한지 확인해주세요"
+            exit 1
+        fi
     else
-        aws lambda update-function-configuration \
+        echo "    📦 Layer 없이 구성 업데이트"
+        if ! aws lambda update-function-configuration \
             --function-name "$FUNCTION_NAME" \
             --memory-size $MEMORY_SIZE \
             --timeout $TIMEOUT \
-            --region $AWS_REGION &>/dev/null
+            --region $AWS_REGION >/dev/null 2>&1; then
+            echo "  ❌ 함수 구성 업데이트 실패"
+            exit 1
+        fi
     fi
+    echo "  ✅ 함수 구성 업데이트 완료"
 
-    aws lambda wait function-updated \
+    echo "  ⏳ 함수 구성 업데이트 완료 대기 중..."
+    if ! aws lambda wait function-updated \
         --function-name "$FUNCTION_NAME" \
-        --region $AWS_REGION
+        --region $AWS_REGION; then
+        echo "  ❌ 함수 구성 업데이트 대기 실패"
+        exit 1
+    fi
+    echo "  ✅ 함수 구성 업데이트 완료 확인"
 
-    aws lambda update-function-code \
+    echo "  📂 함수 코드 업데이트 중..."
+    if ! aws lambda update-function-code \
         --function-name "$FUNCTION_NAME" \
         --zip-file "fileb://$function_zip" \
-        --region $AWS_REGION &>/dev/null
+        --region $AWS_REGION >/dev/null 2>&1; then
+        echo "  ❌ 함수 코드 업데이트 실패"
+        echo "  💡 ZIP 파일이 손상되었거나 너무 클 수 있습니다"
+        exit 1
+    fi
+    echo "  ✅ 함수 코드 업데이트 완료"
 else
+    echo "  🆕 새 함수 생성 모드"
+    
     # 새 함수 생성
+    echo "  🔧 새 Lambda 함수 생성 중..."
     if [[ -n "$layer_args" ]]; then
-        aws lambda create-function \
+        echo "    📦 Layer 포함: $layer_args"
+        if ! aws lambda create-function \
             --function-name "$FUNCTION_NAME" \
             --runtime java21 \
             --role "$LAMBDA_ROLE_ARN" \
@@ -445,9 +549,14 @@ else
             --timeout $TIMEOUT \
             --memory-size $MEMORY_SIZE \
             --environment Variables="{SPRING_PROFILES_ACTIVE=$ENVIRONMENT}" \
-            --region $AWS_REGION &>/dev/null
+            --region $AWS_REGION >/dev/null 2>&1; then
+            echo "  ❌ 새 함수 생성 실패 (Layer 포함)"
+            echo "  💡 IAM 역할이나 Layer ARN을 확인해주세요"
+            exit 1
+        fi
     else
-        aws lambda create-function \
+        echo "    📦 Layer 없이 생성"
+        if ! aws lambda create-function \
             --function-name "$FUNCTION_NAME" \
             --runtime java21 \
             --role "$LAMBDA_ROLE_ARN" \
@@ -456,16 +565,35 @@ else
             --timeout $TIMEOUT \
             --memory-size $MEMORY_SIZE \
             --environment Variables="{SPRING_PROFILES_ACTIVE=$ENVIRONMENT}" \
-            --region $AWS_REGION &>/dev/null
+            --region $AWS_REGION >/dev/null 2>&1; then
+            echo "  ❌ 새 함수 생성 실패"
+            echo "  💡 IAM 역할이나 ZIP 파일을 확인해주세요"
+            exit 1
+        fi
     fi
+    echo "  ✅ 새 함수 생성 완료"
 fi
 
 # 함수 업데이트 완료 대기
-aws lambda wait function-updated \
+echo "⏳ 최종 함수 상태 확인 중..."
+if ! aws lambda wait function-updated \
     --function-name "$FUNCTION_NAME" \
-    --region $AWS_REGION
+    --region $AWS_REGION; then
+    echo "❌ 함수 상태 확인 실패"
+    echo "💡 함수가 부분적으로 생성되었을 수 있습니다. AWS 콘솔에서 확인해주세요"
+    exit 1
+fi
 
-echo "✅ Lambda 함수 배포 완료"
+echo ""
+echo "✅ Lambda 함수 배포 완료!"
+echo "📋 배포된 함수 정보:"
+echo "  🎯 함수명: $FUNCTION_NAME"
+echo "  🏷️  런타임: java21"
+echo "  💾 메모리: ${MEMORY_SIZE}MB"
+echo "  ⏱️  타임아웃: ${TIMEOUT}초"
+if [[ -n "$layer_args" ]]; then
+    echo "  📦 적용된 Layer: $(echo $layer_args | wc -w)개"
+fi
 
 # 배치 실행 (옵션)
 if [[ "${EXECUTE_BATCH:-false}" == "true" ]]; then
