@@ -23,7 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class NoticeFacade {
 
     private final NoticeService noticeService;
-    private final FileStorageService s3Service;
+    private final FileStorageService storageService;
     private static final String NOTICE_FILE_PATH = "notices";
 
     public NoticesGetResponse getNotices(final NoticeCategory category, final int page) {
@@ -74,7 +74,7 @@ public class NoticeFacade {
 
     public NoticeFileUploadPresignedUrlCreateResponse createFileUploadPresignedUrl(final List<String> filenames) {
         List<UploadPresignedUrlResponse> presignedUrls = filenames.stream()
-                .map(filename -> s3Service.createUploadPresignedUrl(NOTICE_FILE_PATH, filename))
+                .map(filename -> storageService.createUploadPresignedUrl(NOTICE_FILE_PATH, filename))
                 .toList();
         List<NoticeFile> noticeFiles = noticeService.createNoticeFiles(
                 presignedUrls.stream().map(UploadPresignedUrlResponse::s3Key).toList()
