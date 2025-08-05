@@ -109,17 +109,33 @@ echo "📦 Layer 배포 중..."
 declare -A LAYER_ARNS
 deployed_count=0
 
-# Layer 파일들 존재 여부 먼저 확인
+# Layer 파일들 존재 여부 및 크기 확인
 echo "🔍 Layer 파일 상태 확인:"
+total_layer_size=0
 for layer_type in "${!LAYERS[@]}"; do
     zip_file="edukit-batch/build/distributions/layers/${layer_type}-layer.zip"
     if [[ -f "$zip_file" ]]; then
         file_size=$(stat -f%z "$zip_file" 2>/dev/null || stat -c%s "$zip_file")
-        echo "  ✅ ${layer_type}-layer.zip: ${file_size} bytes"
+        file_size_mb=$((file_size / 1024 / 1024))
+        total_layer_size=$((total_layer_size + file_size_mb))
+        
+        # 개별 Layer 크기 경고 (50MB 초과)
+        if [[ $file_size_mb -gt 50 ]]; then
+            echo "  ⚠️  ${layer_type}-layer.zip: ${file_size} bytes (${file_size_mb}MB - 큰 용량!)"
+        else
+            echo "  ✅ ${layer_type}-layer.zip: ${file_size} bytes (${file_size_mb}MB)"
+        fi
     else
         echo "  ❌ ${layer_type}-layer.zip: 파일 없음"
     fi
 done
+
+# 전체 Layer 크기 경고
+if [[ $total_layer_size -gt 100 ]]; then
+    echo "⚠️  전체 Layer 크기가 큽니다: ${total_layer_size}MB (최적화 권장)"
+else
+    echo "✅ 전체 Layer 크기: ${total_layer_size}MB"
+fi
 
 for layer_type in "${!LAYERS[@]}"; do
     echo "🚀 ${layer_type} layer 배포 시도 중..."
