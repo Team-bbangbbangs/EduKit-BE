@@ -39,6 +39,6 @@ jar {
 }
 
 bootJar {
-	archiveBaseName = 'edukit-api'
+	archiveFileName = 'edukit-api.jar'
 	archiveVersion = project.version
 } 
