@@ -11,6 +11,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Arrays;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.MDC;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -45,8 +46,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     protected void doFilterInternal(final HttpServletRequest request, final HttpServletResponse response,
                                     final FilterChain filterChain) throws ServletException, IOException {
         String memberUuid = getMemberUuidFromToken(request);
-        doAuthentication(request, memberUuid);
-        filterChain.doFilter(request, response);
+
+        try {
+            MDC.put("userId", memberUuid);
+            doAuthentication(request, memberUuid);
+            filterChain.doFilter(request, response);
+        } finally {
+            MDC.remove("userId");
+            SecurityContextHolder.clearContext();
+        }
     }
 
     private String getMemberUuidFromToken(final HttpServletRequest request) {

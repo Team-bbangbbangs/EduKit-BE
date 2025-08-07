@@ -27,13 +27,13 @@ public class GlobalExceptionHandler {
     // Custom exceptions
     @ExceptionHandler(BusinessException.class)
     public EdukitResponse<Void> handleBusinessException(final BusinessException e) {
-        log.info("Business exception occurred: {}, cause: {}", e.getMessage(), e.getCause(), e);
+        log.info("Business exception occurred: {}", e.getMessage(), e.getCause());
         return EdukitResponse.fail(e.getErrorCode());
     }
 
     @ExceptionHandler(ExternalApiException.class)
     public EdukitResponse<Void> handleExternalApiException(final ExternalApiException e) {
-        log.warn("External API exception occurred: {}, cause: {}", e.getMessage(), e.getCause(), e);
+        log.warn("External API exception occurred: {}", e.getMessage(), e.getCause());
         return EdukitResponse.fail(e.getErrorCode());
     }
 
@@ -51,7 +51,8 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(HandlerMethodValidationException.class)
-    public EdukitResponse<Map<String, String>> handleHandlerMethodValidationException(final HandlerMethodValidationException e) {
+    public EdukitResponse<Map<String, String>> handleHandlerMethodValidationException(
+            final HandlerMethodValidationException e) {
         log.info("Validation parameter exception occurred: {}", e.getMessage());
 
         Map<String, String> validationErrors = new HashMap<>();
@@ -61,6 +62,7 @@ public class GlobalExceptionHandler {
                 fieldName = fe.getField();
             } else {
                 String[] codes = error.getCodes();
+                assert codes != null;
                 if (codes.length > 0) {
                     String firstCode = codes[0];
                     int dotIndex = firstCode.lastIndexOf('.');
