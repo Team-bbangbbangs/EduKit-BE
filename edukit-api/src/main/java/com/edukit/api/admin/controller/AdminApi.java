@@ -19,7 +19,26 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 @Tag(name = "관리자 공지사항", description = "관리자 공지사항 관리 API")
 public interface AdminApi {
-    @Operation(summary = "공지사항 생성")
+    @Operation(
+            summary = "공지사항 생성",
+            description = """
+                    **📝 공지사항 생성 워크플로우**
+                    
+                    **1단계: 파일 업로드 (선택사항)**
+                    - 공지사항에 이미지를 포함하려면 먼저 /presigned-url API로 업로드 URL을 발급받습니다
+                    - 발급받은 presigned URL로 S3에 직접 파일을 업로드합니다
+                    
+                    **2단계: 공지사항 생성**
+                    - categoryId: 공지사항 카테고리 (2: 공지, 3: 이벤트)
+                    - title: 공지사항 제목
+                    - content: 공지사항 본문 내용
+                    - fileKeys: **실제 본문에 포함된 이미지의 fileKey만 포함** (업로드한 모든 파일이 아님)
+                    
+                    **⚠️ 중요사항**
+                    - 여러 파일을 업로드했더라도 fileKeys에는 실제 본문에 사용된 이미지만 포함하세요
+                    - 사용하지 않은 업로드 파일은 자동으로 정리됩니다
+                    """
+    )
     @ApiResponses({
             @ApiResponse(responseCode = "200"),
             @ApiResponse(
@@ -59,7 +78,29 @@ public interface AdminApi {
             @RequestBody @Valid final NoticeCreateRequest request
     );
 
-    @Operation(summary = "공지사항 수정")
+    @Operation(
+            summary = "공지사항 수정",
+            description = """
+                    **✏️ 공지사항 수정 워크플로우**
+                    
+                    **1단계: 기존 공지사항 조회**
+                    - GET /api/v1/notices/{noticeId}로 기존 공지사항 정보와 첨부파일 목록을 확인합니다
+                    
+                    **2단계: 새 파일 업로드 (필요시)**
+                    - 새로 추가할 이미지가 있다면 /presigned-url API로 업로드 URL을 발급받습니다
+                    - 발급받은 presigned URL로 S3에 직접 파일을 업로드합니다
+                    
+                    **3단계: 공지사항 수정**
+                    - categoryId, title, content: 공지사항 정보
+                    - addedFileKeys: **새로 추가된 이미지의 fileKey 목록** (실제 본문에 포함된 것만)
+                    - deletedNoticeFileIds: **삭제할 기존 파일의 ID 목록** (1단계에서 조회한 파일 ID)
+                    
+                    **⚠️ 중요사항**
+                    - addedFileKeys: 새로 업로드한 파일 중 실제 본문에 사용된 것만 포함
+                    - deletedNoticeFileIds: 기존 파일 중 삭제할 파일의 DB ID (fileKey가 아님)
+                    - 두 필드 모두 선택사항이며 각각 독립적으로 처리됩니다
+                    """
+    )
     @ApiResponses({
             @ApiResponse(responseCode = "200"),
             @ApiResponse(
@@ -145,7 +186,34 @@ public interface AdminApi {
             @PathVariable final long noticeId
     );
 
-    @Operation(summary = "파일 업로드용 Presigned URL 생성")
+    @Operation(
+            summary = "파일 업로드용 Presigned URL 생성",
+            description = """
+                    **🔗 파일 업로드 Presigned URL 발급**
+                    
+                    **사용 목적**
+                    - 공지사항에 첨부할 이미지 파일을 S3에 업로드하기 위한 임시 URL을 발급받습니다
+                    - 클라이언트에서 서버를 거치지 않고 S3에 직접 업로드할 수 있습니다
+                    
+                    **요청 방법**
+                    - filenames: 업로드할 파일명 목록 (확장자 포함)
+                    - 예: /presigned-url?filenames=image1.jpg, image2.png
+                    
+                    **응답 정보**
+                    - uploadPresignedUrl: S3 업로드용 임시 URL (PUT 요청 사용, 5분간 유효)
+                    - tmpFileUrl: 업로드 후 임시 파일 접근 URL
+                    - fileUrl: 공지사항 생성 후 최종 파일 URL (해당 주소를 본문에 포함)
+                    - fileKey: 공지사항 생성/수정 시 사용할 파일 키
+                    
+                    **지원 파일 형식**
+                    - 이미지 파일만 지원: png, jpg, jpeg, gif, webp
+                    
+                    **워크플로우**
+                    1. 이 API로 presigned URL 발급
+                    2. 발급받은 URL로 S3에 직접 업로드 (PUT 요청)
+                    3. 공지사항 생성/수정 시 fileKey 값을 사용
+                    """
+    )
     @ApiResponses({
             @ApiResponse(responseCode = "200"),
             @ApiResponse(
