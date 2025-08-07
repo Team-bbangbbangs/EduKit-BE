@@ -6,7 +6,7 @@ import java.util.List;
 
 public class SecurityWhitelist {
 
-    protected static final String[] AUTH_WHITELIST = {
+    static final String[] AUTH_WHITELIST = {
             "/api/v1/auth/signup",
             "/api/v1/auth/login",
             "/api/v1/auth/reissue",
@@ -17,12 +17,12 @@ public class SecurityWhitelist {
             "/actuator/prometheus"
     };
 
-    protected static final String[] BUSINESS_WHITE_LIST = {
+    static final String[] BUSINESS_WHITE_LIST = {
             "/api/v1/notices",
             "/api/v1/notices/{noticeId:\\d+}"
     };
 
-    protected static final String[] SWAGGER_WHITE_LIST = {
+    static final String[] SWAGGER_WHITE_LIST = {
             "/swagger-ui/**",
             "/v3/api-docs/**"
     };
