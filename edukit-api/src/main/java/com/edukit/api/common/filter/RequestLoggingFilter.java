@@ -25,6 +25,8 @@ public class RequestLoggingFilter implements Filter {
 
     private final JwtTokenService tokenService;
 
+    private static final String BEARER_PREFIX = "Bearer ";
+
     @Override
     public void doFilter(final ServletRequest request, final ServletResponse response, final FilterChain chain)
             throws IOException, ServletException {
@@ -52,7 +54,7 @@ public class RequestLoggingFilter implements Filter {
 
             // Response
             long duration = System.currentTimeMillis() - startTime;
-            MDC.put("responseType", "response");
+            MDC.put("requestType", "response");
             MDC.put("duration", String.valueOf(duration));
 
             log.info("Response: {} {} - Duration: {}ms",
@@ -73,8 +75,8 @@ public class RequestLoggingFilter implements Filter {
 
     private String resolveToken(final HttpServletRequest request) {
         String authorization = request.getHeader("Authorization");
-        if (authorization != null && authorization.startsWith("Bearer ")) {
-            return authorization.substring(7);
+        if (authorization != null && authorization.startsWith(BEARER_PREFIX)) {
+            return authorization.substring(BEARER_PREFIX.length());
         }
         return null;
     }
