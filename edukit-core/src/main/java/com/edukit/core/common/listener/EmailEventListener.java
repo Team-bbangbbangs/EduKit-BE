@@ -3,7 +3,6 @@ package com.edukit.core.common.listener;
 import com.edukit.core.auth.event.MemberSignedUpEvent;
 import com.edukit.core.common.service.EmailService;
 import lombok.RequiredArgsConstructor;
-import org.slf4j.MDC;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
@@ -20,9 +19,6 @@ public class EmailEventListener {
     @Async("emailTaskExecutor")
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void handleEmailEvent(final MemberSignedUpEvent event) {
-        if (event.mdcContext() != null) {
-            MDC.setContextMap(event.mdcContext());
-        }
         emailService.sendEmail(event.email(), event.memberUuid(), event.verificationCode());
     }
 }

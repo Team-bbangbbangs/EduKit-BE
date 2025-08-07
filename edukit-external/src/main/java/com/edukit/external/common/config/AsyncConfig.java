@@ -3,9 +3,11 @@ package com.edukit.external.common.config;
 import com.edukit.external.common.handler.CustomAsyncExceptionHandler;
 import java.util.concurrent.Executor;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.MDC;
 import org.springframework.aop.interceptor.AsyncUncaughtExceptionHandler;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.task.TaskDecorator;
 import org.springframework.scheduling.annotation.AsyncConfigurer;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
@@ -26,6 +28,8 @@ public class AsyncConfig implements AsyncConfigurer {
         executor.setThreadNamePrefix("email-async-");
         executor.setAwaitTerminationSeconds(5);
         executor.setWaitForTasksToCompleteOnShutdown(true);
+
+        executor.setTaskDecorator(new MdcTaskDecorator());
         executor.initialize();
         executor.getThreadPoolExecutor().prestartAllCoreThreads();
         return executor;
@@ -34,5 +38,22 @@ public class AsyncConfig implements AsyncConfigurer {
     @Override
     public AsyncUncaughtExceptionHandler getAsyncUncaughtExceptionHandler() {
         return customAsyncExceptionHandler;
+    }
+
+    private static class MdcTaskDecorator implements TaskDecorator {
+        @Override
+        public Runnable decorate(final Runnable runnable) {
+            var contextMap = MDC.getCopyOfContextMap();
+            return () -> {
+                if (contextMap != null) {
+                    MDC.setContextMap(contextMap);
+                }
+                try {
+                    runnable.run();
+                } finally {
+                    MDC.clear();
+                }
+            };
+        }
     }
 }
