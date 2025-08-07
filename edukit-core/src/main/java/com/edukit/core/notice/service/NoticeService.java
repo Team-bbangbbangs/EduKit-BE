@@ -35,16 +35,15 @@ public class NoticeService {
     }
 
     @Transactional
-    public void createNotice(final NoticeCategory category, final String title, final String content) {
+    public Notice createNotice(final NoticeCategory category, final String title, final String content) {
         validateCategory(category);
         Notice notice = Notice.create(category, title, content);
-        noticeRepository.save(notice);
+        return noticeRepository.save(notice);
     }
 
     @Transactional
-    public void updateNotice(final long noticeId, final NoticeCategory category, final String title, final String content) {
+    public void updateNotice(final Notice notice, final NoticeCategory category, final String title, final String content) {
         validateCategory(category);
-        Notice notice = getNotice(noticeId);
         notice.update(category, title, content);
     }
 

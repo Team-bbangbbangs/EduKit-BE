@@ -42,22 +42,24 @@ public class S3ServiceImpl implements FileStorageService {
             "webp", "image/webp"
     );
 
-    public UploadPresignedUrlResponse createUploadPresignedUrl(final String path, final String filename) {
-        validateFilename(filename);
-        String s3Key = generateS3Key(path, filename);
+    public UploadPresignedUrlResponse createUploadPresignedUrl(final String directory, final String originalFileName) {
+        validateFilename(originalFileName);
+        String s3Key = generateS3Key(directory, originalFileName);
         PutObjectRequest putObjectRequest = PutObjectRequest.builder()
                 .bucket(s3Properties.bucket())
                 .key(s3Key)
-                .contentType(getContentType(filename))
+                .contentType(getContentType(originalFileName))
                 .build();
         PutObjectPresignRequest putObjectPresignRequest = PutObjectPresignRequest.builder()
                 .signatureDuration(PRESIGNED_URL_EXPIRATION)
                 .putObjectRequest(putObjectRequest)
                 .build();
         PresignedPutObjectRequest presignedPutObjectRequest = s3Presigner.presignPutObject(putObjectPresignRequest);
+        String fileUrl = getFileUrl(s3Key);
+        String fileName = getFileName(s3Key);
         return UploadPresignedUrlResponse.of(
-                presignedPutObjectRequest.url().toString(), getFileUrl(s3Key),
-                s3Properties.cdnUrl(), filename);
+                presignedPutObjectRequest.url().toString(), fileUrl, s3Properties.cdnUrl(), fileName
+        );
     }
 
     private void validateFilename(final String filename) {
@@ -66,11 +68,11 @@ public class S3ServiceImpl implements FileStorageService {
         }
     }
 
-    private String generateS3Key(final String path, final String filename) {
+    private String generateS3Key(final String directory, final String filename) {
         String timestamp = LocalDateTime.now().format(TIMESTAMP_FORMAT);
         String uuid = UUID.randomUUID().toString().replaceAll("-", "").substring(0, UUID_LENGTH);
         String extension = extractExtension(filename);
-        return String.format("%s/%s_%s%s", path, timestamp, uuid, extension);
+        return String.format("%s/%s_%s%s", directory, timestamp, uuid, extension);
     }
 
     private String extractExtension(final String filename) {
@@ -93,17 +95,21 @@ public class S3ServiceImpl implements FileStorageService {
         return s3Properties.cdnUrl() + "/" + s3Key;
     }
 
-    public void moveFiles(final List<String> fileUrls, final String sourcePath, final String targetPath) {
-        fileUrls.forEach(url -> moveFile(extractFileNameFromUrl(url), sourcePath, targetPath));
+    public String getFileName(String s3Key) {
+        return s3Key.substring(s3Key.lastIndexOf('/') + 1);
     }
 
-    public void deleteFiles(final List<String> fileUrls) {
-        fileUrls.forEach(url -> deleteFile(extractKeyFromUrl(url)));
+    public void moveFiles(final List<String> fileKeys, final String sourceDirectory, final String targetDirectory) {
+        fileKeys.forEach(key -> moveFile(extractFileName(key), sourceDirectory, targetDirectory));
     }
 
-    private void moveFile(final String fileName, final String sourcePath, final String targetPath) {
-        String sourceKey = sourcePath + "/" + fileName;        // tmp/abc.jpg
-        String targetKey = targetPath + "/" + fileName;        // notices/abc.jpg
+    public void deleteFiles(final List<String> fileKeys) {
+        fileKeys.forEach(this::deleteFile);
+    }
+
+    private void moveFile(final String fileName, final String sourceDirectory, final String targetDirectory) {
+        String sourceKey = sourceDirectory + "/" + fileName;        // tmp/abc.jpg
+        String targetKey = targetDirectory + "/" + fileName;        // notices/abc.jpg
         copyFile(sourceKey, targetKey);
         //tmp에 남아있는 파일은 수명 주기 규칙에 의해 자동 삭제
     }
@@ -132,12 +138,12 @@ public class S3ServiceImpl implements FileStorageService {
         }
     }
 
-    private String extractFileNameFromUrl(final String url) {
+    private String extractFileName(final String url) {
         int lastSlash = url.lastIndexOf('/');
         return url.substring(lastSlash + 1);
     }
 
-    private String extractKeyFromUrl(final String url) {
+    private String extractKey(final String url) {
         if (!url.startsWith(s3Properties.cdnUrl())) {
             throw new S3Exception(S3ErrorCode.INVALID_FILE_URL);
         }

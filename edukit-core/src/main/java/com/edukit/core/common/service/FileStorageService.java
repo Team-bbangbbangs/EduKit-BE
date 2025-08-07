@@ -5,9 +5,9 @@ import java.util.List;
 
 public interface FileStorageService {
 
-    UploadPresignedUrlResponse createUploadPresignedUrl(String path, String fileName);
+    UploadPresignedUrlResponse createUploadPresignedUrl(String directory, String fileName);
 
-    void moveFiles(List<String> fileUrls, String sourcePath, String targetPath);
+    void moveFiles(List<String> fileKeys, String sourceDirectory, String targetDirectory);
 
-    void deleteFiles(List<String> deletedImageUrls);
+    void deleteFiles(List<String> fileKeys);
 }

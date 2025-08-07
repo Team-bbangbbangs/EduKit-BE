@@ -10,6 +10,6 @@ public record NoticeCreateRequest(
         String title,
         @NotNull(message = "내용은 필수입니다.")
         String content,
-        List<String> imageUrls
+        List<String> fileKeys
 ) {
 }

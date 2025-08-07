@@ -8,7 +8,9 @@ import com.edukit.api.notice.facade.response.NoticesGetResponse;
 import com.edukit.core.common.service.FileStorageService;
 import com.edukit.core.common.service.response.UploadPresignedUrlResponse;
 import com.edukit.core.notice.db.entity.Notice;
+import com.edukit.core.notice.db.entity.NoticeFile;
 import com.edukit.core.notice.db.enums.NoticeCategory;
+import com.edukit.core.notice.service.NoticeFileService;
 import com.edukit.core.notice.service.NoticeService;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -24,9 +26,10 @@ import org.springframework.util.CollectionUtils;
 public class NoticeFacade {
 
     private final NoticeService noticeService;
+    private final NoticeFileService noticeFileService;
     private final FileStorageService storageService;
-    private static final String TMP_NOTICE_FILE_PATH = "tmp";
-    private static final String NOTICE_FILE_PATH = "notices";
+    private static final String TMP_NOTICE_FILE_DIRECTORY = "tmp";
+    private static final String NOTICE_FILE_DIRECTORY = "notices";
 
     public NoticesGetResponse getNotices(final NoticeCategory category, final int page) {
         int zeroBasedPage = page - 1;
@@ -42,35 +45,50 @@ public class NoticeFacade {
 
     public NoticeGetResponse getNotice(final long noticeId) {
         Notice notice = noticeService.getNotice(noticeId);
+        List<NoticeFile> noticeFiles = noticeFileService.getNoticeFiles(notice);
         return NoticeGetResponse.of(
                 notice.getId(),
                 notice.getCategory().getText(),
                 notice.getTitle(),
                 notice.getContent(),
-                notice.getCreatedAt()
+                notice.getCreatedAt(),
+                noticeFiles.stream().map(NoticeFile::getId).toList()
         );
     }
 
     @Transactional
     public void createNotice(final NoticeCategory category, final String title, final String content,
-                             final List<String> imageUrls) {
-        noticeService.createNotice(category, title, content);
-        if (!CollectionUtils.isEmpty(imageUrls)) {     //사진이 포함된 본문인 경우
-            storageService.moveFiles(imageUrls, TMP_NOTICE_FILE_PATH, NOTICE_FILE_PATH);
+                             final List<String> fileKeys) {
+        Notice notice = noticeService.createNotice(category, title, content);
+        if (!CollectionUtils.isEmpty(fileKeys)) {     //본문에 파일이 포함된 경우
+            createNoticeFiles(fileKeys, notice);
         }
     }
 
     @Transactional
     public void updateNotice(final long noticeId, final NoticeCategory category, final String title,
-                             final String content, final List<String> addedImageUrls,
-                             final List<String> deletedImageUrls) {
-        noticeService.updateNotice(noticeId, category, title, content);
-        if (!CollectionUtils.isEmpty(addedImageUrls)) {
-            storageService.moveFiles(addedImageUrls, TMP_NOTICE_FILE_PATH, NOTICE_FILE_PATH);
+                             final String content, final List<String> addedFileKeys,
+                             final List<Long> deletedNoticeFileIds) {
+        Notice notice = noticeService.getNotice(noticeId);
+        noticeService.updateNotice(notice, category, title, content);
+        if (!CollectionUtils.isEmpty(addedFileKeys)) {          //추가할 파일이 있는 경우
+            createNoticeFiles(addedFileKeys, notice);
         }
-        if (!CollectionUtils.isEmpty(deletedImageUrls)) {
-            storageService.deleteFiles(deletedImageUrls);
+        if (!CollectionUtils.isEmpty(deletedNoticeFileIds)) {   //삭제할 파일이 있는 경우
+            deleteNoticeFiles(deletedNoticeFileIds, notice);
         }
+    }
+
+    private void createNoticeFiles(final List<String> fileKeys, final Notice notice) {
+        List<NoticeFile> noticeFiles = noticeFileService.createNoticeFiles(fileKeys, notice);
+        List<String> noticeFileKeys = noticeFiles.stream().map(NoticeFile::getFileKey).toList();
+        storageService.moveFiles(noticeFileKeys, TMP_NOTICE_FILE_DIRECTORY, NOTICE_FILE_DIRECTORY);
+    }
+
+    private void deleteNoticeFiles(final List<Long> noticeFileIds, final Notice notice) {
+        List<NoticeFile> noticeFiles = noticeFileService.deleteNoticeFiles(noticeFileIds, notice);
+        List<String> noticeFileKeys = noticeFiles.stream().map(NoticeFile::getFileKey).toList();
+        storageService.deleteFiles(noticeFileKeys);
     }
 
     public void deleteNotice(final long noticeId) {
@@ -80,16 +98,11 @@ public class NoticeFacade {
 
     public NoticeFileUploadPresignedUrlCreateResponse createFileUploadPresignedUrl(final List<String> filenames) {
         List<UploadPresignedUrlResponse> presignedUrls = filenames.stream()
-                .map(filename -> storageService.createUploadPresignedUrl(TMP_NOTICE_FILE_PATH, filename))
+                .map(filename -> storageService.createUploadPresignedUrl(TMP_NOTICE_FILE_DIRECTORY, filename))
                 .toList();
-        List<NoticeFileUploadPresignedUrlCreateResponseItem> images = presignedUrls.stream()
-                .map(response -> NoticeFileUploadPresignedUrlCreateResponseItem.of(response,
-                        getNoticeImageUrl(response.baseUrl(), response.fileName())))
+        List<NoticeFileUploadPresignedUrlCreateResponseItem> files = presignedUrls.stream()
+                .map(response -> NoticeFileUploadPresignedUrlCreateResponseItem.of(response, NOTICE_FILE_DIRECTORY))
                 .toList();
-        return NoticeFileUploadPresignedUrlCreateResponse.of(images);
-    }
-
-    private String getNoticeImageUrl(final String baseUrl, final String fileName) {
-        return String.format("%s/%s/%s", baseUrl, NOTICE_FILE_PATH, fileName);
+        return NoticeFileUploadPresignedUrlCreateResponse.of(files);
     }
 }
