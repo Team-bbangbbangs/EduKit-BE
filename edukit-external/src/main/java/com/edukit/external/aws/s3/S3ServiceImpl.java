@@ -103,7 +103,7 @@ public class S3ServiceImpl implements FileStorageService {
         String sourceKey = sourcePath + "/" + fileName;        // tmp/abc.jpg
         String targetKey = targetPath + "/" + fileName;        // notices/abc.jpg
         copyFile(sourceKey, targetKey);
-        deleteFile(sourceKey);
+        //tmp에 남아있는 파일은 수명 주기 규칙에 의해 자동 삭제
     }
 
     private void copyFile(final String sourceKey, final String targetKey) {
