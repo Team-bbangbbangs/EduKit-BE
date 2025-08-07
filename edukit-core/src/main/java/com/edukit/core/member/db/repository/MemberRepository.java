@@ -19,6 +19,8 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
 
     boolean existsByEmailAndIsDeleted(String email, boolean isDeleted);
 
+    boolean existsByNicknameIgnoreCaseAndIsDeleted(String nickname, boolean isDeleted);
+
     boolean existsByIdNotAndNicknameIgnoreCaseAndIsDeleted(long id, String nickname, boolean isDeleted);
 
     @Query("SELECT m FROM Member m JOIN FETCH m.subject WHERE m.id = :id AND m.isDeleted = :isDeleted")

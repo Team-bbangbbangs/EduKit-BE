@@ -24,7 +24,7 @@ public class AuthService {
         PasswordValidator.validatePasswordFormat(password);
         checkAlreadyRegistered(email);
         validateEmail(email);
-        // 닉네임 중복 검사 유효성 검사 로직 작성
+        validateNickname(nickname);
     }
 
     private void checkAlreadyRegistered(final String email) {
@@ -38,6 +38,12 @@ public class AuthService {
         String domain = extractEmailDomain(email);
         if (!validEmails.contains(domain)) {
             throw new AuthException(AuthErrorCode.INVALID_EMAIL);
+        }
+    }
+
+    private void validateNickname(final String nickname) {
+        if (memberRepository.existsByNicknameIgnoreCaseAndIsDeleted(nickname, false)) {
+            throw new AuthException(AuthErrorCode.DUPLICATED_NICKNAME);
         }
     }
 
