@@ -1,18 +1,20 @@
 package com.edukit.external.aws.s3;
 
 import com.edukit.core.common.service.FileStorageService;
+import com.edukit.core.common.service.response.UploadPresignedUrlResponse;
 import com.edukit.external.aws.s3.exception.S3ErrorCode;
 import com.edukit.external.aws.s3.exception.S3Exception;
-import com.edukit.core.common.service.response.UploadPresignedUrlResponse;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.regex.Pattern;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
+import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import software.amazon.awssdk.services.s3.presigner.S3Presigner;
 import software.amazon.awssdk.services.s3.presigner.model.PresignedPutObjectRequest;
@@ -22,6 +24,7 @@ import software.amazon.awssdk.services.s3.presigner.model.PutObjectPresignReques
 @RequiredArgsConstructor
 public class S3ServiceImpl implements FileStorageService {
 
+    private final S3Client s3Client;
     private final S3Presigner s3Presigner;
     private final AwsS3Properties s3Properties;
 
@@ -50,7 +53,9 @@ public class S3ServiceImpl implements FileStorageService {
                 .putObjectRequest(putObjectRequest)
                 .build();
         PresignedPutObjectRequest presignedPutObjectRequest = s3Presigner.presignPutObject(putObjectPresignRequest);
-        return UploadPresignedUrlResponse.of(presignedPutObjectRequest.url().toString(), getFileUrl(s3Key), s3Key);
+        return UploadPresignedUrlResponse.of(
+                presignedPutObjectRequest.url().toString(), getFileUrl(s3Key),
+                s3Properties.cdnUrl(), filename);
     }
 
     private void validateFilename(final String filename) {
@@ -83,6 +88,55 @@ public class S3ServiceImpl implements FileStorageService {
     }
 
     private String getFileUrl(final String s3Key) {
-        return String.format("%s/%s", s3Properties.cdnUrl(), s3Key);
+        return s3Properties.cdnUrl() + "/" + s3Key;
+    }
+
+    public void moveFiles(final List<String> fileUrls, final String sourcePath, final String targetPath) {
+        fileUrls.forEach(url -> moveFile(extractFileNameFromUrl(url), sourcePath, targetPath));
+    }
+
+    public void deleteFiles(final List<String> fileUrls) {
+        fileUrls.forEach(url -> deleteFile(extractKeyFromUrl(url)));
+    }
+
+    private void moveFile(final String fileName, final String sourcePath, final String targetPath) {
+        String sourceKey = sourcePath + "/" + fileName;        // tmp/abc.jpg
+        String targetKey = targetPath + "/" + fileName;        // notices/abc.jpg
+        copyFile(sourceKey, targetKey);
+        deleteFile(sourceKey);
+    }
+
+    private void copyFile(final String sourceKey, final String targetKey) {
+        try {
+            s3Client.copyObject(builder -> builder
+                    .sourceBucket(s3Properties.bucket())
+                    .sourceKey(sourceKey)
+                    .destinationBucket(s3Properties.bucket())
+                    .destinationKey(targetKey));
+        } catch (Exception e) {
+            throw new S3Exception(S3ErrorCode.FILE_COPY_FAILED, e);
+        }
+    }
+
+    private void deleteFile(final String key) {
+        try {
+            s3Client.deleteObject(builder -> builder
+                    .bucket(s3Properties.bucket())
+                    .key(key));
+        } catch (Exception e) {
+            throw new S3Exception(S3ErrorCode.FILE_DELETE_FAILED, e);
+        }
+    }
+
+    private String extractFileNameFromUrl(final String url) {
+        int lastSlash = url.lastIndexOf('/');
+        return url.substring(lastSlash + 1);
+    }
+
+    private String extractKeyFromUrl(final String url) {
+        if (!url.startsWith(s3Properties.cdnUrl())) {
+            throw new S3Exception(S3ErrorCode.INVALID_FILE_URL);
+        }
+        return url.substring(s3Properties.cdnUrl().length() + 1);
     }
 }

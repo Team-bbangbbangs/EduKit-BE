@@ -10,6 +10,7 @@ public record NoticeUpdateRequest(
         String title,
         @NotNull(message = "내용은 필수입니다.")
         String content,
-        List<Long> noticeFileIds
+        List<String> addImageUrls,      //추가된 이미지
+        List<String> removeImageUrls    //삭제된 이미지
 ) {
 }
