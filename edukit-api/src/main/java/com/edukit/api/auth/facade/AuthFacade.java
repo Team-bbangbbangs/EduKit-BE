@@ -20,6 +20,7 @@ import com.edukit.core.member.service.MemberService;
 import com.edukit.core.subject.db.entity.Subject;
 import com.edukit.core.subject.service.SubjectService;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.MDC;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -45,7 +46,9 @@ public class AuthFacade {
         memberService.validateNickname(nickname);
         Subject subject = subjectService.getSubjectByName(subjectName);
         String encodedPassword = passwordEncoder.encode(password);
+
         Member member = memberService.createMember(email, encodedPassword, subject, nickname, school);
+        MDC.put("userId", member.getMemberUuid());
 
         AuthToken authToken = jwtTokenService.generateTokens(member.getMemberUuid());
         refreshTokenStoreService.store(member.getMemberUuid(), authToken.refreshToken());
@@ -60,6 +63,7 @@ public class AuthFacade {
 
     public MemberLoginResponse login(final String email, final String password) {
         Member member = memberService.getMemberByEmail(email);
+        MDC.put("userId", member.getMemberUuid());
 
         if (!passwordEncoder.matches(password, member.getPassword())) {
             throw new AuthException(AuthErrorCode.INVALID_PASSWORD);
@@ -80,6 +84,8 @@ public class AuthFacade {
     public MemberReissueResponse reissue(final String refreshToken) {
         String memberUuid = jwtTokenService.parseMemberUuidFromRefreshToken(refreshToken);
         Member member = memberService.getMemberByUuid(memberUuid);
+        MDC.put("userId", memberUuid);
+
         String storedRefreshToken = refreshTokenStoreService.get(memberUuid);
         if (!jwtTokenService.isTokenEqual(refreshToken, storedRefreshToken)) {
             logout(member.getId());
