@@ -12,6 +12,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.regex.Pattern;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import software.amazon.awssdk.services.s3.S3Client;
@@ -20,6 +21,7 @@ import software.amazon.awssdk.services.s3.presigner.S3Presigner;
 import software.amazon.awssdk.services.s3.presigner.model.PresignedPutObjectRequest;
 import software.amazon.awssdk.services.s3.presigner.model.PutObjectPresignRequest;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class S3ServiceImpl implements FileStorageService {
@@ -114,6 +116,7 @@ public class S3ServiceImpl implements FileStorageService {
                     .destinationBucket(s3Properties.bucket())
                     .destinationKey(targetKey));
         } catch (Exception e) {
+            log.error("S3 파일 복사 실패: sourceKey={}, targetKey={}", sourceKey, targetKey, e);
             throw new S3Exception(S3ErrorCode.FILE_COPY_FAILED, e);
         }
     }
@@ -124,6 +127,7 @@ public class S3ServiceImpl implements FileStorageService {
                     .bucket(s3Properties.bucket())
                     .key(key));
         } catch (Exception e) {
+            log.error("S3 파일 삭제 실패: key={}", key, e);
             throw new S3Exception(S3ErrorCode.FILE_DELETE_FAILED, e);
         }
     }
