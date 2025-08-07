@@ -26,12 +26,8 @@ public class EmailEventListener {
             MDC.setContextMap(event.mdcContext());
         }
 
-        try {
-            log.info("[회원가입] 이메일 발송 시작. to={}", event.email());
-            emailService.sendEmail(event.email(), event.memberUuid(), event.verificationCode());
-            log.info("[회원가입] 이메일 발송 성공. event={}", event);
-        } catch (Exception e) {
-            log.error("[회원가입] 이메일 발송 실패. event={} message={}", event, e.getMessage());
-        }
+        log.info("[회원가입] 이메일 발송 시작. to={}", event.email());
+        emailService.sendEmail(event.email(), event.memberUuid(), event.verificationCode());
+        log.info("[회원가입] 이메일 발송 성공. event={}", event);
     }
 }

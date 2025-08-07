@@ -1,4 +1,4 @@
-package com.edukit.external.config;
+package com.edukit.external.common.config;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 

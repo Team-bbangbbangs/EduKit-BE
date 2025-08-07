@@ -8,7 +8,7 @@ public class MailException extends ExternalApiException {
         super(errorCode);
     }
 
-    public MailException(final MailErrorCode errorCode, final Throwable cause) {
-        super(errorCode, cause);
+    public MailException(final MailErrorCode errorCode, final String target) {
+        super(errorCode, String.format(errorCode.getMessage(), target));
     }
 }

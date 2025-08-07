@@ -22,20 +22,20 @@ public class SlackWebhookService {
         this.webClient = WebClient.builder().build();
     }
 
-    public void sendAlert(final String title, final String message, final String level) {
+    private static final String EMOJI_ALERT = "🚨";
+    private static final String COLOR_DANGER = "danger";
+
+    public void sendAlert(final String title, final String message) {
         if (webhookUrl == null || webhookUrl.isEmpty()) {
             log.warn("Slack webhook URL이 설정되지 않았습니다. 알림을 보낼 수 없습니다.");
             return;
         }
 
-        String emoji = getEmojiByLevel(level);
-        String color = getColorByLevel(level);
-
         Map<String, Object> payload = Map.of(
-                "text", emoji + " " + title,
+                "text", EMOJI_ALERT + " " + title,
                 "attachments", List.of(
                         Map.of(
-                                "color", color,
+                                "color", COLOR_DANGER,
                                 "fields", List.of(
                                         Map.of("title", "Message", "value", message, "short", false),
                                         Map.of("title", "Time", "value", LocalDateTime.now().toString(), "short", true)
@@ -53,23 +53,5 @@ public class SlackWebhookService {
                         result -> log.debug("Slack 알림 전송 성공: {}", result.getStatusCode()),
                         error -> log.error("Slack 알림 전송 실패: {}", error.getMessage(), error)
                 );
-    }
-
-    private String getEmojiByLevel(String level) {
-        return switch (level.toLowerCase()) {
-            case "error", "critical" -> "🚨";
-            case "warning" -> "⚠️";
-            case "info" -> "ℹ️";
-            default -> "📢";
-        };
-    }
-
-    private String getColorByLevel(String level) {
-        return switch (level.toLowerCase()) {
-            case "error", "critical" -> "danger";
-            case "warning" -> "warning";
-            case "info" -> "good";
-            default -> "#36a64f";
-        };
     }
 }

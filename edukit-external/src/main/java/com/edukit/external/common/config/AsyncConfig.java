@@ -1,14 +1,21 @@
-package com.edukit.external.config;
+package com.edukit.external.common.config;
 
+import com.edukit.external.common.handler.CustomAsyncExceptionHandler;
 import java.util.concurrent.Executor;
+import lombok.RequiredArgsConstructor;
+import org.springframework.aop.interceptor.AsyncUncaughtExceptionHandler;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.scheduling.annotation.AsyncConfigurer;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 @EnableAsync
 @Configuration
-public class AsyncConfig {
+@RequiredArgsConstructor
+public class AsyncConfig implements AsyncConfigurer {
+
+    private final CustomAsyncExceptionHandler customAsyncExceptionHandler;
 
     @Bean(name = "emailTaskExecutor")
     public Executor emailTaskExecutor() {
@@ -22,5 +29,10 @@ public class AsyncConfig {
         executor.initialize();
         executor.getThreadPoolExecutor().prestartAllCoreThreads();
         return executor;
+    }
+
+    @Override
+    public AsyncUncaughtExceptionHandler getAsyncUncaughtExceptionHandler() {
+        return customAsyncExceptionHandler;
     }
 }
