@@ -1,4 +1,4 @@
-package com.edukit.core.auth.service.jwt.provider;
+package com.edukit.core.auth.service.jwt.util;
 
 import io.jsonwebtoken.security.Keys;
 import java.security.Key;

@@ -1,14 +1,12 @@
-package com.edukit.core.auth.service.jwt;
+package com.edukit.core.auth.service.jwt.util;
 
 import com.edukit.core.auth.exception.AuthErrorCode;
 import com.edukit.core.auth.exception.AuthException;
 import com.edukit.core.auth.service.jwt.type.TokenType;
 import io.jsonwebtoken.Claims;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
-@Slf4j
 @Component
 @RequiredArgsConstructor
 public class JwtValidator {

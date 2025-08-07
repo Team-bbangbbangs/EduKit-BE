@@ -1,6 +1,5 @@
-package com.edukit.core.auth.service.jwt;
+package com.edukit.core.auth.service.jwt.util;
 
-import com.edukit.core.auth.service.jwt.provider.JwtKeyProvider;
 import com.edukit.core.auth.service.jwt.setting.JwtProperties;
 import com.edukit.core.auth.service.jwt.type.TokenType;
 import io.jsonwebtoken.Header;
