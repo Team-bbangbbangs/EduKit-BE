@@ -62,7 +62,6 @@ public class GlobalExceptionHandler {
                 fieldName = fe.getField();
             } else {
                 String[] codes = error.getCodes();
-                assert codes != null;
                 if (codes.length > 0) {
                     String firstCode = codes[0];
                     int dotIndex = firstCode.lastIndexOf('.');

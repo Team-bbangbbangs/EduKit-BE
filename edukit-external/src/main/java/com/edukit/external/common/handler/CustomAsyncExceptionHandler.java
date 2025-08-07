@@ -2,7 +2,6 @@ package com.edukit.external.common.handler;
 
 import com.edukit.external.slack.SlackWebhookService;
 import java.lang.reflect.Method;
-import java.util.Arrays;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.aop.interceptor.AsyncUncaughtExceptionHandler;
@@ -19,8 +18,7 @@ public class CustomAsyncExceptionHandler implements AsyncUncaughtExceptionHandle
     public void handleUncaughtException(final Throwable ex, final Method method, final Object... params) {
         String methodName = method.getDeclaringClass().getSimpleName() + "." + method.getName();
 
-        log.error("[비동기 작업 실패] method={}, params={}, error={}",
-                methodName, Arrays.toString(params), ex.getMessage(), ex);
+        log.error("[비동기 작업 실패] method={}, error={}", methodName, ex.getMessage(), ex);
 
         sendErrorNotification(methodName, ex);
     }
