@@ -43,8 +43,8 @@ public class AdminController implements AdminApi {
             @PathVariable final long noticeId
     ) {
         NoticeCategory category = NoticeCategory.fromId(request.categoryId());
-        noticeFacade.updateNotice(noticeId, category, request.title(), request.content(), request.addImageUrls(),
-                request.removeImageUrls());
+        noticeFacade.updateNotice(noticeId, category, request.title(), request.content(), request.addedImageUrls(),
+                request.deletedImageUrls());
         return ResponseEntity.ok().body(EdukitResponse.success());
     }
 
