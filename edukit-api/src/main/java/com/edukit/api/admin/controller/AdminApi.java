@@ -100,6 +100,16 @@ public interface AdminApi {
                                                         "message": "해당 공지사항이 존재하지 않습니다."
                                                       }
                                                     """
+                                    ),
+                                    @ExampleObject(
+                                            name = "잘못된 파일 ID",
+                                            description = "삭제 요청한 파일 중 해당 공지사항에 속하지 않는 파일이 있는 경우",
+                                            value = """
+                                                      {
+                                                        "code": "NO-40003",
+                                                        "message": "삭제 요청한 파일 중 해당 공지사항에 속하지 않는 파일이 있습니다."
+                                                      }
+                                                    """
                                     )
                             }
                     )
