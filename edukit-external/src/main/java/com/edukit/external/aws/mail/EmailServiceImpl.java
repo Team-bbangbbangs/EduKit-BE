@@ -34,10 +34,8 @@ public class EmailServiceImpl implements EmailService {
 
     private void send(final SendEmailRequest request, final String emailReceiver) {
         try {
-            log.info("[SES] 이메일 발송 시작: to={}", emailReceiver);
             SendEmailResponse result = sesClient.sendEmail(request);
             validateSendResult(emailReceiver, result);
-
         } catch (ApiCallTimeoutException e) {
             handleTimeoutException(emailReceiver, e);
         } catch (SesException e) {
@@ -49,30 +47,19 @@ public class EmailServiceImpl implements EmailService {
 
     private void validateSendResult(final String emailReceiver, final SdkResponse result) {
         SdkHttpResponse httpResponse = result.sdkHttpResponse();
-        if (httpResponse.isSuccessful()) {
-            log.info("[SES] 이메일 발송 성공: to={}, messageId={}",
-                    emailReceiver, ((SendEmailResponse) result).messageId());
-        } else {
+        if (!httpResponse.isSuccessful()) {
             String errorReason = httpResponse.statusText().orElse("unknown");
-            log.error("[SES] 이메일 발송 실패: to={}, statusCode={}, reason={}",
-                    emailReceiver, httpResponse.statusCode(), errorReason);
-
             sendSlackAlert(
                     "📧 이메일 발송 HTTP 에러",
                     String.format("수신자: %s\\n상태코드: %d\\n이유: %s",
                             emailReceiver, httpResponse.statusCode(), errorReason),
                     "error"
             );
-
             throw new MailException(MailErrorCode.EMAIL_SEND_FAILED);
         }
     }
 
     private void handleTimeoutException(final String emailReceiver, final ApiCallTimeoutException e) {
-        String errorMessage = String.format("이메일 발송 타임아웃: to=%s, timeout=%s",
-                emailReceiver, e.getMessage());
-        log.error(errorMessage, e);
-
         sendSlackAlert(
                 "📧 이메일 발송 타임아웃 발생",
                 String.format("수신자: %s\\n에러: %s", emailReceiver, e.getMessage()),
@@ -83,10 +70,6 @@ public class EmailServiceImpl implements EmailService {
     }
 
     private void handleSesException(final String emailReceiver, final SesException e) {
-        String errorMessage = String.format("SES 서비스 에러: to=%s, awsErrorCode=%s, message=%s",
-                emailReceiver, e.awsErrorDetails().errorCode(), e.getMessage());
-        log.error(errorMessage, e);
-
         if (isSdkRetryExhausted(e)) {
             sendSlackAlert(
                     "📧 이메일 발송 재시도 모두 실패",
@@ -101,10 +84,6 @@ public class EmailServiceImpl implements EmailService {
     }
 
     private void handleSdkClientException(final String emailReceiver, final SdkClientException e) {
-        String errorMessage = String.format("AWS SDK 클라이언트 에러: to=%s, message=%s",
-                emailReceiver, e.getMessage());
-        log.error(errorMessage, e);
-
         sendSlackAlert(
                 "📧 이메일 발송 연결 실패",
                 String.format("수신자: %s\\n에러: %s", emailReceiver, e.getMessage()),
