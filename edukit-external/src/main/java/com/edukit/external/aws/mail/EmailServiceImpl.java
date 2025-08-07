@@ -7,10 +7,8 @@ import com.edukit.external.aws.mail.setting.AwsSesEmailMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import software.amazon.awssdk.core.exception.ApiCallTimeoutException;
-import software.amazon.awssdk.core.exception.SdkClientException;
 import software.amazon.awssdk.services.ses.SesClient;
 import software.amazon.awssdk.services.ses.model.SendEmailRequest;
-import software.amazon.awssdk.services.ses.model.SesException;
 
 
 @Service
@@ -21,8 +19,7 @@ public class EmailServiceImpl implements EmailService {
     private final AwsSesEmailMapper awsSesEmailMapper;
 
     public void sendEmail(final String emailReceiver, final String memberUuid, final String verificationCode) {
-        SendEmailRequest request = awsSesEmailMapper.buildEmailRequestForSignUp(emailReceiver, memberUuid,
-                verificationCode);
+        SendEmailRequest request = awsSesEmailMapper.buildEmailRequestForSignUp(emailReceiver, memberUuid, verificationCode);
         send(request, emailReceiver);
     }
 
@@ -31,7 +28,7 @@ public class EmailServiceImpl implements EmailService {
             sesClient.sendEmail(request);
         } catch (ApiCallTimeoutException e) {
             throw new MailException(MailErrorCode.EMAIL_TIMEOUT, emailReceiver);
-        } catch (SesException | SdkClientException e) {
+        } catch (Exception e) {
             throw new MailException(MailErrorCode.EMAIL_SEND_FAILED, emailReceiver);
         }
     }
