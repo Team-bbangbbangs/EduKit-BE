@@ -108,13 +108,6 @@ public class AuthFacade {
         memberService.updatePassword(member, encodedPassword);
     }
 
-    @Transactional
-    public void withdraw(final long memberId) {
-        Member member = memberService.getMemberById(memberId);
-        memberService.withdraw(member);
-        refreshTokenStoreService.delete(member.getMemberUuid());
-    }
-
     @Transactional(readOnly = true)
     public void checkHasPermission(final long memberId) {
         Member member = memberService.getMemberById(memberId);

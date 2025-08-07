@@ -1,5 +1,6 @@
 package com.edukit.api.member.facade;
 
+import com.edukit.core.auth.service.RefreshTokenStoreService;
 import com.edukit.core.member.db.entity.Member;
 import com.edukit.core.member.db.enums.School;
 import com.edukit.api.member.facade.response.MemberNicknameValidationResponse;
@@ -17,6 +18,7 @@ public class MemberFacade {
 
     private final MemberService memberService;
     private final SubjectService subjectService;
+    private final RefreshTokenStoreService refreshTokenStoreService;
 
     @Transactional(readOnly = true)
     public MemberProfileGetResponse getMemberProfile(final long memberId) {
@@ -41,5 +43,12 @@ public class MemberFacade {
                 memberService.isNicknameInvalid(nickname),
                 memberService.isNicknameDuplicated(member, nickname)
         );
+    }
+
+    @Transactional
+    public void withdraw(final long memberId) {
+        Member member = memberService.getMemberById(memberId);
+        memberService.withdraw(member);
+        refreshTokenStoreService.delete(member.getMemberUuid());
     }
 }

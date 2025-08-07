@@ -2,16 +2,16 @@ package com.edukit.api.auth.controller;
 
 import static com.edukit.api.common.security.handler.RefreshTokenCookieHandler.REFRESH_TOKEN_COOKIE_NAME;
 
-import com.edukit.api.common.EdukitResponse;
-import com.edukit.api.common.annotation.MemberId;
 import com.edukit.api.auth.controller.request.MemberLoginRequest;
 import com.edukit.api.auth.controller.request.MemberSignUpRequest;
 import com.edukit.api.auth.controller.request.UpdatePasswordRequest;
-import com.edukit.api.common.security.handler.RefreshTokenCookieHandler;
 import com.edukit.api.auth.facade.AuthFacade;
 import com.edukit.api.auth.facade.response.MemberLoginResponse;
 import com.edukit.api.auth.facade.response.MemberReissueResponse;
 import com.edukit.api.auth.facade.response.MemberSignUpResponse;
+import com.edukit.api.common.EdukitResponse;
+import com.edukit.api.common.annotation.MemberId;
+import com.edukit.api.common.security.handler.RefreshTokenCookieHandler;
 import com.edukit.core.member.db.enums.School;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -20,7 +20,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CookieValue;
-import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -63,12 +62,6 @@ public class AuthController {
                 .header(HttpHeaders.SET_COOKIE, refreshTokenCookie.toString())
                 .body(EdukitResponse.success(loginResponse));
 
-    }
-
-    @DeleteMapping("/withdraw")
-    public ResponseEntity<EdukitResponse<Void>> withdraw(@MemberId final long memberId) {
-        authFacade.withdraw(memberId);
-        return ResponseEntity.ok().body(EdukitResponse.success());
     }
 
     @PostMapping("/logout")
