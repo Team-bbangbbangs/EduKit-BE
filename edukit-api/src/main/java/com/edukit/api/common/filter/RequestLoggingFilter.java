@@ -53,12 +53,10 @@ public class RequestLoggingFilter implements Filter {
             // Response
             long duration = System.currentTimeMillis() - startTime;
             MDC.put("responseType", "response");
-            MDC.put("status", String.valueOf(httpResponse.getStatus()));
             MDC.put("duration", String.valueOf(duration));
 
-            log.info("Response: {} {} - Status: {}, Duration: {}ms",
-                    httpRequest.getMethod(), httpRequest.getRequestURI(),
-                    httpResponse.getStatus(), duration);
+            log.info("Response: {} {} - Duration: {}ms",
+                    httpRequest.getMethod(), httpRequest.getRequestURI(), duration);
 
         } finally {
             MDC.clear();
