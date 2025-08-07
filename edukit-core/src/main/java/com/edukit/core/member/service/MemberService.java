@@ -3,10 +3,10 @@ package com.edukit.core.member.service;
 import com.edukit.core.member.db.entity.Member;
 import com.edukit.core.member.db.enums.MemberRole;
 import com.edukit.core.member.db.enums.School;
-import com.edukit.core.member.exception.MemberErrorCode;
-import com.edukit.core.member.exception.MemberException;
 import com.edukit.core.member.db.repository.MemberRepository;
 import com.edukit.core.member.db.repository.NicknameBannedWordRepository;
+import com.edukit.core.member.exception.MemberErrorCode;
+import com.edukit.core.member.exception.MemberException;
 import com.edukit.core.subject.db.entity.Subject;
 import java.util.Optional;
 import java.util.regex.Pattern;
@@ -59,11 +59,30 @@ public class MemberService {
         member.updateProfile(subject, school, nickname);
     }
 
-    private void validateNickname(final Member member, final String nickname) {
+    public void validateNickname(final Member member, final String nickname) {
+        validateNicknameInvalid(nickname);
+        validateNicknameDuplicated(member, nickname);
+    }
+
+    public void validateNickname(final String nickname) {
+        validateNicknameInvalid(nickname);
+        validateNicknameDuplicated(nickname);
+    }
+
+    private void validateNicknameInvalid(final String nickname) {
         if (isNicknameInvalid(nickname)) {
             throw new MemberException(MemberErrorCode.INVALID_NICKNAME);
         }
+    }
+
+    private void validateNicknameDuplicated(final Member member, final String nickname) {
         if (isNicknameDuplicated(member, nickname)) {
+            throw new MemberException(MemberErrorCode.DUPLICATED_NICKNAME);
+        }
+    }
+
+    private void validateNicknameDuplicated(final String nickname) {
+        if (isNicknameDuplicated(nickname)) {
             throw new MemberException(MemberErrorCode.DUPLICATED_NICKNAME);
         }
     }
@@ -76,6 +95,10 @@ public class MemberService {
 
     public boolean isNicknameDuplicated(final Member member, final String nickname) {
         return memberRepository.existsByIdNotAndNicknameIgnoreCaseAndIsDeleted(member.getId(), nickname, false);
+    }
+
+    private boolean isNicknameDuplicated(final String nickname) {
+        return memberRepository.existsByNicknameIgnoreCaseAndIsDeleted(nickname, false);
     }
 
     @Transactional

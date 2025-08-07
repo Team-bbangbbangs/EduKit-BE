@@ -41,7 +41,8 @@ public class AuthFacade {
     @Transactional
     public MemberSignUpResponse signUp(final String email, final String password, final String subjectName,
                                        final String nickname, final School school) {
-        authService.validateCondition(password, email, nickname);
+        authService.validateCondition(password, email);
+        memberService.validateNickname(nickname);
         Subject subject = subjectService.getSubjectByName(subjectName);
         String encodedPassword = passwordEncoder.encode(password);
         Member member = memberService.createMember(email, encodedPassword, subject, nickname, school);

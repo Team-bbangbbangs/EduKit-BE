@@ -20,11 +20,10 @@ public class AuthService {
     private static final String EMAIL_SEPARATOR = "@";
     private static final boolean NOT_DELETED = false;
 
-    public void validateCondition(final String password, final String email, final String nickname) {
+    public void validateCondition(final String password, final String email) {
         PasswordValidator.validatePasswordFormat(password);
         checkAlreadyRegistered(email);
         validateEmail(email);
-        validateNickname(nickname);
     }
 
     private void checkAlreadyRegistered(final String email) {
@@ -38,12 +37,6 @@ public class AuthService {
         String domain = extractEmailDomain(email);
         if (!validEmails.contains(domain)) {
             throw new AuthException(AuthErrorCode.INVALID_EMAIL);
-        }
-    }
-
-    private void validateNickname(final String nickname) {
-        if (memberRepository.existsByNicknameIgnoreCaseAndIsDeleted(nickname, false)) {
-            throw new AuthException(AuthErrorCode.DUPLICATED_NICKNAME);
         }
     }
 
