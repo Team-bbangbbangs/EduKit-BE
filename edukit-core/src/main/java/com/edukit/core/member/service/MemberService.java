@@ -54,9 +54,10 @@ public class MemberService {
     }
 
     @Transactional
-    public void updateMemberProfile(final Member member, final Subject subject, final School school, final String nickname) {
+    public void updateMemberProfileAndFlush(final Member member, final Subject subject, final School school, final String nickname) {
         validateNickname(member, nickname);
         member.updateProfile(subject, school, nickname);
+        memberRepository.flush();
     }
 
     public void validateNickname(final Member member, final String nickname) {

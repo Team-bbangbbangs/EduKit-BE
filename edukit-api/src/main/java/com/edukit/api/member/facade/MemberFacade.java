@@ -5,10 +5,13 @@ import com.edukit.core.member.db.entity.Member;
 import com.edukit.core.member.db.enums.School;
 import com.edukit.api.member.facade.response.MemberNicknameValidationResponse;
 import com.edukit.api.member.facade.response.MemberProfileGetResponse;
+import com.edukit.core.member.exception.MemberErrorCode;
+import com.edukit.core.member.exception.MemberException;
 import com.edukit.core.member.service.MemberService;
 import com.edukit.core.subject.db.entity.Subject;
 import com.edukit.core.subject.service.SubjectService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -34,7 +37,11 @@ public class MemberFacade {
                                     final String nickname) {
         Member member = memberService.getMemberById(memberId);
         Subject subject = subjectService.getSubjectByName(subjectName);
-        memberService.updateMemberProfile(member, subject, school, nickname);
+        try {
+            memberService.updateMemberProfileAndFlush(member, subject, school, nickname);
+        } catch (DataIntegrityViolationException e) {
+            throw new MemberException(MemberErrorCode.DUPLICATED_NICKNAME);
+        }
     }
 
     public MemberNicknameValidationResponse validateNickname(final long memberId, final String nickname) {
