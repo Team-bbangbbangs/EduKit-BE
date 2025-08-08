@@ -127,6 +127,7 @@ public class MemberService {
         return memberRepository.findByEmailAndIsDeleted(email, DELETED)
                 .map(member -> {
                     member.restore(password, subject, nickname, school);
+                    memberRepository.flush();
                     return member;
                 });
     }
