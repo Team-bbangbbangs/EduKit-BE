@@ -27,9 +27,11 @@ scrape_configs:
             level: level
             thread: thread
             logger: logger
-            module: module
-            environment: environment
             message: message
+            traceId: traceId
+            userId: userId
+            requestUrl: requestUrl
+            method: method
 
       - drop:
           expression: '.*(/health|/actuator|/metrics|/prometheus|favicon\.ico|GET.*200.*(/health|/actuator|/metrics)).*'
@@ -38,9 +40,15 @@ scrape_configs:
       - drop:
           expression: '.*(GET|POST|PUT|DELETE).*(actuator|health|metrics|prometheus).*'
           source: message
+
       - labels:
           thread:
           logger:
+          traceId:
+          userId:
+          requestUrl:
+          method:
+
       - timestamp:
           source: timestamp
           format: "2006-01-02 15:04:05.000"
@@ -64,9 +72,11 @@ scrape_configs:
             level: level
             thread: thread
             logger: logger
-            module: module
-            environment: environment
             message: message
+            traceId: traceId
+            userId: userId
+            requestUrl: requestUrl
+            method: method
 
       - drop:
           expression: '.*(/health|/actuator|/metrics|/prometheus|favicon\.ico|GET.*200.*(/health|/actuator|/metrics)).*'
@@ -75,9 +85,15 @@ scrape_configs:
       - drop:
           expression: '.*(GET|POST|PUT|DELETE).*(actuator|health|metrics|prometheus).*'
           source: message
+
       - labels:
           thread:
           logger:
+          traceId:
+          userId:
+          requestUrl:
+          method:
+
       - timestamp:
           source: timestamp
           format: "2006-01-02 15:04:05.000"
@@ -101,9 +117,11 @@ scrape_configs:
             level: level
             thread: thread
             logger: logger
-            module: module
-            environment: environment
             message: message
+            traceId: traceId
+            userId: userId
+            requestUrl: requestUrl
+            method: method
 
       - drop:
           expression: '.*(/health|/actuator|/metrics|/prometheus|favicon\.ico|GET.*200.*(/health|/actuator|/metrics)).*'
@@ -112,9 +130,15 @@ scrape_configs:
       - drop:
           expression: '.*(GET|POST|PUT|DELETE).*(actuator|health|metrics|prometheus).*'
           source: message
+
       - labels:
           thread:
           logger:
+          traceId:
+          userId:
+          requestUrl:
+          method:
+
       - timestamp:
           source: timestamp
           format: "2006-01-02 15:04:05.000"

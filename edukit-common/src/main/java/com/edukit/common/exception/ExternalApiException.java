@@ -6,14 +6,15 @@ import lombok.Getter;
 public class ExternalApiException extends RuntimeException {
 
     private final ErrorCode errorCode;
+    private final String customMessage;
 
     public ExternalApiException(final ErrorCode errorCode) {
-        super(errorCode.getMessage());
-        this.errorCode = errorCode;
+        this(errorCode, errorCode.getMessage());
     }
 
-    public ExternalApiException(final ErrorCode errorCode, final Throwable cause) {
-        super(errorCode.getMessage(), cause);
+    public ExternalApiException(final ErrorCode errorCode, final String customMessage) {
+        super(customMessage);
+        this.customMessage = customMessage;
         this.errorCode = errorCode;
     }
 }

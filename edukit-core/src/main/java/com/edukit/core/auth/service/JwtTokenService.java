@@ -1,8 +1,8 @@
 package com.edukit.core.auth.service;
 
-import com.edukit.core.auth.service.jwt.JwtGenerator;
-import com.edukit.core.auth.service.jwt.JwtParser;
-import com.edukit.core.auth.service.jwt.JwtValidator;
+import com.edukit.core.auth.service.jwt.util.JwtGenerator;
+import com.edukit.core.auth.service.jwt.util.JwtParser;
+import com.edukit.core.auth.service.jwt.util.JwtValidator;
 import com.edukit.core.auth.service.jwt.dto.AuthToken;
 import com.edukit.core.auth.service.jwt.type.TokenType;
 import java.nio.charset.StandardCharsets;

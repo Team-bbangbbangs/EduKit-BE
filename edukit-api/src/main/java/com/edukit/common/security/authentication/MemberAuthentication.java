@@ -1,0 +1,18 @@
+package com.edukit.common.security.authentication;
+
+import java.util.Collection;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.GrantedAuthority;
+
+public class MemberAuthentication extends UsernamePasswordAuthenticationToken {
+
+    private MemberAuthentication(final Object principal, final Object credentials,
+                                 final Collection<? extends GrantedAuthority> authorities) {
+        super(principal, credentials, authorities);
+    }
+
+    public static MemberAuthentication create(final long memberId,
+                                              final Collection<? extends GrantedAuthority> authorities) {
+        return new MemberAuthentication(memberId, null, authorities);
+    }
+}
