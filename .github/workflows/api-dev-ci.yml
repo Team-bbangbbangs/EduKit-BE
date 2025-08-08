@@ -1,4 +1,4 @@
-name: api-dev-cd
+name: api-dev-ci
 
 on:
   workflow_dispatch:
