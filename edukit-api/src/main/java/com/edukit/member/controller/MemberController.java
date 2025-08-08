@@ -1,12 +1,12 @@
-package com.edukit.api.member.controller;
+package com.edukit.member.controller;
 
-import com.edukit.api.common.EdukitResponse;
-import com.edukit.api.common.annotation.MemberId;
-import com.edukit.api.member.controller.request.MemberProfileUpdateRequest;
-import com.edukit.api.member.facade.MemberFacade;
-import com.edukit.api.member.facade.response.MemberNicknameValidationResponse;
-import com.edukit.api.member.facade.response.MemberProfileGetResponse;
+import com.edukit.common.EdukitResponse;
+import com.edukit.common.annotation.MemberId;
 import com.edukit.core.member.db.enums.School;
+import com.edukit.member.controller.request.MemberProfileUpdateRequest;
+import com.edukit.member.facade.MemberFacade;
+import com.edukit.member.facade.response.MemberNicknameValidationResponse;
+import com.edukit.member.facade.response.MemberProfileGetResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;

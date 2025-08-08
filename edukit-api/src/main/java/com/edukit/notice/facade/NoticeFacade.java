@@ -1,10 +1,5 @@
-package com.edukit.api.notice.facade;
+package com.edukit.notice.facade;
 
-import com.edukit.api.notice.facade.response.NoticeFileUploadPresignedUrlCreateResponse;
-import com.edukit.api.notice.facade.response.NoticeFileUploadPresignedUrlCreateResponse.NoticeFileUploadPresignedUrlCreateResponseItem;
-import com.edukit.api.notice.facade.response.NoticeGetResponse;
-import com.edukit.api.notice.facade.response.NoticeResponse;
-import com.edukit.api.notice.facade.response.NoticesGetResponse;
 import com.edukit.core.common.service.FileStorageService;
 import com.edukit.core.common.service.response.UploadPresignedUrlResponse;
 import com.edukit.core.notice.db.entity.Notice;
@@ -13,6 +8,11 @@ import com.edukit.core.notice.db.enums.NoticeCategory;
 import com.edukit.core.notice.service.NoticeService;
 import com.edukit.core.notice.service.dto.NoticeCreateResult;
 import com.edukit.core.notice.service.dto.NoticeUpdateResult;
+import com.edukit.notice.facade.response.NoticeFileUploadPresignedUrlCreateResponse;
+import com.edukit.notice.facade.response.NoticeFileUploadPresignedUrlCreateResponse.NoticeFileUploadPresignedUrlCreateResponseItem;
+import com.edukit.notice.facade.response.NoticeGetResponse;
+import com.edukit.notice.facade.response.NoticeResponse;
+import com.edukit.notice.facade.response.NoticesGetResponse;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;

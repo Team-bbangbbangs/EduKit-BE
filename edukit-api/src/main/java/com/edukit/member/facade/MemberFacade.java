@@ -1,15 +1,15 @@
-package com.edukit.api.member.facade;
+package com.edukit.member.facade;
 
 import com.edukit.core.auth.service.RefreshTokenStoreService;
 import com.edukit.core.member.db.entity.Member;
 import com.edukit.core.member.db.enums.School;
-import com.edukit.api.member.facade.response.MemberNicknameValidationResponse;
-import com.edukit.api.member.facade.response.MemberProfileGetResponse;
 import com.edukit.core.member.exception.MemberErrorCode;
 import com.edukit.core.member.exception.MemberException;
 import com.edukit.core.member.service.MemberService;
 import com.edukit.core.subject.db.entity.Subject;
 import com.edukit.core.subject.service.SubjectService;
+import com.edukit.member.facade.response.MemberNicknameValidationResponse;
+import com.edukit.member.facade.response.MemberProfileGetResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
