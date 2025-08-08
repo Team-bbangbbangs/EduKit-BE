@@ -27,13 +27,13 @@ public class GlobalExceptionHandler {
     // Custom exceptions
     @ExceptionHandler(BusinessException.class)
     public EdukitResponse<Void> handleBusinessException(final BusinessException e) {
-        log.info("Business exception occurred: {}", e.getMessage(), e.getCause());
+        log.info("Business exception occurred: {}", e.getMessage());
         return EdukitResponse.fail(e.getErrorCode());
     }
 
     @ExceptionHandler(ExternalApiException.class)
     public EdukitResponse<Void> handleExternalApiException(final ExternalApiException e) {
-        log.warn("External API exception occurred: {}", e.getMessage(), e.getCause());
+        log.warn("External API exception occurred: {}", e.getMessage());
         return EdukitResponse.fail(e.getErrorCode());
     }
 
