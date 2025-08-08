@@ -123,7 +123,7 @@ public class S3ServiceImpl implements FileStorageService {
                     .destinationKey(targetKey));
         } catch (Exception e) {
             log.error("S3 파일 복사 실패: sourceKey={}, targetKey={}", sourceKey, targetKey, e);
-            throw new S3Exception(S3ErrorCode.FILE_COPY_FAILED, e);
+            throw new S3Exception(S3ErrorCode.FILE_COPY_FAILED);
         }
     }
 
@@ -134,7 +134,7 @@ public class S3ServiceImpl implements FileStorageService {
                     .key(key));
         } catch (Exception e) {
             log.error("S3 파일 삭제 실패: key={}", key, e);
-            throw new S3Exception(S3ErrorCode.FILE_DELETE_FAILED, e);
+            throw new S3Exception(S3ErrorCode.FILE_DELETE_FAILED);
         }
     }
 
