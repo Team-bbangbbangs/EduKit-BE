@@ -10,6 +10,7 @@ public record NoticeUpdateRequest(
         String title,
         @NotNull(message = "내용은 필수입니다.")
         String content,
-        List<Long> noticeFileIds
+        List<String> addedFileKeys,         //추가된 파일 목록
+        List<Long> deletedNoticeFileIds     //삭제된 파일 목록
 ) {
 }

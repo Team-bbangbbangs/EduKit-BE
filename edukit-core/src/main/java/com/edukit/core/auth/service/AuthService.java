@@ -20,11 +20,10 @@ public class AuthService {
     private static final String EMAIL_SEPARATOR = "@";
     private static final boolean NOT_DELETED = false;
 
-    public void validateCondition(final String password, final String email, final String nickname) {
+    public void validateCondition(final String password, final String email) {
         PasswordValidator.validatePasswordFormat(password);
         checkAlreadyRegistered(email);
         validateEmail(email);
-        // 닉네임 중복 검사 유효성 검사 로직 작성
     }
 
     private void checkAlreadyRegistered(final String email) {

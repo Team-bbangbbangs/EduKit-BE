@@ -1,21 +1,23 @@
 package com.edukit.api.notice.facade;
 
+import com.edukit.api.notice.facade.response.NoticeFileUploadPresignedUrlCreateResponse;
+import com.edukit.api.notice.facade.response.NoticeFileUploadPresignedUrlCreateResponse.NoticeFileUploadPresignedUrlCreateResponseItem;
+import com.edukit.api.notice.facade.response.NoticeGetResponse;
+import com.edukit.api.notice.facade.response.NoticeResponse;
+import com.edukit.api.notice.facade.response.NoticesGetResponse;
 import com.edukit.core.common.service.FileStorageService;
 import com.edukit.core.common.service.response.UploadPresignedUrlResponse;
 import com.edukit.core.notice.db.entity.Notice;
 import com.edukit.core.notice.db.entity.NoticeFile;
 import com.edukit.core.notice.db.enums.NoticeCategory;
-import com.edukit.api.notice.facade.response.NoticeFileUploadPresignedUrlCreateResponse;
-import com.edukit.api.notice.facade.response.NoticeGetResponse;
-import com.edukit.api.notice.facade.response.NoticeResponse;
-import com.edukit.api.notice.facade.response.NoticesGetResponse;
 import com.edukit.core.notice.service.NoticeService;
+import com.edukit.core.notice.service.dto.NoticeCreateResult;
+import com.edukit.core.notice.service.dto.NoticeUpdateResult;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -24,7 +26,8 @@ public class NoticeFacade {
 
     private final NoticeService noticeService;
     private final FileStorageService storageService;
-    private static final String NOTICE_FILE_PATH = "notices";
+    private static final String TMP_NOTICE_FILE_DIRECTORY = "tmp";
+    private static final String NOTICE_FILE_DIRECTORY = "notices";
 
     public NoticesGetResponse getNotices(final NoticeCategory category, final int page) {
         int zeroBasedPage = page - 1;
@@ -51,34 +54,39 @@ public class NoticeFacade {
         );
     }
 
-    @Transactional
     public void createNotice(final NoticeCategory category, final String title, final String content,
-                             final List<Long> noticeFileIds) {
-        Notice notice = noticeService.createNotice(category, title, content);
-        if (!noticeFileIds.isEmpty()) {
-            noticeService.updateNoticeFilesNoticeId(noticeFileIds, notice);
+                             final List<String> fileKeys) {
+        NoticeCreateResult result = noticeService.createNoticeAndFiles(category, title, content, fileKeys);
+        if (result.hasFiles()) {
+            storageService.moveFiles(result.fileKeys(), TMP_NOTICE_FILE_DIRECTORY, NOTICE_FILE_DIRECTORY);
         }
     }
 
-    @Transactional
     public void updateNotice(final long noticeId, final NoticeCategory category, final String title,
-                             final String content, final List<Long> noticeFileIds) {
-        Notice notice = noticeService.updateNotice(noticeId, category, title, content);
-        noticeService.updateNoticeFiles(notice, noticeFileIds);
+                             final String content, final List<String> addedFileKeys,
+                             final List<Long> deletedNoticeFileIds) {
+        NoticeUpdateResult result = noticeService.updateNoticeAndFiles(
+                noticeId, category, title, content, addedFileKeys, deletedNoticeFileIds);
+        if (result.hasAddedFiles()) {
+            storageService.moveFiles(result.addedFileKeys(), TMP_NOTICE_FILE_DIRECTORY, NOTICE_FILE_DIRECTORY);
+        }
+        if (result.hasDeletedFiles()) {
+            storageService.deleteFiles(result.deletedFileKeys());
+        }
     }
 
-    // 공지사항 복구 시 파일 복원 가능해야 하므로 NoticeFile은 삭제하지 않음
     public void deleteNotice(final long noticeId) {
+        // 공지사항 복구 시 파일 복원 가능해야 하므로 사진은 삭제하지 않음
         noticeService.deleteNotice(noticeId);
     }
 
     public NoticeFileUploadPresignedUrlCreateResponse createFileUploadPresignedUrl(final List<String> filenames) {
         List<UploadPresignedUrlResponse> presignedUrls = filenames.stream()
-                .map(filename -> storageService.createUploadPresignedUrl(NOTICE_FILE_PATH, filename))
+                .map(filename -> storageService.createUploadPresignedUrl(TMP_NOTICE_FILE_DIRECTORY, filename))
                 .toList();
-        List<NoticeFile> noticeFiles = noticeService.createNoticeFiles(
-                presignedUrls.stream().map(UploadPresignedUrlResponse::s3Key).toList()
-        );
-        return NoticeFileUploadPresignedUrlCreateResponse.of(presignedUrls, noticeFiles);
+        List<NoticeFileUploadPresignedUrlCreateResponseItem> files = presignedUrls.stream()
+                .map(response -> NoticeFileUploadPresignedUrlCreateResponseItem.of(response, NOTICE_FILE_DIRECTORY))
+                .toList();
+        return NoticeFileUploadPresignedUrlCreateResponse.of(files);
     }
 }

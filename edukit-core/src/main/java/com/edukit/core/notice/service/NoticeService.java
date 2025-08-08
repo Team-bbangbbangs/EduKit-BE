@@ -3,10 +3,12 @@ package com.edukit.core.notice.service;
 import com.edukit.core.notice.db.entity.Notice;
 import com.edukit.core.notice.db.entity.NoticeFile;
 import com.edukit.core.notice.db.enums.NoticeCategory;
-import com.edukit.core.notice.exception.NoticeException;
-import com.edukit.core.notice.exception.NoticeErrorCode;
 import com.edukit.core.notice.db.repository.NoticeFileRepository;
 import com.edukit.core.notice.db.repository.NoticeRepository;
+import com.edukit.core.notice.exception.NoticeErrorCode;
+import com.edukit.core.notice.exception.NoticeException;
+import com.edukit.core.notice.service.dto.NoticeCreateResult;
+import com.edukit.core.notice.service.dto.NoticeUpdateResult;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -39,18 +41,60 @@ public class NoticeService {
     }
 
     @Transactional
-    public Notice createNotice(final NoticeCategory category, final String title, final String content) {
-        validateCategory(category);
-        Notice notice = Notice.create(category, title, content);
-        return noticeRepository.save(notice);
+    public NoticeCreateResult createNoticeAndFiles(final NoticeCategory category, final String title,
+                                                   final String content,
+                                                   final List<String> fileKeys) {
+        Notice notice = createNotice(category, title, content);
+        List<NoticeFile> noticeFiles = createNoticeFiles(fileKeys, notice);
+
+        return NoticeCreateResult.of(noticeFiles);
     }
 
     @Transactional
-    public Notice updateNotice(final long noticeId, final NoticeCategory category, final String title, final String content) {
+    public NoticeUpdateResult updateNoticeAndFiles(final long noticeId, final NoticeCategory category, final String title,
+                                           final String content,
+                                           final List<String> addedFileKeys, final List<Long> deletedNoticeFileIds) {
+        Notice notice = updateNotice(noticeId, category, title, content);
+        List<NoticeFile> addedNoticeFiles = createNoticeFiles(addedFileKeys, notice);
+        List<NoticeFile> deletedNoticeFiles = deleteNoticeFiles(deletedNoticeFileIds, notice);
+
+        return NoticeUpdateResult.of(addedNoticeFiles, deletedNoticeFiles);
+    }
+
+    private Notice createNotice(final NoticeCategory category, final String title, final String content) {
         validateCategory(category);
+        Notice notice = Notice.create(category, title, content);
+        noticeRepository.save(notice);
+        return notice;
+    }
+
+    private Notice updateNotice(final long noticeId, final NoticeCategory category, final String title,
+                                final String content) {
         Notice notice = getNotice(noticeId);
+        validateCategory(category);
         notice.update(category, title, content);
         return notice;
+    }
+
+    private List<NoticeFile> createNoticeFiles(final List<String> fileKeys, final Notice notice) {
+        if (fileKeys.isEmpty()) {
+            return List.of();
+        }
+        List<NoticeFile> noticeFiles = fileKeys.stream().map(fileKey -> NoticeFile.create(notice, fileKey)).toList();
+        noticeFileRepository.saveAll(noticeFiles);
+        return noticeFiles;
+    }
+
+    private List<NoticeFile> deleteNoticeFiles(final List<Long> noticeFileIds, final Notice notice) {
+        if (noticeFileIds.isEmpty()) {
+            return List.of();
+        }
+        List<NoticeFile> noticeFiles = noticeFileRepository.findByNoticeAndIdIn(notice, noticeFileIds);
+        if (noticeFiles.size() != noticeFileIds.size()) {
+            throw new NoticeException(NoticeErrorCode.INVALID_NOTICE_FILE_IDS);
+        }
+        noticeFileRepository.deleteAll(noticeFiles);
+        return noticeFiles;
     }
 
     @Transactional
@@ -59,43 +103,13 @@ public class NoticeService {
         notice.delete();
     }
 
-    @Transactional
-    public List<NoticeFile> createNoticeFiles(final List<String> filePaths) {
-        List<NoticeFile> noticeFiles = filePaths.stream().map(NoticeFile::create).toList();
-        return noticeFileRepository.saveAll(noticeFiles);
-    }
-
-    @Transactional
-    public void updateNoticeFilesNoticeId(final List<Long> noticeFileIds, final Notice notice) {
-        List<NoticeFile> noticeFiles = noticeFileRepository.findAllById(noticeFileIds);
-        for (NoticeFile noticeFile : noticeFiles) {
-            noticeFile.attachToNotice(notice);
+    private void validateCategory(final NoticeCategory category) {
+        if (category == null || !category.isCreatable()) {
+            throw new NoticeException(NoticeErrorCode.INVALID_NOTICE_CATEGORY);
         }
     }
 
     public List<NoticeFile> getNoticeFiles(final Notice notice) {
         return noticeFileRepository.findByNotice(notice);
-    }
-
-    @Transactional
-    public void updateNoticeFiles(final Notice notice, final List<Long> noticeFileIds) {
-        List<NoticeFile> beforeNoticeFiles = getNoticeFiles(notice);
-        List<NoticeFile> updatedNoticeFiles = noticeFileRepository.findAllById(noticeFileIds);
-        for (NoticeFile beforeNoticeFile : beforeNoticeFiles) {
-            if (beforeNoticeFile.isExcludedFrom(updatedNoticeFiles)) {
-                beforeNoticeFile.detachNotice();
-            }
-        }
-        for (NoticeFile updatedNoticeFile : updatedNoticeFiles) {
-            if (updatedNoticeFile.isDetachedFromNotice()) {
-                updatedNoticeFile.attachToNotice(notice);
-            }
-        }
-    }
-
-    private void validateCategory(final NoticeCategory category) {
-        if (category == null || !category.isCreatable()) {
-            throw new NoticeException(NoticeErrorCode.INVALID_NOTICE_CATEGORY);
-        }
     }
 }

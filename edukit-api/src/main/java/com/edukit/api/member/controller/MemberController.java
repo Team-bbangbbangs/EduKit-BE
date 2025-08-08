@@ -3,13 +3,14 @@ package com.edukit.api.member.controller;
 import com.edukit.api.common.EdukitResponse;
 import com.edukit.api.common.annotation.MemberId;
 import com.edukit.api.member.controller.request.MemberProfileUpdateRequest;
-import com.edukit.core.member.db.enums.School;
 import com.edukit.api.member.facade.MemberFacade;
 import com.edukit.api.member.facade.response.MemberNicknameValidationResponse;
 import com.edukit.api.member.facade.response.MemberProfileGetResponse;
+import com.edukit.core.member.db.enums.School;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -45,5 +46,11 @@ public class MemberController {
             @RequestParam final String nickname
     ) {
         return ResponseEntity.ok().body(EdukitResponse.success(memberFacade.validateNickname(memberId, nickname)));
+    }
+
+    @DeleteMapping("/withdraw")
+    public ResponseEntity<EdukitResponse<Void>> withdraw(@MemberId final long memberId) {
+        memberFacade.withdraw(memberId);
+        return ResponseEntity.ok().body(EdukitResponse.success());
     }
 }

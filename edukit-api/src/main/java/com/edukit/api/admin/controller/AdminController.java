@@ -33,7 +33,7 @@ public class AdminController implements AdminApi {
             @RequestBody @Valid final NoticeCreateRequest request
     ) {
         NoticeCategory category = NoticeCategory.fromId(request.categoryId());
-        noticeFacade.createNotice(category, request.title(), request.content(), request.noticeFileIds());
+        noticeFacade.createNotice(category, request.title(), request.content(), request.fileKeys());
         return ResponseEntity.ok().body(EdukitResponse.success());
     }
 
@@ -43,7 +43,8 @@ public class AdminController implements AdminApi {
             @PathVariable final long noticeId
     ) {
         NoticeCategory category = NoticeCategory.fromId(request.categoryId());
-        noticeFacade.updateNotice(noticeId, category, request.title(), request.content(), request.noticeFileIds());
+        noticeFacade.updateNotice(noticeId, category, request.title(), request.content(), request.addedFileKeys(),
+                request.deletedNoticeFileIds());
         return ResponseEntity.ok().body(EdukitResponse.success());
     }
 

@@ -41,7 +41,8 @@ public class AuthFacade {
     @Transactional
     public MemberSignUpResponse signUp(final String email, final String password, final String subjectName,
                                        final String nickname, final School school) {
-        authService.validateCondition(password, email, nickname);
+        authService.validateCondition(password, email);
+        memberService.validateNickname(nickname);
         Subject subject = subjectService.getSubjectByName(subjectName);
         String encodedPassword = passwordEncoder.encode(password);
         Member member = memberService.createMember(email, encodedPassword, subject, nickname, school);
@@ -106,13 +107,6 @@ public class AuthFacade {
 
         String encodedPassword = passwordEncoder.encode(newPassword);
         memberService.updatePassword(member, encodedPassword);
-    }
-
-    @Transactional
-    public void withdraw(final long memberId) {
-        Member member = memberService.getMemberById(memberId);
-        memberService.withdraw(member);
-        refreshTokenStoreService.delete(member.getMemberUuid());
     }
 
     @Transactional(readOnly = true)
