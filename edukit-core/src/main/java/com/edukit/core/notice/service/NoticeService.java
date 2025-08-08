@@ -108,4 +108,8 @@ public class NoticeService {
             throw new NoticeException(NoticeErrorCode.INVALID_NOTICE_CATEGORY);
         }
     }
+
+    public List<NoticeFile> getNoticeFiles(final Notice notice) {
+        return noticeFileRepository.findByNotice(notice);
+    }
 }

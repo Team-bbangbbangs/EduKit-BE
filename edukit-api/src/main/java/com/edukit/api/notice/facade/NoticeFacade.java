@@ -10,7 +10,6 @@ import com.edukit.core.common.service.response.UploadPresignedUrlResponse;
 import com.edukit.core.notice.db.entity.Notice;
 import com.edukit.core.notice.db.entity.NoticeFile;
 import com.edukit.core.notice.db.enums.NoticeCategory;
-import com.edukit.core.notice.service.NoticeFileService;
 import com.edukit.core.notice.service.NoticeService;
 import com.edukit.core.notice.service.dto.NoticeCreateResult;
 import com.edukit.core.notice.service.dto.NoticeUpdateResult;
@@ -26,7 +25,6 @@ import org.springframework.stereotype.Service;
 public class NoticeFacade {
 
     private final NoticeService noticeService;
-    private final NoticeFileService noticeFileService;
     private final FileStorageService storageService;
     private static final String TMP_NOTICE_FILE_DIRECTORY = "tmp";
     private static final String NOTICE_FILE_DIRECTORY = "notices";
@@ -45,7 +43,7 @@ public class NoticeFacade {
 
     public NoticeGetResponse getNotice(final long noticeId) {
         Notice notice = noticeService.getNotice(noticeId);
-        List<NoticeFile> noticeFiles = noticeFileService.getNoticeFiles(notice);
+        List<NoticeFile> noticeFiles = noticeService.getNoticeFiles(notice);
         return NoticeGetResponse.of(
                 notice.getId(),
                 notice.getCategory().getText(),
