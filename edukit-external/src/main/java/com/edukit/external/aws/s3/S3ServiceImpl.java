@@ -142,11 +142,4 @@ public class S3ServiceImpl implements FileStorageService {
         int lastSlash = url.lastIndexOf('/');
         return url.substring(lastSlash + 1);
     }
-
-    private String extractKey(final String url) {
-        if (!url.startsWith(s3Properties.cdnUrl())) {
-            throw new S3Exception(S3ErrorCode.INVALID_FILE_URL);
-        }
-        return url.substring(s3Properties.cdnUrl().length() + 1);
-    }
 }
