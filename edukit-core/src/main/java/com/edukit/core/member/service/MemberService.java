@@ -55,14 +55,14 @@ public class MemberService {
 
     @Transactional
     public void updateMemberProfileAndFlush(final Member member, final Subject subject, final School school, final String nickname) {
-        validateNickname(member, nickname);
+        validateNickname(nickname, member);
         member.updateProfile(subject, school, nickname);
         memberRepository.flush();
     }
 
-    public void validateNickname(final Member member, final String nickname) {
+    public void validateNickname(final String nickname, final Member member) {
         validateNicknameInvalid(nickname);
-        validateNicknameDuplicated(member, nickname);
+        validateNicknameDuplicated(nickname, member);
     }
 
     public void validateNickname(final String nickname) {
@@ -76,8 +76,8 @@ public class MemberService {
         }
     }
 
-    private void validateNicknameDuplicated(final Member member, final String nickname) {
-        if (isNicknameDuplicated(member, nickname)) {
+    private void validateNicknameDuplicated(final String nickname, final Member member) {
+        if (isNicknameDuplicated(nickname, member)) {
             throw new MemberException(MemberErrorCode.DUPLICATED_NICKNAME);
         }
     }
@@ -94,12 +94,15 @@ public class MemberService {
                 || nicknameBannedWordRepository.existsBannedWordIn(nickname);
     }
 
-    public boolean isNicknameDuplicated(final Member member, final String nickname) {
-        return memberRepository.existsByIdNotAndNicknameIgnoreCaseAndIsDeleted(member.getId(), nickname, false);
+    public boolean isNicknameDuplicated(final String nickname, final Member member) {
+        if (member.getNickname().equals(nickname)) {
+            return true;
+        }
+        return isNicknameDuplicated(nickname);
     }
 
     private boolean isNicknameDuplicated(final String nickname) {
-        return memberRepository.existsByNicknameIgnoreCaseAndIsDeleted(nickname, false);
+        return memberRepository.existsByNicknameIgnoreCase(nickname);
     }
 
     @Transactional

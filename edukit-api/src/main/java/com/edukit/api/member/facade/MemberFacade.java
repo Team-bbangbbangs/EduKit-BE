@@ -48,7 +48,7 @@ public class MemberFacade {
         Member member = memberService.getMemberById(memberId);
         return MemberNicknameValidationResponse.of(
                 memberService.isNicknameInvalid(nickname),
-                memberService.isNicknameDuplicated(member, nickname)
+                memberService.isNicknameDuplicated(nickname, member)
         );
     }
 
