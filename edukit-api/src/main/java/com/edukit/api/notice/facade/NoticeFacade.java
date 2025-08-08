@@ -12,13 +12,13 @@ import com.edukit.core.notice.db.entity.NoticeFile;
 import com.edukit.core.notice.db.enums.NoticeCategory;
 import com.edukit.core.notice.service.NoticeFileService;
 import com.edukit.core.notice.service.NoticeService;
+import com.edukit.core.notice.service.dto.NoticeCreateResult;
+import com.edukit.core.notice.service.dto.NoticeUpdateResult;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.CollectionUtils;
 
 @Service
 @RequiredArgsConstructor
@@ -56,39 +56,25 @@ public class NoticeFacade {
         );
     }
 
-    @Transactional
     public void createNotice(final NoticeCategory category, final String title, final String content,
                              final List<String> fileKeys) {
-        Notice notice = noticeService.createNotice(category, title, content);
-        if (!CollectionUtils.isEmpty(fileKeys)) {     //본문에 파일이 포함된 경우
-            createNoticeFiles(fileKeys, notice);
+        NoticeCreateResult result = noticeService.createNoticeAndFiles(category, title, content, fileKeys);
+        if (result.hasFiles()) {
+            storageService.moveFiles(result.fileKeys(), TMP_NOTICE_FILE_DIRECTORY, NOTICE_FILE_DIRECTORY);
         }
     }
 
-    @Transactional
     public void updateNotice(final long noticeId, final NoticeCategory category, final String title,
                              final String content, final List<String> addedFileKeys,
                              final List<Long> deletedNoticeFileIds) {
-        Notice notice = noticeService.getNotice(noticeId);
-        noticeService.updateNotice(notice, category, title, content);
-        if (!CollectionUtils.isEmpty(addedFileKeys)) {          //추가할 파일이 있는 경우
-            createNoticeFiles(addedFileKeys, notice);
+        NoticeUpdateResult result = noticeService.updateNoticeAndFiles(
+                noticeId, category, title, content, addedFileKeys, deletedNoticeFileIds);
+        if (result.hasAddedFiles()) {
+            storageService.moveFiles(result.addedFileKeys(), TMP_NOTICE_FILE_DIRECTORY, NOTICE_FILE_DIRECTORY);
         }
-        if (!CollectionUtils.isEmpty(deletedNoticeFileIds)) {   //삭제할 파일이 있는 경우
-            deleteNoticeFiles(deletedNoticeFileIds, notice);
+        if (result.hasDeletedFiles()) {
+            storageService.deleteFiles(result.deletedFileKeys());
         }
-    }
-
-    private void createNoticeFiles(final List<String> fileKeys, final Notice notice) {
-        List<NoticeFile> noticeFiles = noticeFileService.createNoticeFiles(fileKeys, notice);
-        List<String> noticeFileKeys = noticeFiles.stream().map(NoticeFile::getFileKey).toList();
-        storageService.moveFiles(noticeFileKeys, TMP_NOTICE_FILE_DIRECTORY, NOTICE_FILE_DIRECTORY);
-    }
-
-    private void deleteNoticeFiles(final List<Long> noticeFileIds, final Notice notice) {
-        List<NoticeFile> noticeFiles = noticeFileService.deleteNoticeFiles(noticeFileIds, notice);
-        List<String> noticeFileKeys = noticeFiles.stream().map(NoticeFile::getFileKey).toList();
-        storageService.deleteFiles(noticeFileKeys);
     }
 
     public void deleteNotice(final long noticeId) {
