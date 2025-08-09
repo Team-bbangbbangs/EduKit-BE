@@ -1,6 +1,6 @@
-package com.edukit.external.ai;
+package com.edukit.external.ai.service;
 
-import com.edukit.core.common.port.AIService;
+import com.edukit.core.common.service.AIService;
 import com.edukit.external.ai.exception.OpenAiErrorCode;
 import com.edukit.external.ai.exception.OpenAiException;
 import com.edukit.core.common.service.response.OpenAIVersionResponse;

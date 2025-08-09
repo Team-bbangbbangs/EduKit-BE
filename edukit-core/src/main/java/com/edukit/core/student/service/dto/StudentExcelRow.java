@@ -1,4 +1,4 @@
-package com.edukit.core.common.service.response;
+package com.edukit.core.student.service.dto;
 
 public record StudentExcelRow(
         String grade,

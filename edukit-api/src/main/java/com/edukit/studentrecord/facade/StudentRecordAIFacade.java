@@ -1,6 +1,6 @@
 package com.edukit.studentrecord.facade;
 
-import com.edukit.core.common.port.AIService;
+import com.edukit.core.common.service.AIService;
 import com.edukit.core.common.service.response.OpenAIVersionResponse;
 import com.edukit.core.studentrecord.db.entity.StudentRecord;
 import com.edukit.studentrecord.facade.response.StudentRecordCreateResponse;

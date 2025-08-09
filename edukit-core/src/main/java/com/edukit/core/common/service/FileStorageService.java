@@ -1,4 +1,4 @@
-package com.edukit.core.common.port;
+package com.edukit.core.common.service;
 
 import com.edukit.core.common.service.response.UploadPresignedUrlResponse;
 import java.util.List;

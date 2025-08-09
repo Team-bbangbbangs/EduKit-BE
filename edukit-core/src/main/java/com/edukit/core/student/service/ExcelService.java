@@ -1,6 +1,6 @@
-package com.edukit.core.common;
+package com.edukit.core.student.service;
 
-import com.edukit.core.common.service.response.StudentExcelRow;
+import com.edukit.core.student.service.dto.StudentExcelRow;
 import com.edukit.core.student.exception.StudentErrorCode;
 import com.edukit.core.student.exception.StudentException;
 import java.io.IOException;

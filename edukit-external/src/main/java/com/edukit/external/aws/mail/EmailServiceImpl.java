@@ -1,6 +1,6 @@
 package com.edukit.external.aws.mail;
 
-import com.edukit.core.common.port.EmailService;
+import com.edukit.core.common.service.EmailService;
 import com.edukit.external.aws.mail.exception.MailErrorCode;
 import com.edukit.external.aws.mail.exception.MailException;
 import com.edukit.external.aws.mail.setting.AwsSesEmailMapper;

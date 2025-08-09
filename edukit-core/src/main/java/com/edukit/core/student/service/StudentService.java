@@ -1,6 +1,6 @@
 package com.edukit.core.student.service;
 
-import com.edukit.core.common.service.response.StudentExcelRow;
+import com.edukit.core.student.service.dto.StudentExcelRow;
 import com.edukit.core.member.db.entity.Member;
 import com.edukit.core.student.db.entity.Student;
 import com.edukit.core.student.db.repository.StudentRepository;

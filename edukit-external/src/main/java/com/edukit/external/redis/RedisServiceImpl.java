@@ -1,6 +1,6 @@
 package com.edukit.external.redis;
 
-import com.edukit.core.common.port.RedisService;
+import com.edukit.core.common.service.RedisService;
 import java.time.Duration;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;

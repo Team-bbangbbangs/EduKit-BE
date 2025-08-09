@@ -1,7 +1,7 @@
 package com.edukit.student.facade;
 
-import com.edukit.core.common.ExcelService;
-import com.edukit.core.common.service.response.StudentExcelRow;
+import com.edukit.core.student.service.ExcelService;
+import com.edukit.core.student.service.dto.StudentExcelRow;
 import com.edukit.core.member.db.entity.Member;
 import com.edukit.core.member.service.MemberService;
 import com.edukit.core.student.db.entity.Student;

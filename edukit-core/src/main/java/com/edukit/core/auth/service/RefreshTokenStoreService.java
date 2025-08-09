@@ -1,7 +1,7 @@
 package com.edukit.core.auth.service;
 
 import com.edukit.core.auth.service.jwt.setting.JwtProperties;
-import com.edukit.core.common.port.RedisService;
+import com.edukit.core.common.service.RedisService;
 import java.time.Duration;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
