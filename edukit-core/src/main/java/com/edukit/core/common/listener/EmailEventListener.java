@@ -1,7 +1,7 @@
 package com.edukit.core.common.listener;
 
 import com.edukit.core.auth.event.MemberSignedUpEvent;
-import com.edukit.core.common.service.EmailService;
+import com.edukit.core.common.port.EmailService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.scheduling.annotation.Async;

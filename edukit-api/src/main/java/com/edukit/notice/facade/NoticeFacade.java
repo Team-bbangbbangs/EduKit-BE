@@ -1,6 +1,6 @@
 package com.edukit.notice.facade;
 
-import com.edukit.core.common.service.FileStorageService;
+import com.edukit.core.common.port.FileStorageService;
 import com.edukit.core.common.service.response.UploadPresignedUrlResponse;
 import com.edukit.core.notice.db.entity.Notice;
 import com.edukit.core.notice.db.entity.NoticeFile;

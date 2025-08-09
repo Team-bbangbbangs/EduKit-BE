@@ -1,4 +1,4 @@
-package com.edukit.core.common.service.port;
+package com.edukit.core.common.port;
 
 public interface EmailService {
 
