@@ -1,0 +1,113 @@
+package com.edukit.core.common;
+
+import com.edukit.core.common.service.response.StudentExcelRow;
+import com.edukit.core.student.exception.StudentErrorCode;
+import com.edukit.core.student.exception.StudentException;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import lombok.RequiredArgsConstructor;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellType;
+import org.apache.poi.ss.usermodel.DateUtil;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+
+@Service
+@RequiredArgsConstructor
+public class ExcelService {
+
+    public List<StudentExcelRow> parseStudentExcel(final MultipartFile file) {
+        List<StudentExcelRow> students = new ArrayList<>();
+
+        try (Workbook workbook = new XSSFWorkbook(file.getInputStream())) {
+            Sheet sheet = workbook.getSheetAt(0);
+
+            // 첫 번째 행은 헤더로 가정하고 스킵
+            for (int rowIndex = 1; rowIndex <= sheet.getLastRowNum(); rowIndex++) {
+                Row row = sheet.getRow(rowIndex);
+
+                if (row == null || isRowEmpty(row)) {
+                    continue;
+                }
+
+                StudentExcelRow studentRow = parseRow(row);
+                if (studentRow != null) {
+                    students.add(studentRow);
+                }
+            }
+        } catch (IOException e) {
+            throw new StudentException(StudentErrorCode.EXCEL_FILE_READ_ERROR);
+        }
+
+        return students;
+    }
+
+    public void validateExcelFormat(final MultipartFile file) {
+        String contentType = file.getContentType();
+        String fileName = file.getOriginalFilename();
+
+        if ((contentType != null && contentType.equals(
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
+                || (fileName != null && fileName.toLowerCase().endsWith(".xlsx"))) {
+
+        } else {
+            throw new StudentException(StudentErrorCode.EXCEL_FILE_FORMAT_ERROR);
+        }
+    }
+
+    private StudentExcelRow parseRow(final Row row) {
+        try {
+            String grade = getCellValueAsString(row.getCell(0));
+            String classNumber = getCellValueAsString(row.getCell(1));
+            String studentNumber = getCellValueAsString(row.getCell(2));
+            String studentName = getCellValueAsString(row.getCell(3));
+
+            return new StudentExcelRow(grade, classNumber, studentNumber, studentName);
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    private String getCellValueAsString(final Cell cell) {
+        if (cell == null) {
+            return null;
+        }
+
+        switch (cell.getCellType()) {
+            case CellType.STRING:
+                return cell.getStringCellValue().trim();
+            case CellType.NUMERIC:
+                if (DateUtil.isCellDateFormatted(cell)) {
+                    return cell.getDateCellValue().toString();
+                } else {
+                    return String.valueOf((int) cell.getNumericCellValue());
+                }
+            case CellType.BOOLEAN:
+                return String.valueOf(cell.getBooleanCellValue());
+            case CellType.FORMULA:
+                return cell.getCellFormula();
+            case CellType.BLANK:
+                return "";
+            default:
+                return "";
+        }
+    }
+
+    private boolean isRowEmpty(final Row row) {
+        for (int cellIndex = 0; cellIndex < 4; cellIndex++) {
+            Cell cell = row.getCell(cellIndex);
+            if (cell != null && cell.getCellType() != CellType.BLANK) {
+                String value = getCellValueAsString(cell);
+                if (value != null && !value.trim().isEmpty()) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+}

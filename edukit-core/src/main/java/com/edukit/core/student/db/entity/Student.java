@@ -50,4 +50,15 @@ public class Student extends BaseTimeEntity {
         this.studentNumber = studentNumber;
         this.studentName = studentName;
     }
+    
+    public static Student create(final Member member, final String grade, final String classNumber, 
+                                final String studentNumber, final String studentName) {
+        return Student.builder()
+                .member(member)
+                .grade(grade)
+                .classNumber(classNumber)
+                .studentNumber(studentNumber)
+                .studentName(studentName)
+                .build();
+    }
 }
