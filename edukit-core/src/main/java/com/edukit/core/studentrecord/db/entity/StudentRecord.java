@@ -1,6 +1,7 @@
 package com.edukit.core.studentrecord.db.entity;
 
 import com.edukit.core.common.domain.BaseTimeEntity;
+import com.edukit.core.student.db.entity.Student;
 import com.edukit.core.studentrecord.db.enums.StudentRecordType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -39,7 +40,7 @@ public class StudentRecord extends BaseTimeEntity {
     private String description;
 
     @Builder(access = AccessLevel.PRIVATE)
-    public StudentRecord(Student student, StudentRecordType studentRecordType, String description) {
+    public StudentRecord(final Student student, final StudentRecordType studentRecordType, final String description) {
         this.student = student;
         this.studentRecordType = studentRecordType;
         this.description = description;

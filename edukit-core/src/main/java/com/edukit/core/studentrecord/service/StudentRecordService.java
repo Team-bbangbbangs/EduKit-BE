@@ -1,6 +1,6 @@
 package com.edukit.core.studentrecord.service;
 
-import com.edukit.core.studentrecord.db.entity.Student;
+import com.edukit.core.student.db.entity.Student;
 import com.edukit.core.studentrecord.db.entity.StudentRecord;
 import com.edukit.core.studentrecord.db.entity.StudentRecordAITask;
 import com.edukit.core.studentrecord.exception.StudentRecordErrorCode;
