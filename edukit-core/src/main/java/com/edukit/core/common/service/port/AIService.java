@@ -1,4 +1,4 @@
-package com.edukit.core.common.service;
+package com.edukit.core.common.service.port;
 
 import com.edukit.core.common.service.response.OpenAIVersionResponse;
 import reactor.core.publisher.Flux;

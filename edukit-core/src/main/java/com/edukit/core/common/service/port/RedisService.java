@@ -1,4 +1,4 @@
-package com.edukit.core.common.service;
+package com.edukit.core.common.service.port;
 
 import java.time.Duration;
 
