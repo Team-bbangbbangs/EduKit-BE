@@ -1,4 +1,4 @@
-package com.edukit.core.studentrecord.db.entity;
+package com.edukit.core.student.db.entity;
 
 import com.edukit.core.common.domain.BaseTimeEntity;
 import com.edukit.core.member.db.entity.Member;
@@ -42,11 +42,23 @@ public class Student extends BaseTimeEntity {
     private String studentName;
 
     @Builder(access = AccessLevel.PRIVATE)
-    public Student(Member member, String grade, String classNumber, String studentNumber, String studentName) {
+    public Student(final Member member, final String grade, final String classNumber, final String studentNumber,
+                   final String studentName) {
         this.member = member;
         this.grade = grade;
         this.classNumber = classNumber;
         this.studentNumber = studentNumber;
         this.studentName = studentName;
+    }
+    
+    public static Student create(final Member member, final String grade, final String classNumber, 
+                                final String studentNumber, final String studentName) {
+        return Student.builder()
+                .member(member)
+                .grade(grade)
+                .classNumber(classNumber)
+                .studentNumber(studentNumber)
+                .studentName(studentName)
+                .build();
     }
 }

@@ -24,8 +24,6 @@ public class RequestLoggingFilter implements Filter {
 
     private final JwtTokenService tokenService;
 
-    private static final String BEARER_PREFIX = "Bearer ";
-
     @Override
     public void doFilter(final ServletRequest request, final ServletResponse response, final FilterChain chain)
             throws IOException, ServletException {
@@ -64,18 +62,10 @@ public class RequestLoggingFilter implements Filter {
     }
 
     private String extractUserIdFromRequest(final HttpServletRequest request) {
-        String token = resolveToken(request);
+        String token = request.getHeader("Authorization");
         if (token != null && !token.isBlank()) {
             return tokenService.parseMemberUuidFromAccessToken(token);
         }
         return "anonymous";
-    }
-
-    private String resolveToken(final HttpServletRequest request) {
-        String authorization = request.getHeader("Authorization");
-        if (authorization != null && authorization.startsWith(BEARER_PREFIX)) {
-            return authorization.substring(BEARER_PREFIX.length());
-        }
-        return null;
     }
 }

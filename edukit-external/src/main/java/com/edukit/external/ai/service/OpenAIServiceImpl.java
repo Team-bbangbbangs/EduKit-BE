@@ -1,4 +1,4 @@
-package com.edukit.external.ai;
+package com.edukit.external.ai.service;
 
 import com.edukit.core.common.service.AIService;
 import com.edukit.external.ai.exception.OpenAiErrorCode;
