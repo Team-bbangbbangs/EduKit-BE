@@ -1,19 +1,21 @@
 package com.edukit.core.student.service;
 
-import com.edukit.core.student.utils.ExcelUtils;
 import com.edukit.core.student.exception.StudentErrorCode;
 import com.edukit.core.student.exception.StudentException;
 import com.edukit.core.student.service.dto.StudentExcelRow;
+import com.edukit.core.student.utils.ExcelUtils;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
+import org.apache.poi.poifs.filesystem.FileMagic;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.apache.poi.ss.usermodel.WorkbookFactory;
+import org.apache.poi.util.IOUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -21,8 +23,16 @@ import org.springframework.web.multipart.MultipartFile;
 @RequiredArgsConstructor
 public class ExcelService {
 
-    private static final String EXCEL_CONTENT_TYPE = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
-    private static final String EXCEL_FILE_EXTENSION = ".xlsx";
+    private static final String XLSX_CONTENT_TYPE = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+    private static final String XLS_CONTENT_TYPE = "application/vnd.ms-excel";
+    private static final String XLSX_EXTENSION = ".xlsx";
+    private static final String XLS_EXTENSION = ".xls";
+
+    static {
+        // Zip Bomb 방어 설정
+        IOUtils.setByteArrayMaxOverride(100 * 1024 * 1024); // 100MB 제한
+    }
+
     private static final int HEADER_ROW_INDEX = 0;
     private static final int GRADE_INDEX = 0;
     private static final int CLASS_NUMBER_INDEX = 1;
@@ -39,24 +49,43 @@ public class ExcelService {
     }
 
     private boolean isExcelFile(final String contentType, final String fileName) {
-        return (contentType != null && contentType.equals(EXCEL_CONTENT_TYPE))
-                || (fileName != null && fileName.toLowerCase().endsWith(EXCEL_FILE_EXTENSION));
+        boolean validContentType = contentType != null &&
+                (contentType.equals(XLSX_CONTENT_TYPE) || contentType.equals(XLS_CONTENT_TYPE));
+        boolean validExtension = fileName != null &&
+                (fileName.toLowerCase().endsWith(XLSX_EXTENSION) || fileName.toLowerCase().endsWith(XLS_EXTENSION));
+        return validContentType || validExtension;
     }
 
     public Set<StudentExcelRow> parseStudentExcel(final MultipartFile file) {
         Set<StudentExcelRow> students = new HashSet<>();
 
-        try (Workbook workbook = new XSSFWorkbook(file.getInputStream())) {
+        try {
+            validateFileFormat(file);
 
-            for (int sheetIndex = 0; sheetIndex < workbook.getNumberOfSheets(); sheetIndex++) {
-                Sheet sheet = workbook.getSheetAt(sheetIndex);
-                students.addAll(parseSheet(sheet));
+            try (Workbook workbook = WorkbookFactory.create(file.getInputStream())) {
+                for (int sheetIndex = 0; sheetIndex < workbook.getNumberOfSheets(); sheetIndex++) {
+                    Sheet sheet = workbook.getSheetAt(sheetIndex);
+                    students.addAll(parseSheet(sheet));
+                }
             }
 
         } catch (IOException e) {
             throw new StudentException(StudentErrorCode.EXCEL_FILE_READ_ERROR, e);
+        } catch (Exception e) {
+            throw new StudentException(StudentErrorCode.EXCEL_FILE_FORMAT_ERROR, e);
         }
         return students;
+    }
+
+    private void validateFileFormat(final MultipartFile file) throws IOException {
+        try {
+            FileMagic fileMagic = FileMagic.valueOf(file.getInputStream());
+            if (fileMagic != FileMagic.OLE2 && fileMagic != FileMagic.OOXML) {
+                throw new StudentException(StudentErrorCode.EXCEL_FILE_FORMAT_ERROR);
+            }
+        } catch (Exception e) {
+            throw new StudentException(StudentErrorCode.EXCEL_FILE_FORMAT_ERROR, e);
+        }
     }
 
     private Set<StudentExcelRow> parseSheet(final Sheet sheet) {
