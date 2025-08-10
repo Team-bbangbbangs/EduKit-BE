@@ -1,5 +1,6 @@
 package com.edukit.core.student.service;
 
+import com.edukit.core.common.utils.ExcelUtils;
 import com.edukit.core.student.exception.StudentErrorCode;
 import com.edukit.core.student.exception.StudentException;
 import com.edukit.core.student.service.dto.StudentExcelRow;
@@ -9,9 +10,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.CellType;
-import org.apache.poi.ss.usermodel.DateUtil;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -30,7 +28,6 @@ public class ExcelService {
     private static final int CLASS_NUMBER_INDEX = 1;
     private static final int STUDENT_NUMBER_INDEX = 2;
     private static final int STUDENT_NAME_INDEX = 3;
-    private static final int MAX_ROW_LENGTH = 4;
 
     public void validateExcelFormat(final MultipartFile file) {
         String contentType = file.getContentType();
@@ -68,7 +65,7 @@ public class ExcelService {
         for (int rowIndex = HEADER_ROW_INDEX + 1; rowIndex <= sheet.getLastRowNum(); rowIndex++) {
             Row row = sheet.getRow(rowIndex);
 
-            if (row == null || isRowEmpty(row)) {
+            if (row == null || ExcelUtils.isRowEmpty(row)) {
                 continue;
             }
 
@@ -81,50 +78,14 @@ public class ExcelService {
 
     private Optional<StudentExcelRow> parseRow(final Row row) {
         try {
-            String grade = getCellValueAsString(row.getCell(GRADE_INDEX));
-            String classNumber = getCellValueAsString(row.getCell(CLASS_NUMBER_INDEX));
-            String studentNumber = getCellValueAsString(row.getCell(STUDENT_NUMBER_INDEX));
-            String studentName = getCellValueAsString(row.getCell(STUDENT_NAME_INDEX));
+            String grade = ExcelUtils.getCellValueAsStringOrDefault(row.getCell(GRADE_INDEX));
+            String classNumber = ExcelUtils.getCellValueAsStringOrDefault(row.getCell(CLASS_NUMBER_INDEX));
+            String studentNumber = ExcelUtils.getCellValueAsStringOrDefault(row.getCell(STUDENT_NUMBER_INDEX));
+            String studentName = ExcelUtils.getCellValueAsStringOrDefault(row.getCell(STUDENT_NAME_INDEX));
 
             return Optional.of(StudentExcelRow.of(grade, classNumber, studentNumber, studentName));
         } catch (Exception e) {
             return Optional.empty();
         }
-    }
-
-    private String getCellValueAsString(final Cell cell) {
-        if (cell == null) {
-            return null;
-        }
-
-        switch (cell.getCellType()) {
-            case CellType.STRING:
-                return cell.getStringCellValue().trim();
-            case CellType.NUMERIC:
-                if (DateUtil.isCellDateFormatted(cell)) {
-                    return cell.getDateCellValue().toString();
-                } else {
-                    return String.valueOf((int) cell.getNumericCellValue());
-                }
-            case CellType.BOOLEAN:
-                return String.valueOf(cell.getBooleanCellValue());
-            case CellType.FORMULA:
-                return cell.getCellFormula();
-            default:
-                return "";
-        }
-    }
-
-    private boolean isRowEmpty(final Row row) {
-        for (int cellIndex = 0; cellIndex < MAX_ROW_LENGTH; cellIndex++) {
-            Cell cell = row.getCell(cellIndex);
-            if (cell != null && cell.getCellType() != CellType.BLANK) {
-                String value = getCellValueAsString(cell);
-                if (value != null && !value.trim().isEmpty()) {
-                    return false;
-                }
-            }
-        }
-        return true;
     }
 }
