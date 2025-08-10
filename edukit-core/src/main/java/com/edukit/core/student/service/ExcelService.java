@@ -1,8 +1,8 @@
 package com.edukit.core.student.service;
 
-import com.edukit.core.student.service.dto.StudentExcelRow;
 import com.edukit.core.student.exception.StudentErrorCode;
 import com.edukit.core.student.exception.StudentException;
+import com.edukit.core.student.service.dto.StudentExcelRow;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -20,6 +20,23 @@ import org.springframework.web.multipart.MultipartFile;
 @Service
 @RequiredArgsConstructor
 public class ExcelService {
+
+    private static final String EXCEL_CONTENT_TYPE = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+    private static final String EXCEL_FILE_EXTENSION = ".xlsx";
+
+    public void validateExcelFormat(final MultipartFile file) {
+        String contentType = file.getContentType();
+        String fileName = file.getOriginalFilename();
+
+        if (!isExcelFile(contentType, fileName)) {
+            throw new StudentException(StudentErrorCode.EXCEL_FILE_FORMAT_ERROR);
+        }
+    }
+
+    private boolean isExcelFile(final String contentType, final String fileName) {
+        return (contentType != null && contentType.equals(EXCEL_CONTENT_TYPE))
+                || (fileName != null && fileName.toLowerCase().endsWith(EXCEL_FILE_EXTENSION));
+    }
 
     public List<StudentExcelRow> parseStudentExcel(final MultipartFile file) {
         List<StudentExcelRow> students = new ArrayList<>();
@@ -45,19 +62,6 @@ public class ExcelService {
         }
 
         return students;
-    }
-
-    public void validateExcelFormat(final MultipartFile file) {
-        String contentType = file.getContentType();
-        String fileName = file.getOriginalFilename();
-
-        if ((contentType != null && contentType.equals(
-                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
-                || (fileName != null && fileName.toLowerCase().endsWith(".xlsx"))) {
-
-        } else {
-            throw new StudentException(StudentErrorCode.EXCEL_FILE_FORMAT_ERROR);
-        }
     }
 
     private StudentExcelRow parseRow(final Row row) {
