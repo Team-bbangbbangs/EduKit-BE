@@ -24,7 +24,10 @@ public class ExcelService {
     private static final String EXCEL_CONTENT_TYPE = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
     private static final String EXCEL_FILE_EXTENSION = ".xlsx";
     private static final int HEADER_ROW_INDEX = 0;
-    private static final int TARGET_SHEET_INDEX = 0;
+    private static final int GRADE_INDEX = 0;
+    private static final int CLASS_NUMBER_INDEX = 1;
+    private static final int STUDENT_NUMBER_INDEX = 2;
+    private static final int STUDENT_NAME_INDEX = 3;
 
     public void validateExcelFormat(final MultipartFile file) {
         String contentType = file.getContentType();
@@ -77,12 +80,12 @@ public class ExcelService {
 
     private StudentExcelRow parseRow(final Row row) {
         try {
-            String grade = getCellValueAsString(row.getCell(0));
-            String classNumber = getCellValueAsString(row.getCell(1));
-            String studentNumber = getCellValueAsString(row.getCell(2));
-            String studentName = getCellValueAsString(row.getCell(3));
+            String grade = getCellValueAsString(row.getCell(GRADE_INDEX));
+            String classNumber = getCellValueAsString(row.getCell(CLASS_NUMBER_INDEX));
+            String studentNumber = getCellValueAsString(row.getCell(STUDENT_NUMBER_INDEX));
+            String studentName = getCellValueAsString(row.getCell(STUDENT_NAME_INDEX));
 
-            return new StudentExcelRow(grade, classNumber, studentNumber, studentName);
+            return StudentExcelRow.of(grade, classNumber, studentNumber, studentName);
         } catch (Exception e) {
             return null;
         }

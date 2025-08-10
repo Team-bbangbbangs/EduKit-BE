@@ -8,6 +8,12 @@ public record StudentExcelRow(
         String studentNumber,
         String studentName
 ) {
+    public static StudentExcelRow of(final String grade, final String classNumber, final String studentNumber,
+                                     final String studentName
+    ) {
+        return new StudentExcelRow(grade, classNumber, studentNumber, studentName);
+    }
+
     @Override
     public boolean equals(final Object o) {
         if (this == o) {
