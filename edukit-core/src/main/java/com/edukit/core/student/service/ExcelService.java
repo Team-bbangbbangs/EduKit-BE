@@ -5,6 +5,8 @@ import com.edukit.core.student.exception.StudentException;
 import com.edukit.core.student.service.dto.StudentExcelRow;
 import java.io.IOException;
 import java.util.HashSet;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.apache.poi.ss.usermodel.Cell;
@@ -28,6 +30,7 @@ public class ExcelService {
     private static final int CLASS_NUMBER_INDEX = 1;
     private static final int STUDENT_NUMBER_INDEX = 2;
     private static final int STUDENT_NAME_INDEX = 3;
+    private static final int MAX_ROW_LENGTH = 4;
 
     public void validateExcelFormat(final MultipartFile file) {
         String contentType = file.getContentType();
@@ -69,25 +72,24 @@ public class ExcelService {
                 continue;
             }
 
-            StudentExcelRow studentRow = parseRow(row);
-            if (studentRow != null) {
-                students.add(studentRow);
-            }
+            Objects.requireNonNull(parseRow(row))
+                    .ifPresent(students::add);
+
         }
         return students;
     }
 
 
-    private StudentExcelRow parseRow(final Row row) {
+    private Optional<StudentExcelRow> parseRow(final Row row) {
         try {
             String grade = getCellValueAsString(row.getCell(GRADE_INDEX));
             String classNumber = getCellValueAsString(row.getCell(CLASS_NUMBER_INDEX));
             String studentNumber = getCellValueAsString(row.getCell(STUDENT_NUMBER_INDEX));
             String studentName = getCellValueAsString(row.getCell(STUDENT_NAME_INDEX));
 
-            return StudentExcelRow.of(grade, classNumber, studentNumber, studentName);
+            return Optional.of(StudentExcelRow.of(grade, classNumber, studentNumber, studentName));
         } catch (Exception e) {
-            return null;
+            return Optional.empty();
         }
     }
 
@@ -115,7 +117,7 @@ public class ExcelService {
     }
 
     private boolean isRowEmpty(final Row row) {
-        for (int cellIndex = 0; cellIndex < 4; cellIndex++) {
+        for (int cellIndex = 0; cellIndex < MAX_ROW_LENGTH; cellIndex++) {
             Cell cell = row.getCell(cellIndex);
             if (cell != null && cell.getCellType() != CellType.BLANK) {
                 String value = getCellValueAsString(cell);
