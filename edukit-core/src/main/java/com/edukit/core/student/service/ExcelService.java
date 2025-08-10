@@ -10,7 +10,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
-import org.apache.poi.poifs.filesystem.FileMagic;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -60,8 +59,6 @@ public class ExcelService {
         Set<StudentExcelRow> students = new HashSet<>();
 
         try {
-            validateFileFormat(file);
-
             try (Workbook workbook = WorkbookFactory.create(file.getInputStream())) {
                 for (int sheetIndex = 0; sheetIndex < workbook.getNumberOfSheets(); sheetIndex++) {
                     Sheet sheet = workbook.getSheetAt(sheetIndex);
@@ -77,16 +74,6 @@ public class ExcelService {
         return students;
     }
 
-    private void validateFileFormat(final MultipartFile file) throws IOException {
-        try {
-            FileMagic fileMagic = FileMagic.valueOf(file.getInputStream());
-            if (fileMagic != FileMagic.OLE2 && fileMagic != FileMagic.OOXML) {
-                throw new StudentException(StudentErrorCode.EXCEL_FILE_FORMAT_ERROR);
-            }
-        } catch (Exception e) {
-            throw new StudentException(StudentErrorCode.EXCEL_FILE_FORMAT_ERROR, e);
-        }
-    }
 
     private Set<StudentExcelRow> parseSheet(final Sheet sheet) {
         Set<StudentExcelRow> students = new HashSet<>();
