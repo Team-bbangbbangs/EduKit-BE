@@ -4,6 +4,7 @@ import com.edukit.common.EdukitResponse;
 import com.edukit.common.annotation.MemberId;
 import com.edukit.student.facade.StudentFacade;
 import com.edukit.student.facade.response.StudentsCreateResponse;
+import jakarta.validation.constraints.NotEmpty;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -22,7 +23,7 @@ public class StudentController {
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<EdukitResponse<StudentsCreateResponse>> uploadStudentExcel(@MemberId long memberId,
-                                                                                     @RequestParam("file") final MultipartFile file) {
+                                                                                     @NotEmpty @RequestParam("file") final MultipartFile file) {
         StudentsCreateResponse response = studentFacade.createStudentsFromExcel(memberId, file);
         return ResponseEntity.ok().body(EdukitResponse.success(response));
     }
