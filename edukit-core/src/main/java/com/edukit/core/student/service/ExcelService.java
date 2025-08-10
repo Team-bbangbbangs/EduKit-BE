@@ -28,8 +28,7 @@ public class ExcelService {
     private static final String XLS_EXTENSION = ".xls";
 
     static {
-        // Zip Bomb 방어 설정
-        IOUtils.setByteArrayMaxOverride(100 * 1024 * 1024); // 100MB 제한
+        IOUtils.setByteArrayMaxOverride(100 * 1024 * 1024);
     }
 
     private static final int HEADER_ROW_INDEX = 0;
@@ -47,23 +46,13 @@ public class ExcelService {
         }
     }
 
-    private boolean isExcelFile(final String contentType, final String fileName) {
-        boolean validContentType = contentType != null &&
-                (contentType.equals(XLSX_CONTENT_TYPE) || contentType.equals(XLS_CONTENT_TYPE));
-        boolean validExtension = fileName != null &&
-                (fileName.toLowerCase().endsWith(XLSX_EXTENSION) || fileName.toLowerCase().endsWith(XLS_EXTENSION));
-        return validContentType || validExtension;
-    }
-
     public Set<StudentExcelRow> parseStudentExcel(final MultipartFile file) {
         Set<StudentExcelRow> students = new HashSet<>();
 
-        try {
-            try (Workbook workbook = WorkbookFactory.create(file.getInputStream())) {
-                for (int sheetIndex = 0; sheetIndex < workbook.getNumberOfSheets(); sheetIndex++) {
-                    Sheet sheet = workbook.getSheetAt(sheetIndex);
-                    students.addAll(parseSheet(sheet));
-                }
+        try (Workbook workbook = WorkbookFactory.create(file.getInputStream())) {
+            for (int sheetIndex = 0; sheetIndex < workbook.getNumberOfSheets(); sheetIndex++) {
+                Sheet sheet = workbook.getSheetAt(sheetIndex);
+                students.addAll(parseSheet(sheet));
             }
 
         } catch (IOException e) {
@@ -74,6 +63,13 @@ public class ExcelService {
         return students;
     }
 
+    private boolean isExcelFile(final String contentType, final String fileName) {
+        boolean validContentType = contentType != null &&
+                (contentType.equals(XLSX_CONTENT_TYPE) || contentType.equals(XLS_CONTENT_TYPE));
+        boolean validExtension = fileName != null &&
+                (fileName.toLowerCase().endsWith(XLSX_EXTENSION) || fileName.toLowerCase().endsWith(XLS_EXTENSION));
+        return validContentType || validExtension;
+    }
 
     private Set<StudentExcelRow> parseSheet(final Sheet sheet) {
         Set<StudentExcelRow> students = new HashSet<>();
@@ -87,7 +83,6 @@ public class ExcelService {
 
             Objects.requireNonNull(parseRow(row))
                     .ifPresent(students::add);
-
         }
         return students;
     }

@@ -4,10 +4,13 @@ import com.edukit.core.member.db.entity.Member;
 import com.edukit.core.student.db.entity.Student;
 import com.edukit.core.student.db.repository.StudentRepository;
 import com.edukit.core.student.service.dto.StudentExcelRow;
+import com.edukit.core.student.service.dto.StudentKey;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -15,24 +18,26 @@ public class StudentService {
 
     private final StudentRepository studentRepository;
 
+    @Transactional
     public void createStudent(final Set<StudentExcelRow> studentRows, final Member member) {
-        List<Student> existingStudents = studentRepository.findByMember(member);
+        Set<StudentKey> existingKeys = getExistingStudents(member);
 
         List<Student> newStudents = studentRows.stream()
-                .filter(row -> !isDuplicateStudent(row, existingStudents))
-                .map(row -> Student.create(member, row.grade(), row.classNumber(), row.studentNumber(), row.studentName()))
+                .filter(row -> !existingKeys.contains(
+                        StudentKey.from(row.grade(), row.classNumber(), row.studentNumber())))
+                .map(row -> Student.create(member, row.grade(), row.classNumber(), row.studentNumber(),
+                        row.studentName()))
                 .toList();
 
         studentRepository.saveAll(newStudents);
     }
 
-    private boolean isDuplicateStudent(final StudentExcelRow row, final List<Student> existingStudents) {
+    private Set<StudentKey> getExistingStudents(final Member member) {
+        List<Student> existingStudents = studentRepository.findByMember(member);
+
         return existingStudents.stream()
-                .anyMatch(student ->
-                        student.getGrade().equals(row.grade()) &&
-                                student.getClassNumber().equals(row.classNumber()) &&
-                                student.getStudentNumber().equals(row.studentNumber()) &&
-                                student.getStudentName().equals(row.studentName())
-                );
+                .map(student -> StudentKey.from(student.getGrade(), student.getClassNumber(),
+                        student.getStudentNumber()))
+                .collect(Collectors.toSet());
     }
 }
