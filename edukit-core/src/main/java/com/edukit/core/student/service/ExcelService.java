@@ -41,15 +41,22 @@ public class ExcelService {
     }
 
     public Set<StudentExcelRow> parseStudentExcel(final MultipartFile file) {
+        Set<StudentExcelRow> students = new HashSet<>();
+
         try (Workbook workbook = new XSSFWorkbook(file.getInputStream())) {
-            Sheet sheet = workbook.getSheetAt(TARGET_SHEET_INDEX);
-            return extractStudentsFromSheet(sheet);
+
+            for (int sheetIndex = 0; sheetIndex < workbook.getNumberOfSheets(); sheetIndex++) {
+                Sheet sheet = workbook.getSheetAt(sheetIndex);
+                students.addAll(parseSheet(sheet));
+            }
+
         } catch (IOException e) {
-            throw new StudentException(StudentErrorCode.EXCEL_FILE_READ_ERROR);
+            throw new StudentException(StudentErrorCode.EXCEL_FILE_READ_ERROR, e);
         }
+        return students;
     }
 
-    private Set<StudentExcelRow> extractStudentsFromSheet(Sheet sheet) {
+    private Set<StudentExcelRow> parseSheet(final Sheet sheet) {
         Set<StudentExcelRow> students = new HashSet<>();
 
         for (int rowIndex = HEADER_ROW_INDEX + 1; rowIndex <= sheet.getLastRowNum(); rowIndex++) {
