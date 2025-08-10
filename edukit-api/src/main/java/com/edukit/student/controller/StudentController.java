@@ -15,7 +15,7 @@ import org.springframework.web.multipart.MultipartFile;
 @RestController
 @RequestMapping("/api/v2/student")
 @RequiredArgsConstructor
-public class StudentController {
+public class StudentController implements StudentApi {
 
     private final StudentFacade studentFacade;
 
@@ -25,5 +25,4 @@ public class StudentController {
         studentFacade.createStudentsFromExcel(memberId, file);
         return ResponseEntity.ok().body(EdukitResponse.success());
     }
-
 }
