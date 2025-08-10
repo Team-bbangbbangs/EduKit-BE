@@ -16,17 +16,24 @@ public class StudentService {
     private final StudentRepository studentRepository;
 
     public List<Student> createStudent(final Set<StudentExcelRow> studentRows, final Member member) {
-        List<Student> createdStudents = studentRows.stream()
-                .map(row -> Student.create(
-                        member,
-                        row.grade(),
-                        row.classNumber(),
-                        row.studentNumber(),
-                        row.studentName()
-                ))
+        List<Student> existingStudents = studentRepository.findByMember(member);
+
+        List<Student> newStudents = studentRows.stream()
+                .filter(row -> !isDuplicateStudent(row, existingStudents))
+                .map(row -> Student.create(member, row.grade(), row.classNumber(), row.studentNumber(), row.studentName()))
                 .toList();
 
-        studentRepository.saveAll(createdStudents);
-        return createdStudents;
+        studentRepository.saveAll(newStudents);
+        return newStudents;
+    }
+
+    private boolean isDuplicateStudent(final StudentExcelRow row, final List<Student> existingStudents) {
+        return existingStudents.stream()
+                .anyMatch(student ->
+                        student.getGrade().equals(row.grade()) &&
+                        student.getClassNumber().equals(row.classNumber()) &&
+                        student.getStudentNumber().equals(row.studentNumber()) &&
+                        student.getStudentName().equals(row.studentName())
+                );
     }
 }
