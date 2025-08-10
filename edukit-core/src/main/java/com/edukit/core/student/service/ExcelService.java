@@ -23,6 +23,8 @@ public class ExcelService {
 
     private static final String EXCEL_CONTENT_TYPE = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
     private static final String EXCEL_FILE_EXTENSION = ".xlsx";
+    private static final int HEADER_ROW_INDEX = 0;
+    private static final int TARGET_SHEET_INDEX = 0;
 
     public void validateExcelFormat(final MultipartFile file) {
         String contentType = file.getContentType();
@@ -39,30 +41,32 @@ public class ExcelService {
     }
 
     public Set<StudentExcelRow> parseStudentExcel(final MultipartFile file) {
-        Set<StudentExcelRow> students = new HashSet<>();
-
         try (Workbook workbook = new XSSFWorkbook(file.getInputStream())) {
-            Sheet sheet = workbook.getSheetAt(0);
-
-            // 첫 번째 행은 헤더로 가정하고 스킵
-            for (int rowIndex = 1; rowIndex <= sheet.getLastRowNum(); rowIndex++) {
-                Row row = sheet.getRow(rowIndex);
-
-                if (row == null || isRowEmpty(row)) {
-                    continue;
-                }
-
-                StudentExcelRow studentRow = parseRow(row);
-                if (studentRow != null) {
-                    students.add(studentRow);
-                }
-            }
+            Sheet sheet = workbook.getSheetAt(TARGET_SHEET_INDEX);
+            return extractStudentsFromSheet(sheet);
         } catch (IOException e) {
             throw new StudentException(StudentErrorCode.EXCEL_FILE_READ_ERROR);
         }
+    }
 
+    private Set<StudentExcelRow> extractStudentsFromSheet(Sheet sheet) {
+        Set<StudentExcelRow> students = new HashSet<>();
+
+        for (int rowIndex = HEADER_ROW_INDEX + 1; rowIndex <= sheet.getLastRowNum(); rowIndex++) {
+            Row row = sheet.getRow(rowIndex);
+
+            if (row == null || isRowEmpty(row)) {
+                continue;
+            }
+
+            StudentExcelRow studentRow = parseRow(row);
+            if (studentRow != null) {
+                students.add(studentRow);
+            }
+        }
         return students;
     }
+
 
     private StudentExcelRow parseRow(final Row row) {
         try {
@@ -95,8 +99,6 @@ public class ExcelService {
                 return String.valueOf(cell.getBooleanCellValue());
             case CellType.FORMULA:
                 return cell.getCellFormula();
-            case CellType.BLANK:
-                return "";
             default:
                 return "";
         }
