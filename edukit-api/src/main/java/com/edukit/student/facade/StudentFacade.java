@@ -1,13 +1,14 @@
 package com.edukit.student.facade;
 
-import com.edukit.core.student.service.ExcelService;
-import com.edukit.core.student.service.dto.StudentExcelRow;
 import com.edukit.core.member.db.entity.Member;
 import com.edukit.core.member.service.MemberService;
 import com.edukit.core.student.db.entity.Student;
+import com.edukit.core.student.service.ExcelService;
 import com.edukit.core.student.service.StudentService;
+import com.edukit.core.student.service.dto.StudentExcelRow;
 import com.edukit.student.facade.response.StudentsCreateResponse;
 import java.util.List;
+import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,7 +25,7 @@ public class StudentFacade {
     @Transactional
     public StudentsCreateResponse createStudentsFromExcel(final long memberId, final MultipartFile excelFile) {
         excelService.validateExcelFormat(excelFile);
-        List<StudentExcelRow> studentRows = excelService.parseStudentExcel(excelFile);
+        Set<StudentExcelRow> studentRows = excelService.parseStudentExcel(excelFile);
 
         Member member = memberService.getMemberById(memberId);
         List<Student> createdStudents = studentService.createStudent(studentRows, member);

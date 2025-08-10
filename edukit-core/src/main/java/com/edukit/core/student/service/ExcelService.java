@@ -4,8 +4,8 @@ import com.edukit.core.student.exception.StudentErrorCode;
 import com.edukit.core.student.exception.StudentException;
 import com.edukit.core.student.service.dto.StudentExcelRow;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellType;
@@ -38,8 +38,8 @@ public class ExcelService {
                 || (fileName != null && fileName.toLowerCase().endsWith(EXCEL_FILE_EXTENSION));
     }
 
-    public List<StudentExcelRow> parseStudentExcel(final MultipartFile file) {
-        List<StudentExcelRow> students = new ArrayList<>();
+    public Set<StudentExcelRow> parseStudentExcel(final MultipartFile file) {
+        Set<StudentExcelRow> students = new HashSet<>();
 
         try (Workbook workbook = new XSSFWorkbook(file.getInputStream())) {
             Sheet sheet = workbook.getSheetAt(0);
