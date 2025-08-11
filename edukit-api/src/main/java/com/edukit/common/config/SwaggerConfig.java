@@ -1,15 +1,12 @@
 package com.edukit.common.config;
 
-import com.edukit.common.annotation.MemberId;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.security.SecurityScheme;
 import io.swagger.v3.oas.models.servers.Server;
-import java.util.Arrays;
 import lombok.RequiredArgsConstructor;
-import org.springdoc.core.customizers.OperationCustomizer;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -29,18 +26,6 @@ public class SwaggerConfig {
                 .addServersItem(server())
                 .addSecurityItem(securityRequirement())
                 .components(components());
-    }
-
-    @Bean
-    public OperationCustomizer customizeOperation() {
-        return (operation, handlerMethod) -> {
-            boolean hasMemberId = Arrays.stream(handlerMethod.getMethodParameters())
-                    .anyMatch(param -> param.hasParameterAnnotation(MemberId.class));
-            if (hasMemberId) {
-                operation.getParameters().removeIf(param -> "memberId".equals(param.getName()));
-            }
-            return operation;
-        };
     }
 
     private Info info() {
