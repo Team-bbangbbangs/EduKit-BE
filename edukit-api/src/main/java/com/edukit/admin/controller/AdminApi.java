@@ -84,7 +84,7 @@ public interface AdminApi {
                     **✏️ 공지사항 수정 워크플로우**
                     
                     **1단계: 기존 공지사항 조회**
-                    - GET /api/v1/notices/{noticeId}로 기존 공지사항 정보와 첨부파일 목록을 확인합니다
+                    - GET /api/v2/notices/{noticeId}로 기존 공지사항 정보와 첨부파일 목록을 확인합니다
                     
                     **2단계: 새 파일 업로드 (필요시)**
                     - 새로 추가할 이미지가 있다면 /presigned-url API로 업로드 URL을 발급받습니다

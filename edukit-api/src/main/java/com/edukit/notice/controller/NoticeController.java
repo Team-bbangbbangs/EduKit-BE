@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/v1/notices")
+@RequestMapping("/api/v2/notices")
 @RequiredArgsConstructor
 public class NoticeController implements NoticeApi {
 
