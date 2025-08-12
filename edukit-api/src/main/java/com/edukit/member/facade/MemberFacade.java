@@ -95,16 +95,12 @@ public class MemberFacade {
     private void validatePassword(final Member member, final String currentPassword, final String newPassword) {
         String savedPassword = member.getPassword();
 
-        if (!isPasswordMatched(currentPassword, savedPassword)) {
+        if (!passwordEncoder.matches(currentPassword, savedPassword)) {
             throw new MemberException(MemberErrorCode.INVALID_CURRENT_PASSWORD);
         }
 
-        if (isPasswordMatched(newPassword, savedPassword)) {
+        if (currentPassword.equals(newPassword)) {
             throw new MemberException(MemberErrorCode.SAME_PASSWORD);
         }
-    }
-
-    private boolean isPasswordMatched(final String target, final String savedPassword) {
-        return passwordEncoder.matches(target, savedPassword);
     }
 }
