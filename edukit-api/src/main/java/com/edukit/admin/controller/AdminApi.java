@@ -29,7 +29,7 @@ public interface AdminApi {
                     - 발급받은 presigned URL로 S3에 직접 파일을 업로드합니다
                     
                     **2단계: 공지사항 생성**
-                    - categoryId: 공지사항 카테고리 (2: 공지, 3: 이벤트)
+                    - category: 공지사항 카테고리 (announcement: 공지, event: 이벤트)
                     - title: 공지사항 제목
                     - content: 공지사항 본문 내용
                     - fileKeys: **실제 본문에 포함된 이미지의 fileKey만 포함** (업로드한 모든 파일이 아님)
@@ -53,7 +53,7 @@ public interface AdminApi {
                                                         "code": "FAIL-400",
                                                         "message": "validation 오류",
                                                         "data": {
-                                                          "categoryId": "카테고리 ID는 필수입니다.",
+                                                          "category": "카테고리는 필수입니다.",
                                                           "title": "제목은 필수입니다.",
                                                           "content": "내용은 필수입니다."
                                                         }
@@ -84,14 +84,14 @@ public interface AdminApi {
                     **✏️ 공지사항 수정 워크플로우**
                     
                     **1단계: 기존 공지사항 조회**
-                    - GET /api/v1/notices/{noticeId}로 기존 공지사항 정보와 첨부파일 목록을 확인합니다
+                    - GET /api/v2/notices/{noticeId}로 기존 공지사항 정보와 첨부파일 목록을 확인합니다
                     
                     **2단계: 새 파일 업로드 (필요시)**
                     - 새로 추가할 이미지가 있다면 /presigned-url API로 업로드 URL을 발급받습니다
                     - 발급받은 presigned URL로 S3에 직접 파일을 업로드합니다
                     
                     **3단계: 공지사항 수정**
-                    - categoryId, title, content: 공지사항 정보
+                    - category, title, content: 공지사항 정보
                     - addedFileKeys: **새로 추가된 이미지의 fileKey 목록** (실제 본문에 포함된 것만)
                     - deletedNoticeFileIds: **삭제할 기존 파일의 ID 목록** (1단계에서 조회한 파일 ID)
                     
@@ -115,7 +115,7 @@ public interface AdminApi {
                                                         "code": "FAIL-400",
                                                         "message": "validation 오류",
                                                         "data": {
-                                                          "categoryId": "카테고리 ID는 필수입니다.",
+                                                          "category": "카테고리는 필수입니다.",
                                                           "title": "제목은 필수입니다.",
                                                           "content": "내용은 필수입니다."
                                                         }

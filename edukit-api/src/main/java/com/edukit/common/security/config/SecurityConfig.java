@@ -48,7 +48,7 @@ public class SecurityConfig {
                         .requestMatchers(SecurityWhitelist.SWAGGER_WHITE_LIST).permitAll()
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers("/api/v2/student-records/ai-generate/**").permitAll()
-                        .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/api/v2/admin/**").hasRole("ADMIN")
                         .requestMatchers("/api/v*/student-records/**").hasAnyRole("TEACHER", "ADMIN")
                         .anyRequest().authenticated()
                 )

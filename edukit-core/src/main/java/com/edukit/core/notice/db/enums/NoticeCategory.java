@@ -16,12 +16,13 @@ public enum NoticeCategory {
     private final int id;
     private final String text;
 
-    public static NoticeCategory fromId(final Integer code) {
-        if (code == null) {
+    public static NoticeCategory from(final String name) {
+        if (name == null || name.isBlank()) {
             return ALL;
         }
+        final String normalized = name.trim();
         return Arrays.stream(NoticeCategory.values())
-                .filter(category -> category.id == code)
+                .filter(category -> category.name().equalsIgnoreCase(normalized))
                 .findFirst()
                 .orElseThrow(() -> new NoticeException(NoticeErrorCode.INVALID_NOTICE_CATEGORY));
     }

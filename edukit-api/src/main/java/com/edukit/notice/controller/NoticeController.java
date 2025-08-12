@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/v1/notices")
+@RequestMapping("/api/v2/notices")
 @RequiredArgsConstructor
 public class NoticeController implements NoticeApi {
 
@@ -23,11 +23,11 @@ public class NoticeController implements NoticeApi {
 
     @GetMapping
     public ResponseEntity<EdukitResponse<NoticesGetResponse>> getNotices(
-            @RequestParam(name = "categoryId", required = false) Integer categoryId,
+            @RequestParam(name = "category", required = false) String category,
             @RequestParam(name = "page", required = false, defaultValue = "1") @Min(1) int page
     ) {
-        NoticeCategory category = NoticeCategory.fromId(categoryId);
-        return ResponseEntity.ok().body(EdukitResponse.success(noticeFacade.getNotices(category, page)));
+        NoticeCategory noticeCategory = NoticeCategory.from(category);
+        return ResponseEntity.ok().body(EdukitResponse.success(noticeFacade.getNotices(noticeCategory, page)));
     }
 
     @GetMapping("/{noticeId}")

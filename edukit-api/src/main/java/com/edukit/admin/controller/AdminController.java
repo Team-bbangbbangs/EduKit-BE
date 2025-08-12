@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/v1/admin/notices")
+@RequestMapping("/api/v2/admin/notices")
 @RequiredArgsConstructor
 public class AdminController implements AdminApi {
 
@@ -32,7 +32,7 @@ public class AdminController implements AdminApi {
     public ResponseEntity<EdukitResponse<Void>> createNotice(
             @RequestBody @Valid final NoticeCreateRequest request
     ) {
-        NoticeCategory category = NoticeCategory.fromId(request.categoryId());
+        NoticeCategory category = NoticeCategory.from(request.category());
         noticeFacade.createNotice(category, request.title(), request.content(), request.fileKeys());
         return ResponseEntity.ok().body(EdukitResponse.success());
     }
@@ -42,7 +42,7 @@ public class AdminController implements AdminApi {
             @RequestBody @Valid final NoticeUpdateRequest request,
             @PathVariable final long noticeId
     ) {
-        NoticeCategory category = NoticeCategory.fromId(request.categoryId());
+        NoticeCategory category = NoticeCategory.from(request.category());
         noticeFacade.updateNotice(noticeId, category, request.title(), request.content(), request.addedFileKeys(),
                 request.deletedNoticeFileIds());
         return ResponseEntity.ok().body(EdukitResponse.success());

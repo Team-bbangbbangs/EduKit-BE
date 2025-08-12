@@ -10,7 +10,7 @@ public class SecurityWhitelist {
             "/api/v1/auth/signup",
             "/api/v1/auth/login",
             "/api/v1/auth/reissue",
-            "/api/v1/auth/password",
+            "/api/v2/auth/password",
             "/api/v1/auth/verify-email",
             "/api/v1/auth/find-password",
             "/actuator/health",
@@ -18,8 +18,8 @@ public class SecurityWhitelist {
     };
 
     static final String[] BUSINESS_WHITE_LIST = {
-            "/api/v1/notices",
-            "/api/v1/notices/{noticeId:\\d+}"
+            "/api/v2/notices",
+            "/api/v2/notices/{noticeId:\\d+}"
     };
 
     static final String[] SWAGGER_WHITE_LIST = {
