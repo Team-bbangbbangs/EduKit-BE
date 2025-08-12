@@ -102,7 +102,7 @@ public class AuthFacade {
         PasswordValidator.validatePasswordEquality(newPassword, confirmPassword);
 
         Member member = memberService.getMemberByUuid(memberUuid);
-        verificationCodeService.verifyPasswordResetCode(member, verificationCode);
+        verificationCodeService.checkVerificationCode(member, verificationCode, VerificationCodeType.PASSWORD_RESET);
 
         if (passwordEncoder.matches(newPassword, member.getPassword())) {
             throw new AuthException(AuthErrorCode.SAME_PASSWORD);
@@ -126,5 +126,12 @@ public class AuthFacade {
                 VerificationCodeType.TEACHER_VERIFICATION);
         eventPublisher.publishEvent(
                 EmailSendEvent.of(member.getEmail(), member.getMemberUuid(), verificationCode));
+    }
+
+    @Transactional
+    public void verifyEmailCode(final String memberUuid, final String verificationCode) {
+        Member member = memberService.getMemberByUuid(memberUuid);
+        verificationCodeService.checkVerificationCode(member, verificationCode, VerificationCodeType.TEACHER_VERIFICATION);
+        memberService.memberVerified(member);
     }
 }

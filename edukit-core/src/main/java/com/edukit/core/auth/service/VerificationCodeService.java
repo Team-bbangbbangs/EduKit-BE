@@ -3,13 +3,11 @@ package com.edukit.core.auth.service;
 import com.edukit.core.auth.db.entity.VerificationCode;
 import com.edukit.core.auth.db.enums.VerificationCodeType;
 import com.edukit.core.auth.db.enums.VerificationStatus;
+import com.edukit.core.auth.db.repository.VerificationCodeRepository;
 import com.edukit.core.auth.exception.AuthErrorCode;
 import com.edukit.core.auth.exception.AuthException;
-import com.edukit.core.auth.db.repository.VerificationCodeRepository;
-import com.edukit.core.auth.service.dto.MemberVerificationData;
 import com.edukit.core.auth.util.RandomCodeGenerator;
 import com.edukit.core.member.db.entity.Member;
-import java.util.List;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import lombok.RequiredArgsConstructor;
@@ -32,28 +30,16 @@ public class VerificationCodeService {
     }
 
     @Transactional
-    public List<MemberVerificationData> issueVerificationCodesForMembers(final List<Member> members) {
-        return members.stream()
-                .map(member -> {
-                    String code = RandomCodeGenerator.generate();
-                    VerificationCode verificationCode = VerificationCode.create(member, code,
-                            VerificationStatus.PENDING,
-                            VerificationCodeType.TEACHER_VERIFICATION);
-                    verificationCodeRepository.save(verificationCode);
-                    return MemberVerificationData.of(member.getEmail(), member.getMemberUuid(), code);
-                })
-                .toList();
-    }
-
-    public void verifyPasswordResetCode(final Member member, final String inputCode) {
-        VerificationCode verificationCode = getValidPasswordResetCodeByMember(member.getId());
+    public void checkVerificationCode(final Member member, final String inputCode, final VerificationCodeType verificationCodeType) {
+        VerificationCode verificationCode = getValidVerificationCodeByMember(member.getId(), verificationCodeType);
         checkVerified(verificationCode, inputCode);
-        verificationCode.complete();
+        verificationCode.verified();
     }
 
-    private VerificationCode getValidPasswordResetCodeByMember(final long memberId) {
+    private VerificationCode getValidVerificationCodeByMember(final long memberId,
+                                                              final VerificationCodeType verificationCodeType) {
         return verificationCodeRepository.findTop1ByMemberIdAndTypeAndStatusOrderByIdDesc(memberId,
-                        VerificationCodeType.PASSWORD_RESET, VerificationStatus.PENDING)
+                        verificationCodeType, VerificationStatus.PENDING)
                 .orElseThrow(() -> new AuthException(AuthErrorCode.VERIFICATION_CODE_NOT_FOUND));
     }
 

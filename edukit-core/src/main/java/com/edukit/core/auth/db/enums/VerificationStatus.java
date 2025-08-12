@@ -1,7 +1,7 @@
 package com.edukit.core.auth.db.enums;
 
 public enum VerificationStatus {
-    COMPLETE,
+    VERIFIED,
     PENDING,
     EXPIRED
 }

@@ -19,10 +19,12 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CookieValue;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -94,6 +96,13 @@ public class AuthController {
     @PostMapping("/v1/auth/email/send-verification")
     public ResponseEntity<EdukitResponse<Void>> sendVerificationEmail(@MemberId final long memberId) {
         authFacade.sendVerificationEmail(memberId);
+        return ResponseEntity.ok(EdukitResponse.success());
+    }
+
+    @GetMapping("/verify-email")
+    public ResponseEntity<EdukitResponse<Void>> verifyEmail(@RequestParam("id") final String memberUuid,
+                                                            @RequestParam("code") final String verificationCode) {
+        authFacade.verifyEmailCode(memberUuid.strip(), verificationCode.strip());
         return ResponseEntity.ok(EdukitResponse.success());
     }
 }

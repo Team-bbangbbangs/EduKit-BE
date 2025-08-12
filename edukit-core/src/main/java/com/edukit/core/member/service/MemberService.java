@@ -145,4 +145,8 @@ public class MemberService {
     public void updatePassword(final Member member, final String encodedPassword) {
         member.updatePassword(encodedPassword);
     }
+
+    public void memberVerified(final Member member) {
+        member.verifyAsTeacher();
+    }
 }
