@@ -82,7 +82,8 @@ public class MemberFacade {
     }
 
     @Transactional
-    public void updatePassword(final long memberId, final String currentPassword, final String newPassword, final String confirmPassword) {
+    public void updatePassword(final long memberId, final String currentPassword, final String newPassword,
+                               final String confirmPassword) {
         PasswordValidator.validatePasswordFormat(newPassword);
         PasswordValidator.validatePasswordEquality(newPassword, confirmPassword);
 
@@ -93,16 +94,17 @@ public class MemberFacade {
 
     private void validatePassword(final Member member, final String currentPassword, final String newPassword) {
         String savedPassword = member.getPassword();
-        
-        // 성능 최적화: passwordEncoder.matches() 호출을 한 번만 수행
-        boolean isCurrentPasswordValid = passwordEncoder.matches(currentPassword, savedPassword);
-        if (!isCurrentPasswordValid) {
+
+        if (!isPasswordMatched(currentPassword, savedPassword)) {
             throw new MemberException(MemberErrorCode.INVALID_CURRENT_PASSWORD);
         }
-        
-        // 새 비밀번호가 현재 비밀번호와 같은지 확인
-        if (passwordEncoder.matches(newPassword, savedPassword)) {
+
+        if (isPasswordMatched(newPassword, savedPassword)) {
             throw new MemberException(MemberErrorCode.SAME_PASSWORD);
         }
+    }
+
+    private boolean isPasswordMatched(final String target, final String savedPassword) {
+        return passwordEncoder.matches(target, savedPassword);
     }
 }
