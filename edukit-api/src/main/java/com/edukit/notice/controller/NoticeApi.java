@@ -51,7 +51,7 @@ public interface NoticeApi {
             )
     })
     ResponseEntity<EdukitResponse<NoticesGetResponse>> getNotices(
-            @RequestParam(name = "categoryId", required = false) Integer categoryId,
+            @RequestParam(name = "category", required = false) String category,
             @RequestParam(name = "page", required = false, defaultValue = "1") @Min(1) int page
     );
 

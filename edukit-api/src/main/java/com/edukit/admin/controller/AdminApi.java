@@ -29,7 +29,7 @@ public interface AdminApi {
                     - 발급받은 presigned URL로 S3에 직접 파일을 업로드합니다
                     
                     **2단계: 공지사항 생성**
-                    - categoryId: 공지사항 카테고리 (2: 공지, 3: 이벤트)
+                    - category: 공지사항 카테고리 (announcement: 공지, event: 이벤트)
                     - title: 공지사항 제목
                     - content: 공지사항 본문 내용
                     - fileKeys: **실제 본문에 포함된 이미지의 fileKey만 포함** (업로드한 모든 파일이 아님)
@@ -53,7 +53,7 @@ public interface AdminApi {
                                                         "code": "FAIL-400",
                                                         "message": "validation 오류",
                                                         "data": {
-                                                          "categoryId": "카테고리 ID는 필수입니다.",
+                                                          "categoryId": "카테고리는 필수입니다.",
                                                           "title": "제목은 필수입니다.",
                                                           "content": "내용은 필수입니다."
                                                         }
@@ -115,7 +115,7 @@ public interface AdminApi {
                                                         "code": "FAIL-400",
                                                         "message": "validation 오류",
                                                         "data": {
-                                                          "categoryId": "카테고리 ID는 필수입니다.",
+                                                          "categoryId": "카테고리는 필수입니다.",
                                                           "title": "제목은 필수입니다.",
                                                           "content": "내용은 필수입니다."
                                                         }
