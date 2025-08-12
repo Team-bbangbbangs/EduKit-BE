@@ -4,6 +4,7 @@ import com.edukit.core.auth.db.enums.VerificationCodeType;
 import com.edukit.core.auth.service.AuthService;
 import com.edukit.core.auth.service.RefreshTokenStoreService;
 import com.edukit.core.auth.service.VerificationCodeService;
+import com.edukit.core.auth.util.PasswordValidator;
 import com.edukit.core.member.db.entity.Member;
 import com.edukit.core.member.db.enums.School;
 import com.edukit.core.member.event.MemberEmailUpdateEvent;
@@ -17,6 +18,7 @@ import com.edukit.member.facade.response.MemberProfileGetResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,6 +31,7 @@ public class MemberFacade {
     private final SubjectService subjectService;
     private final RefreshTokenStoreService refreshTokenStoreService;
     private final VerificationCodeService verificationCodeService;
+    private final PasswordEncoder passwordEncoder;
     private final ApplicationEventPublisher eventPublisher;
 
     @Transactional(readOnly = true)
@@ -76,5 +79,27 @@ public class MemberFacade {
                 VerificationCodeType.TEACHER_VERIFICATION);
         eventPublisher.publishEvent(
                 MemberEmailUpdateEvent.of(member.getEmail(), member.getMemberUuid(), verificationCode));
+    }
+
+    @Transactional
+    public void updatePassword(final long memberId, final String currentPassword, final String newPassword) {
+        Member member = memberService.getMemberById(memberId);
+        PasswordValidator.validatePasswordFormat(newPassword);
+        validatePassword(member, currentPassword, newPassword);
+        member.updatePassword(passwordEncoder.encode(newPassword));
+    }
+
+    private void validatePassword(final Member member, final String currentPassword, final String newPassword) {
+        String savedPassword = member.getPassword();
+        if (!isPasswordMatched(currentPassword, savedPassword)) {
+            throw new MemberException(MemberErrorCode.INVALID_CURRENT_PASSWORD);
+        }
+        if (isPasswordMatched(newPassword, savedPassword)) {
+            throw new MemberException(MemberErrorCode.SAME_PASSWORD);
+        }
+    }
+
+    private boolean isPasswordMatched(final String inputPassword, final String savedPassword) {
+        return passwordEncoder.matches(inputPassword, savedPassword);
     }
 }

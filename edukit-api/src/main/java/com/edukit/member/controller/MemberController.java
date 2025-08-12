@@ -5,6 +5,7 @@ import com.edukit.common.annotation.MemberId;
 import com.edukit.core.member.db.enums.School;
 import com.edukit.member.controller.request.MemberEmailUpdateRequest;
 import com.edukit.member.controller.request.MemberProfileUpdateRequest;
+import com.edukit.member.controller.request.PasswordChangeRequest;
 import com.edukit.member.facade.MemberFacade;
 import com.edukit.member.facade.response.MemberNicknameValidationResponse;
 import com.edukit.member.facade.response.MemberProfileGetResponse;
@@ -60,6 +61,13 @@ public class MemberController {
                                                             @RequestBody @Valid final MemberEmailUpdateRequest request
     ) {
         memberFacade.updateEmail(memberId, request.email());
+        return ResponseEntity.ok().body(EdukitResponse.success());
+    }
+
+    @PatchMapping("/password")
+    public ResponseEntity<EdukitResponse<Void>> updatePassword(@MemberId final long memberId,
+                                                               @RequestBody @Valid final PasswordChangeRequest request) {
+        memberFacade.updatePassword(memberId, request.currentPassword(), request.newPassword());
         return ResponseEntity.ok().body(EdukitResponse.success());
     }
 }
