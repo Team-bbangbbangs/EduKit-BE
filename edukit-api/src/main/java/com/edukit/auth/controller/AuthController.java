@@ -99,7 +99,7 @@ public class AuthController {
         return ResponseEntity.ok(EdukitResponse.success());
     }
 
-    @GetMapping("/verify-email")
+    @GetMapping("/v1/auth/verify-email")
     public ResponseEntity<EdukitResponse<Void>> verifyEmail(@RequestParam("id") final String memberUuid,
                                                             @RequestParam("code") final String verificationCode) {
         authFacade.verifyEmailCode(memberUuid.strip(), verificationCode.strip());
