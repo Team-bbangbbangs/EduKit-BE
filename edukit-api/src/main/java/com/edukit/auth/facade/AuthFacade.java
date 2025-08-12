@@ -121,6 +121,7 @@ public class AuthFacade {
         }
     }
 
+    @Transactional
     public void sendVerificationEmail(final long memberId) {
         Member member = memberService.getMemberById(memberId);
         String verificationCode = verificationCodeService.issueVerificationCode(member,
