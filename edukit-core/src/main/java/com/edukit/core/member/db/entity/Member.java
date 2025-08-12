@@ -134,4 +134,9 @@ public class Member extends BaseTimeEntity {
         this.role = MemberRole.TEACHER;
         this.verifiedAt = LocalDateTime.now();
     }
+
+    public void updateEmailAndChangeVerifyStatus(final String email) {
+        this.email = email;
+        this.role = MemberRole.PENDING_TEACHER;
+    }
 }

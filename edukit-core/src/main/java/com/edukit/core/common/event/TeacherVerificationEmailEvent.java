@@ -1,4 +1,4 @@
-package com.edukit.core.auth.event;
+package com.edukit.core.common.event;
 
 public interface TeacherVerificationEmailEvent {
     String email();

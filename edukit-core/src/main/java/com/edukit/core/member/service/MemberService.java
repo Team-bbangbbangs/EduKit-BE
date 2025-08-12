@@ -149,4 +149,8 @@ public class MemberService {
     public void memberVerified(final Member member) {
         member.verifyAsTeacher();
     }
+
+    public void updateEmail(final Member member, final String email) {
+        member.updateEmailAndChangeVerifyStatus(email);
+    }
 }

@@ -3,6 +3,7 @@ package com.edukit.member.controller;
 import com.edukit.common.EdukitResponse;
 import com.edukit.common.annotation.MemberId;
 import com.edukit.core.member.db.enums.School;
+import com.edukit.member.controller.request.MemberEmailUpdateRequest;
 import com.edukit.member.controller.request.MemberProfileUpdateRequest;
 import com.edukit.member.facade.MemberFacade;
 import com.edukit.member.facade.response.MemberNicknameValidationResponse;
@@ -51,6 +52,14 @@ public class MemberController {
     @DeleteMapping("/withdraw")
     public ResponseEntity<EdukitResponse<Void>> withdraw(@MemberId final long memberId) {
         memberFacade.withdraw(memberId);
+        return ResponseEntity.ok().body(EdukitResponse.success());
+    }
+
+    @PatchMapping("/email")
+    public ResponseEntity<EdukitResponse<Void>> updateEmail(@MemberId final long memberId,
+                                                            @RequestBody @Valid final MemberEmailUpdateRequest request
+    ) {
+        memberFacade.updateEmail(memberId, request.email());
         return ResponseEntity.ok().body(EdukitResponse.success());
     }
 }

@@ -1,5 +1,7 @@
 package com.edukit.core.auth.event;
 
+import com.edukit.core.common.event.TeacherVerificationEmailEvent;
+
 public record MemberSignedUpEventTeacher(
         String email,
         String memberUuid,

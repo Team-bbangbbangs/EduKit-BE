@@ -23,10 +23,10 @@ public class AwsSesEmailMapper {
 
     private static final String DEFAULT_CHARSET = StandardCharsets.UTF_8.name();
 
-    public SendEmailRequest buildEmailRequestForSignUp(final String emailReceiver, final String memberUuid,
-                                                       final String verificationCode) {
+    public SendEmailRequest buildEmailRequestForTeacherVerify(final String emailReceiver, final String memberUuid,
+                                                              final String verificationCode) {
         String htmlBody = buildVerificationEmail(memberUuid, verificationCode);
-        return buildSendEmailRequest(emailReceiver, "EduKit 회원가입을 환영합니다.", htmlBody);
+        return buildSendEmailRequest(emailReceiver, "[Edukit] 교사 인증 링크", htmlBody);
     }
 
     private String buildVerificationEmail(final String memberUuid, final String verificationCode) {
