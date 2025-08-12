@@ -4,7 +4,6 @@ import static com.edukit.common.security.handler.RefreshTokenCookieHandler.REFRE
 
 import com.edukit.auth.controller.request.MemberLoginRequest;
 import com.edukit.auth.controller.request.MemberSignUpRequest;
-import com.edukit.auth.controller.request.UpdatePasswordRequest;
 import com.edukit.auth.facade.AuthFacade;
 import com.edukit.auth.facade.response.MemberLoginResponse;
 import com.edukit.auth.facade.response.MemberReissueResponse;
@@ -28,14 +27,14 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/api/v1/auth")
 @RequiredArgsConstructor
 public class AuthController {
 
     private final AuthFacade authFacade;
     private final RefreshTokenCookieHandler cookieHandler;
 
-    @PostMapping("/v1/auth/signup")
+    @PostMapping("/signup")
     public ResponseEntity<EdukitResponse<MemberSignUpResponse>> signUp(
             @RequestBody @Valid final MemberSignUpRequest request) {
 
@@ -51,7 +50,7 @@ public class AuthController {
                 .body(EdukitResponse.success(response));
     }
 
-    @PostMapping("/v1/auth/login")
+    @PostMapping("/login")
     public ResponseEntity<EdukitResponse<MemberLoginResponse>> login(
             @RequestBody @Valid final MemberLoginRequest request) {
         MemberLoginResponse loginResponse = authFacade.login(request.email(), request.password());
@@ -64,7 +63,7 @@ public class AuthController {
 
     }
 
-    @PostMapping("/v1/auth/logout")
+    @PostMapping("/logout")
     public ResponseEntity<EdukitResponse<Void>> logout(@MemberId final long memberId) {
         authFacade.logout(memberId);
 
@@ -74,7 +73,7 @@ public class AuthController {
                 .body(EdukitResponse.success());
     }
 
-    @PatchMapping("/v1/auth/reissue")
+    @PatchMapping("/reissue")
     public ResponseEntity<EdukitResponse<MemberReissueResponse>> reissue(
             @CookieValue(value = REFRESH_TOKEN_COOKIE_NAME) final String refreshToken) {
         MemberReissueResponse reissueResponse = authFacade.reissue(refreshToken.strip());
@@ -85,21 +84,13 @@ public class AuthController {
                 .body(EdukitResponse.success(reissueResponse));
     }
 
-    @PatchMapping("/v2/auth/password")
-    public ResponseEntity<EdukitResponse<Void>> updatePassword(
-            @RequestBody @Valid final UpdatePasswordRequest request) {
-        authFacade.updatePassword(request.memberUuid(), request.verificationCode(), request.password(),
-                request.confirmPassword());
-        return ResponseEntity.ok(EdukitResponse.success());
-    }
-
-    @PostMapping("/v1/auth/email/send-verification")
+    @PostMapping("/email/send-verification")
     public ResponseEntity<EdukitResponse<Void>> sendVerificationEmail(@MemberId final long memberId) {
         authFacade.sendVerificationEmail(memberId);
         return ResponseEntity.ok(EdukitResponse.success());
     }
 
-    @GetMapping("/v1/auth/verify-email")
+    @GetMapping("/verify-email")
     public ResponseEntity<EdukitResponse<Void>> verifyEmail(@RequestParam("id") final String memberUuid,
                                                             @RequestParam("code") final String verificationCode) {
         authFacade.verifyEmailCode(memberUuid.strip(), verificationCode.strip());

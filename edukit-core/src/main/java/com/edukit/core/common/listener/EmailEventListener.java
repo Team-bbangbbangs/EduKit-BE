@@ -1,6 +1,6 @@
 package com.edukit.core.common.listener;
 
-import com.edukit.core.auth.event.VerificationEmailEvent;
+import com.edukit.core.auth.event.TeacherVerificationEmailEvent;
 import com.edukit.core.common.service.EmailService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
@@ -18,7 +18,13 @@ public class EmailEventListener {
 
     @Async("emailTaskExecutor")
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
-    public void handleEmailEvent(final VerificationEmailEvent event) {
+    public void handleEmailEvent(final TeacherVerificationEmailEvent event) {
+        emailService.sendEmail(event.email(), event.memberUuid(), event.verificationCode());
+    }
+
+    @Async("emailTaskExecutor")
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+    public void handlePasswordFindEvent(final TeacherVerificationEmailEvent event) {
         emailService.sendEmail(event.email(), event.memberUuid(), event.verificationCode());
     }
 }

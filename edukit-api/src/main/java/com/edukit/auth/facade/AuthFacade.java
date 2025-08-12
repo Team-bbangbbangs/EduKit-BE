@@ -4,8 +4,9 @@ import com.edukit.auth.facade.response.MemberLoginResponse;
 import com.edukit.auth.facade.response.MemberReissueResponse;
 import com.edukit.auth.facade.response.MemberSignUpResponse;
 import com.edukit.core.auth.db.enums.VerificationCodeType;
-import com.edukit.core.auth.event.EmailSendEvent;
-import com.edukit.core.auth.event.MemberSignedUpEvent;
+import com.edukit.core.auth.event.EmailSendEventTeacher;
+import com.edukit.core.auth.event.MemberSignedUpEventTeacher;
+import com.edukit.core.auth.event.PasswordFindEvent;
 import com.edukit.core.auth.exception.AuthErrorCode;
 import com.edukit.core.auth.exception.AuthException;
 import com.edukit.core.auth.service.AuthService;
@@ -56,7 +57,7 @@ public class AuthFacade {
                 VerificationCodeType.TEACHER_VERIFICATION);
 
         eventPublisher.publishEvent(
-                MemberSignedUpEvent.of(member.getEmail(), member.getMemberUuid(), verificationCode));
+                MemberSignedUpEventTeacher.of(member.getEmail(), member.getMemberUuid(), verificationCode));
         return MemberSignUpResponse.of(authToken.accessToken(), authToken.refreshToken());
     }
 
@@ -125,13 +126,23 @@ public class AuthFacade {
         String verificationCode = verificationCodeService.issueVerificationCode(member,
                 VerificationCodeType.TEACHER_VERIFICATION);
         eventPublisher.publishEvent(
-                EmailSendEvent.of(member.getEmail(), member.getMemberUuid(), verificationCode));
+                EmailSendEventTeacher.of(member.getEmail(), member.getMemberUuid(), verificationCode));
     }
 
     @Transactional
     public void verifyEmailCode(final String memberUuid, final String verificationCode) {
         Member member = memberService.getMemberByUuid(memberUuid);
-        verificationCodeService.checkVerificationCode(member, verificationCode, VerificationCodeType.TEACHER_VERIFICATION);
+        verificationCodeService.checkVerificationCode(member, verificationCode,
+                VerificationCodeType.TEACHER_VERIFICATION);
         memberService.memberVerified(member);
+    }
+
+    @Transactional
+    public void findPassword(final String email) {
+        Member member = memberService.getMemberByEmail(email);
+        String verificationCode = verificationCodeService.issueVerificationCode(member,
+                VerificationCodeType.PASSWORD_RESET);
+        eventPublisher.publishEvent(
+                PasswordFindEvent.of(member.getEmail(), member.getMemberUuid(), verificationCode));
     }
 }
