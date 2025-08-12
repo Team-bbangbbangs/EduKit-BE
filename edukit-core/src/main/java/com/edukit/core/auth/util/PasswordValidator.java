@@ -8,11 +8,8 @@ public class PasswordValidator {
 
     private static final int MIN_PASSWORD_LENGTH = 8;
     private static final int MAX_PASSWORD_LENGTH = 16;
-    
+
     // 성능 개선을 위해 정규표현식을 단순화
-    private static final Pattern HAS_LETTER = Pattern.compile("[A-Za-z]");
-    private static final Pattern HAS_DIGIT = Pattern.compile("\\d");
-    private static final Pattern HAS_SPECIAL = Pattern.compile("[!@#$%^&*()\\-_=+\\[\\]{};:'\",.<>/?`~]");
     private static final Pattern VALID_CHARS = Pattern.compile("^[A-Za-z\\d!@#$%^&*()\\-_=+\\[\\]{};:'\",.<>/?`~]*$");
 
     public static void validatePasswordFormat(final String password) {
@@ -25,20 +22,32 @@ public class PasswordValidator {
             throw new AuthException(AuthErrorCode.INVALID_PASSWORD_FORMAT);
         }
 
-        // 성능 최적화: 정규표현식 매처를 재사용
-        var letterMatcher = HAS_LETTER.matcher(password);
-        var digitMatcher = HAS_DIGIT.matcher(password);
-        var specialMatcher = HAS_SPECIAL.matcher(password);
-        
-        boolean hasLetter = letterMatcher.find();
-        boolean hasDigit = digitMatcher.find();
-        boolean hasSpecial = specialMatcher.find();
-        
+        // 영문자, 숫자, 특수문자 중 최소 2가지 조합 체크 (성능 최적화)
+        boolean hasLetter = false;
+        boolean hasDigit = false;
+        boolean hasSpecial = false;
+
+        for (char c : password.toCharArray()) {
+            if (Character.isLetter(c)) {
+                hasLetter = true;
+            } else if (Character.isDigit(c)) {
+                hasDigit = true;
+            } else if ("!@#$%^&*()\\-_=+\\[\\]{};:'\",.<>/?`~".indexOf(c) != -1) {
+                hasSpecial = true;
+            }
+        }
+
         int combinationCount = 0;
-        if (hasLetter) combinationCount++;
-        if (hasDigit) combinationCount++;
-        if (hasSpecial) combinationCount++;
-        
+        if (hasLetter) {
+            combinationCount++;
+        }
+        if (hasDigit) {
+            combinationCount++;
+        }
+        if (hasSpecial) {
+            combinationCount++;
+        }
+
         if (combinationCount < 2) {
             throw new AuthException(AuthErrorCode.INVALID_PASSWORD_FORMAT);
         }
@@ -53,7 +62,6 @@ public class PasswordValidator {
     }
 
     public static void validatePasswordEquality(final String newPassword, final String confirmedNewPassword) {
-        // 성능 개선을 위해 MessageDigest.isEqual() 대신 일반적인 문자열 비교 사용
         if (!newPassword.equals(confirmedNewPassword)) {
             throw new AuthException(AuthErrorCode.PASSWORD_CONFIRM_MISMATCH);
         }
