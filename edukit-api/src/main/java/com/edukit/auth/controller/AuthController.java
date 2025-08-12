@@ -90,4 +90,10 @@ public class AuthController {
                 request.confirmPassword());
         return ResponseEntity.ok(EdukitResponse.success());
     }
+
+    @PostMapping("/v1/auth/email/send-verification")
+    public ResponseEntity<EdukitResponse<Void>> sendVerificationEmail(@MemberId final long memberId) {
+        authFacade.sendVerificationEmail(memberId);
+        return ResponseEntity.ok(EdukitResponse.success());
+    }
 }

@@ -4,6 +4,7 @@ import com.edukit.auth.facade.response.MemberLoginResponse;
 import com.edukit.auth.facade.response.MemberReissueResponse;
 import com.edukit.auth.facade.response.MemberSignUpResponse;
 import com.edukit.core.auth.db.enums.VerificationCodeType;
+import com.edukit.core.auth.event.EmailSendEvent;
 import com.edukit.core.auth.event.MemberSignedUpEvent;
 import com.edukit.core.auth.exception.AuthErrorCode;
 import com.edukit.core.auth.exception.AuthException;
@@ -117,5 +118,13 @@ public class AuthFacade {
         if (member.getRole() == MemberRole.PENDING_TEACHER) {
             throw new AuthException(AuthErrorCode.FORBIDDEN_MEMBER);
         }
+    }
+
+    public void sendVerificationEmail(final long memberId) {
+        Member member = memberService.getMemberById(memberId);
+        String verificationCode = verificationCodeService.issueVerificationCode(member,
+                VerificationCodeType.TEACHER_VERIFICATION);
+        eventPublisher.publishEvent(
+                EmailSendEvent.of(member.getEmail(), member.getMemberUuid(), verificationCode));
     }
 }
