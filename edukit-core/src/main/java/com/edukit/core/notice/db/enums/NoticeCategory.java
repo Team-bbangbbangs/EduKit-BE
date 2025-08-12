@@ -17,11 +17,12 @@ public enum NoticeCategory {
     private final String text;
 
     public static NoticeCategory from(final String name) {
-        if (name == null) {
+        if (name == null || name.isBlank()) {
             return ALL;
         }
+        final String normalized = name.trim();
         return Arrays.stream(NoticeCategory.values())
-                .filter(category -> category.name().equalsIgnoreCase(name))
+                .filter(category -> category.name().equalsIgnoreCase(normalized))
                 .findFirst()
                 .orElseThrow(() -> new NoticeException(NoticeErrorCode.INVALID_NOTICE_CATEGORY));
     }
