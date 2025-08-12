@@ -67,7 +67,7 @@ public class MemberController {
     @PatchMapping("/password")
     public ResponseEntity<EdukitResponse<Void>> updatePassword(@MemberId final long memberId,
                                                                @RequestBody @Valid final PasswordChangeRequest request) {
-        memberFacade.updatePassword(memberId, request.currentPassword(), request.newPassword());
+        memberFacade.updatePassword(memberId, request.currentPassword(), request.newPassword(), request.confirmPassword());
         return ResponseEntity.ok().body(EdukitResponse.success());
     }
 }
