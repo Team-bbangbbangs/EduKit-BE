@@ -5,15 +5,12 @@ import com.edukit.core.student.db.entity.Student;
 import com.edukit.core.student.db.repository.StudentRepository;
 import com.edukit.core.student.service.dto.StudentExcelRow;
 import com.edukit.core.student.service.dto.StudentKey;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
-import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -41,31 +38,26 @@ public class StudentService {
 
     private void bulkInsertStudents(final List<StudentExcelRow> studentRows, final Member member) {
         String sql = """
-                INSERT INTO student (member_id, grade, class_number, student_number, student_name, created_at, updated_at)
+                INSERT INTO student (member_id, grade, class_number, student_number, student_name, created_at, modified_at)
                 VALUES (?, ?, ?, ?, ?, ?, ?)
                 """;
 
         LocalDateTime now = LocalDateTime.now();
         Timestamp timestamp = Timestamp.valueOf(now);
 
-        jdbcTemplate.batchUpdate(sql, new BatchPreparedStatementSetter() {
-            @Override
-            public void setValues(PreparedStatement ps, int i) throws SQLException {
-                StudentExcelRow row = studentRows.get(i);
-                ps.setLong(1, member.getId());
-                ps.setString(2, row.grade());
-                ps.setString(3, row.classNumber());
-                ps.setString(4, row.studentNumber());
-                ps.setString(5, row.studentName());
-                ps.setTimestamp(6, timestamp);
-                ps.setTimestamp(7, timestamp);
-            }
+        jdbcTemplate.batchUpdate(sql,
+                studentRows,
+                studentRows.size(),
+                (ps, row) -> {
+                    ps.setLong(1, member.getId());
+                    ps.setString(2, row.grade());
+                    ps.setString(3, row.classNumber());
+                    ps.setString(4, row.studentNumber());
+                    ps.setString(5, row.studentName());
+                    ps.setTimestamp(6, timestamp);
+                    ps.setTimestamp(7, timestamp);
+                });
 
-            @Override
-            public int getBatchSize() {
-                return studentRows.size();
-            }
-        });
     }
 
     private Set<StudentKey> getExistingStudents(final Member member) {
