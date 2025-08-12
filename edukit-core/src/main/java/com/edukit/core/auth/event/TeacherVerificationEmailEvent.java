@@ -1,6 +1,6 @@
 package com.edukit.core.auth.event;
 
-public interface VerificationEmailEvent {
+public interface TeacherVerificationEmailEvent {
     String email();
 
     String memberUuid();
