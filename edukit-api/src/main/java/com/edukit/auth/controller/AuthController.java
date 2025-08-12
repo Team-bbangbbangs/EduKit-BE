@@ -26,14 +26,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/v2/auth")
+@RequestMapping("/api")
 @RequiredArgsConstructor
 public class AuthController {
 
     private final AuthFacade authFacade;
     private final RefreshTokenCookieHandler cookieHandler;
 
-    @PostMapping("/signup")
+    @PostMapping("/v1/auth/signup")
     public ResponseEntity<EdukitResponse<MemberSignUpResponse>> signUp(
             @RequestBody @Valid final MemberSignUpRequest request) {
 
@@ -49,7 +49,7 @@ public class AuthController {
                 .body(EdukitResponse.success(response));
     }
 
-    @PostMapping("/login")
+    @PostMapping("/v1/auth/login")
     public ResponseEntity<EdukitResponse<MemberLoginResponse>> login(
             @RequestBody @Valid final MemberLoginRequest request) {
         MemberLoginResponse loginResponse = authFacade.login(request.email(), request.password());
@@ -62,7 +62,7 @@ public class AuthController {
 
     }
 
-    @PostMapping("/logout")
+    @PostMapping("/v1/auth/logout")
     public ResponseEntity<EdukitResponse<Void>> logout(@MemberId final long memberId) {
         authFacade.logout(memberId);
 
@@ -72,7 +72,7 @@ public class AuthController {
                 .body(EdukitResponse.success());
     }
 
-    @PatchMapping("/reissue")
+    @PatchMapping("/v1/auth/reissue")
     public ResponseEntity<EdukitResponse<MemberReissueResponse>> reissue(
             @CookieValue(value = REFRESH_TOKEN_COOKIE_NAME) final String refreshToken) {
         MemberReissueResponse reissueResponse = authFacade.reissue(refreshToken.strip());
@@ -83,7 +83,7 @@ public class AuthController {
                 .body(EdukitResponse.success(reissueResponse));
     }
 
-    @PatchMapping("/password")
+    @PatchMapping("/v2/auth/password")
     public ResponseEntity<EdukitResponse<Void>> updatePassword(
             @RequestBody @Valid final UpdatePasswordRequest request) {
         authFacade.updatePassword(request.memberUuid(), request.verificationCode(), request.password(),
