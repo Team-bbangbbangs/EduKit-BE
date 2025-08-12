@@ -93,15 +93,16 @@ public class MemberFacade {
 
     private void validatePassword(final Member member, final String currentPassword, final String newPassword) {
         String savedPassword = member.getPassword();
-        if (!isPasswordMatched(currentPassword, savedPassword)) {
+        
+        // 성능 최적화: passwordEncoder.matches() 호출을 한 번만 수행
+        boolean isCurrentPasswordValid = passwordEncoder.matches(currentPassword, savedPassword);
+        if (!isCurrentPasswordValid) {
             throw new MemberException(MemberErrorCode.INVALID_CURRENT_PASSWORD);
         }
-        if (isPasswordMatched(newPassword, savedPassword)) {
+        
+        // 새 비밀번호가 현재 비밀번호와 같은지 확인
+        if (passwordEncoder.matches(newPassword, savedPassword)) {
             throw new MemberException(MemberErrorCode.SAME_PASSWORD);
         }
-    }
-
-    private boolean isPasswordMatched(final String inputPassword, final String savedPassword) {
-        return passwordEncoder.matches(inputPassword, savedPassword);
     }
 }
