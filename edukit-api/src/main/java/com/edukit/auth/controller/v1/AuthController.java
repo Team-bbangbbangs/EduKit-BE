@@ -1,4 +1,4 @@
-package com.edukit.auth.controller;
+package com.edukit.auth.controller.v1;
 
 import static com.edukit.common.security.handler.RefreshTokenCookieHandler.REFRESH_TOKEN_COOKIE_NAME;
 
@@ -29,7 +29,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/v1/auth")
 @RequiredArgsConstructor
-public class AuthController {
+public class AuthController implements AuthApi {
 
     private final AuthFacade authFacade;
     private final RefreshTokenCookieHandler cookieHandler;
