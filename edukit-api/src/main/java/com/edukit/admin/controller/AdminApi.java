@@ -53,7 +53,7 @@ public interface AdminApi {
                                                         "code": "FAIL-400",
                                                         "message": "validation 오류",
                                                         "data": {
-                                                          "categoryId": "카테고리는 필수입니다.",
+                                                          "category": "카테고리는 필수입니다.",
                                                           "title": "제목은 필수입니다.",
                                                           "content": "내용은 필수입니다."
                                                         }
@@ -91,7 +91,7 @@ public interface AdminApi {
                     - 발급받은 presigned URL로 S3에 직접 파일을 업로드합니다
                     
                     **3단계: 공지사항 수정**
-                    - categoryId, title, content: 공지사항 정보
+                    - category, title, content: 공지사항 정보
                     - addedFileKeys: **새로 추가된 이미지의 fileKey 목록** (실제 본문에 포함된 것만)
                     - deletedNoticeFileIds: **삭제할 기존 파일의 ID 목록** (1단계에서 조회한 파일 ID)
                     
@@ -115,7 +115,7 @@ public interface AdminApi {
                                                         "code": "FAIL-400",
                                                         "message": "validation 오류",
                                                         "data": {
-                                                          "categoryId": "카테고리는 필수입니다.",
+                                                          "category": "카테고리는 필수입니다.",
                                                           "title": "제목은 필수입니다.",
                                                           "content": "내용은 필수입니다."
                                                         }
