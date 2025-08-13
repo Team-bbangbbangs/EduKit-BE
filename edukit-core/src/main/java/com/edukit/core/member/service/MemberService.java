@@ -61,6 +61,21 @@ public class MemberService {
         memberRepository.flush();
     }
 
+    @Transactional
+    public void withdraw(final Member member) {
+        member.withdraw();
+    }
+
+    @Transactional
+    public void updateEmail(final Member member, final String email) {
+        try {
+            member.updateEmailAndChangeVerifyStatus(email);
+            memberRepository.flush();
+        } catch (DataIntegrityViolationException e) {
+            throw new MemberException(MemberErrorCode.DUPLICATED_EMAIL);
+        }
+    }
+
     public void validateNickname(final String nickname, final Member member) {
         validateNicknameInvalid(nickname);
         validateNicknameDuplicated(nickname, member);
@@ -106,11 +121,6 @@ public class MemberService {
         return memberRepository.existsByNicknameIgnoreCase(nickname);
     }
 
-    @Transactional
-    public void withdraw(final Member member) {
-        member.withdraw();
-    }
-
     private Member saveMember(final String email, final String encodedPassword, final Subject subject,
                               final String nickname, final School school) {
         Optional<Member> restored = restoreIfSoftDeletedMemberByEmail(email, encodedPassword, subject, nickname,
@@ -147,16 +157,8 @@ public class MemberService {
         member.updatePassword(encodedPassword);
     }
 
+    @Transactional
     public void memberVerified(final Member member) {
         member.verifyAsTeacher();
-    }
-
-    public void updateEmail(final Member member, final String email) {
-        try {
-            member.updateEmailAndChangeVerifyStatus(email);
-            memberRepository.flush();
-        } catch (DataIntegrityViolationException e) {
-            throw new MemberException(MemberErrorCode.DUPLICATED_EMAIL);
-        }
     }
 }
