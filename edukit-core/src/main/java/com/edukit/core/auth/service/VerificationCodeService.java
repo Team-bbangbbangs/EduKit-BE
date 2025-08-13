@@ -49,10 +49,11 @@ public class VerificationCodeService {
 
     private void checkVerified(final VerificationCode code, final String inputCode) {
         if (code.isVerificationAttemptLimitExceeded()) {
+            code.invalidate(VerificationStatus.LOCKED);
             throw new AuthException(AuthErrorCode.VERIFICATION_CODE_ATTEMPT_LIMIT_EXCEEDED);
         }
         if (code.isExpired()) {
-            code.expire();
+            code.invalidate(VerificationStatus.EXPIRED);
             throw new AuthException(AuthErrorCode.INVALID_TOKEN);
         }
         if (!code.getVerificationCode().equals(inputCode) || code.isVerified()) {

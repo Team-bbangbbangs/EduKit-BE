@@ -88,8 +88,8 @@ public class VerificationCode {
         this.status = VerificationStatus.VERIFIED;
     }
 
-    public void expire() {
-        this.status = VerificationStatus.EXPIRED;
+    public void invalidate(final VerificationStatus status) {
+        this.status = status;
     }
 
     public boolean isVerified() {
