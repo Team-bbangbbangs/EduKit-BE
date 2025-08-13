@@ -26,8 +26,7 @@ public class StudentRecordAIFacade {
                                                         final String userPrompt) {
         StudentRecord studentRecord = studentRecordService.getRecordDetail(memberId, recordId);
 
-        String requestPrompt = AIPromptGenerator.createStreamingPrompt(studentRecord.getStudentRecordType(), byteCount,
-                userPrompt);
+        String requestPrompt = AIPromptGenerator.createStreamingPrompt(studentRecord.getStudentRecordType(), byteCount, userPrompt);
         long taskId = studentRecordService.createAITask(studentRecord, userPrompt);
         return StudentRecordTaskResponse.of(taskId, requestPrompt);
     }
