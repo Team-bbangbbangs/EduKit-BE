@@ -8,8 +8,6 @@ import com.edukit.core.auth.exception.AuthErrorCode;
 import com.edukit.core.auth.exception.AuthException;
 import com.edukit.core.auth.util.RandomCodeGenerator;
 import com.edukit.core.member.db.entity.Member;
-import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -30,7 +28,8 @@ public class VerificationCodeService {
     }
 
     @Transactional
-    public void checkVerificationCode(final Member member, final String inputCode, final VerificationCodeType verificationCodeType) {
+    public void checkVerificationCode(final Member member, final String inputCode,
+                                      final VerificationCodeType verificationCodeType) {
         VerificationCode verificationCode = getValidVerificationCodeByMember(member.getId(), verificationCodeType);
         checkVerified(verificationCode, inputCode);
         verificationCode.verified();
@@ -43,6 +42,7 @@ public class VerificationCodeService {
                 .orElseThrow(() -> new AuthException(AuthErrorCode.VERIFICATION_CODE_NOT_FOUND));
     }
 
+
     private void checkVerified(final VerificationCode code, final String inputCode) {
         try {
             validateCode(code, inputCode);
@@ -53,13 +53,10 @@ public class VerificationCodeService {
     }
 
     private void validateCode(final VerificationCode code, final String inputCode) {
-        if (code.isExpired()) {
-            throw new AuthException(AuthErrorCode.INVALID_TOKEN);
+        if (code.isVerificationAttemptLimitExceeded()) {
+            throw new AuthException(AuthErrorCode.VERIFICATION_CODE_ATTEMPT_LIMIT_EXCEEDED);
         }
-        if (!MessageDigest.isEqual(
-                code.getVerificationCode().getBytes(StandardCharsets.UTF_8),
-                inputCode.getBytes(StandardCharsets.UTF_8))
-        ) {
+        if (code.isExpired() || !code.getVerificationCode().equals(inputCode)) {
             throw new AuthException(AuthErrorCode.INVALID_TOKEN);
         }
     }

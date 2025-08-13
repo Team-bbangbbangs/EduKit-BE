@@ -95,4 +95,8 @@ public class VerificationCode {
     public boolean isExpired() {
         return LocalDateTime.now().isAfter(expiredAt);
     }
+
+    public boolean isVerificationAttemptLimitExceeded() {
+        return attempts >= MAX_ATTEMPT_COUNT;
+    }
 }
