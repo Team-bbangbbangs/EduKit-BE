@@ -1,6 +1,6 @@
 package com.edukit.auth.event;
 
-import com.edukit.core.common.event.TeacherVerificationEmailEvent;
+import com.edukit.core.common.event.mail.TeacherVerificationEmailEvent;
 
 public record MemberSignedUpEvent(
         String email,
