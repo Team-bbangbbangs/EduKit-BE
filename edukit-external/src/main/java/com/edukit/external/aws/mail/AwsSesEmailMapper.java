@@ -1,5 +1,6 @@
-package com.edukit.external.aws.mail.setting;
+package com.edukit.external.aws.mail;
 
+import com.edukit.external.aws.mail.config.AwsSesProperties;
 import com.edukit.external.aws.mail.exception.MailErrorCode;
 import com.edukit.external.aws.mail.exception.MailException;
 import java.nio.charset.StandardCharsets;

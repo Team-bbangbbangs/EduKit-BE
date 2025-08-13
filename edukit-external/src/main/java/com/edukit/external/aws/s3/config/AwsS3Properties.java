@@ -1,4 +1,4 @@
-package com.edukit.external.aws.s3;
+package com.edukit.external.aws.s3.config;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 

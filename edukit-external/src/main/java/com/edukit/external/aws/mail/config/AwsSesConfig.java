@@ -1,6 +1,5 @@
 package com.edukit.external.aws.mail.config;
 
-import com.edukit.external.aws.mail.setting.AwsSesProperties;
 import java.time.Duration;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
