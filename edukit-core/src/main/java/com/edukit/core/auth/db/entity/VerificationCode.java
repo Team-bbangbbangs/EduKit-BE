@@ -86,11 +86,14 @@ public class VerificationCode {
 
     public void verified() {
         this.status = VerificationStatus.VERIFIED;
-        this.attempts++;
     }
 
     public void expire() {
         this.status = VerificationStatus.EXPIRED;
+    }
+
+    public boolean isVerified() {
+        return this.status == VerificationStatus.VERIFIED;
     }
 
     public boolean isExpired() {

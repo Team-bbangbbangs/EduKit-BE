@@ -31,8 +31,12 @@ public class VerificationCodeService {
     public void checkVerificationCode(final Member member, final String inputCode,
                                       final VerificationCodeType verificationCodeType) {
         VerificationCode verificationCode = getValidVerificationCodeByMember(member.getId(), verificationCodeType);
-        checkVerified(verificationCode, inputCode);
-        verificationCode.verified();
+        try {
+            checkVerified(verificationCode, inputCode);
+            verificationCode.verified();
+        } finally {
+            verificationCodeRepository.incrementAttempts(verificationCode.getId());
+        }
     }
 
     private VerificationCode getValidVerificationCodeByMember(final long memberId,
@@ -44,19 +48,14 @@ public class VerificationCodeService {
 
 
     private void checkVerified(final VerificationCode code, final String inputCode) {
-        try {
-            validateCode(code, inputCode);
-        } catch (AuthException e) {
-            code.expire();
-            throw e;
-        }
-    }
-
-    private void validateCode(final VerificationCode code, final String inputCode) {
         if (code.isVerificationAttemptLimitExceeded()) {
             throw new AuthException(AuthErrorCode.VERIFICATION_CODE_ATTEMPT_LIMIT_EXCEEDED);
         }
-        if (code.isExpired() || !code.getVerificationCode().equals(inputCode)) {
+        if (code.isExpired()) {
+            code.expire();
+            throw new AuthException(AuthErrorCode.INVALID_TOKEN);
+        }
+        if (!code.getVerificationCode().equals(inputCode) || code.isVerified()) {
             throw new AuthException(AuthErrorCode.INVALID_TOKEN);
         }
     }
