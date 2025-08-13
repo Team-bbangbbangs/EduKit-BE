@@ -32,7 +32,7 @@ public class AuthService {
         }
     }
 
-    private void validateEmail(final String email) {
+    public void validateEmail(final String email) {
         List<String> validEmails = getValidEmails();
         String domain = extractEmailDomain(email);
         if (!validEmails.contains(domain)) {

@@ -25,21 +25,6 @@ public class StudentRecordAIController {
     private final StudentRecordAIFacade studentRecordAIFacade;
     private final AuthFacade authFacade;
 
-    /* v1.0.0
-    @PostMapping("/ai-generate/{recordId}")
-    public ResponseEntity<EdukitResponse<StudentRecordCreateResponse>> aiGenerateStudentRecord(
-            @MemberId final long memberId,
-            @PathVariable final long recordId,
-            @RequestBody @Valid final StudentRecordPromptRequest request
-    ) {
-        StudentRecordTaskResponse promptResponse = studentRecordAIFacade.getPrompt(memberId, recordId,
-                request.byteCount(), request.prompt());
-        StudentRecordCreateResponse response = studentRecordAIFacade.generateAIStudentRecord(
-                promptResponse.inputPrompt());
-        return ResponseEntity.ok(EdukitResponse.success(response));
-    }
-     */
-
     @PostMapping(value = "/ai-generate/{recordId}/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<ServerSentEvent<StudentRecordCreateResponse>> aiGenerateStudentRecordStream(
             @MemberId final long memberId,

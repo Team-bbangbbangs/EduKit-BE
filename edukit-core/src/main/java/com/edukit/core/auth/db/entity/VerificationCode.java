@@ -77,8 +77,8 @@ public class VerificationCode {
                 .build();
     }
 
-    public void complete() {
-        this.status = VerificationStatus.COMPLETE;
+    public void verified() {
+        this.status = VerificationStatus.VERIFIED;
     }
 
     public void expire() {

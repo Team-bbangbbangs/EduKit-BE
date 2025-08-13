@@ -3,7 +3,9 @@ package com.edukit.member.controller;
 import com.edukit.common.EdukitResponse;
 import com.edukit.common.annotation.MemberId;
 import com.edukit.core.member.db.enums.School;
+import com.edukit.member.controller.request.MemberEmailUpdateRequest;
 import com.edukit.member.controller.request.MemberProfileUpdateRequest;
+import com.edukit.member.controller.request.PasswordChangeRequest;
 import com.edukit.member.facade.MemberFacade;
 import com.edukit.member.facade.response.MemberNicknameValidationResponse;
 import com.edukit.member.facade.response.MemberProfileGetResponse;
@@ -21,7 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/v1/users")
 @RequiredArgsConstructor
-public class MemberController {
+public class MemberController implements MemberApi {
 
     private final MemberFacade memberFacade;
 
@@ -51,6 +53,22 @@ public class MemberController {
     @DeleteMapping("/withdraw")
     public ResponseEntity<EdukitResponse<Void>> withdraw(@MemberId final long memberId) {
         memberFacade.withdraw(memberId);
+        return ResponseEntity.ok().body(EdukitResponse.success());
+    }
+
+    @PatchMapping("/email")
+    public ResponseEntity<EdukitResponse<Void>> updateEmail(@MemberId final long memberId,
+                                                            @RequestBody @Valid final MemberEmailUpdateRequest request
+    ) {
+        memberFacade.updateEmail(memberId, request.email());
+        return ResponseEntity.ok().body(EdukitResponse.success());
+    }
+
+    @PatchMapping("/password")
+    public ResponseEntity<EdukitResponse<Void>> updatePassword(@MemberId final long memberId,
+                                                               @RequestBody @Valid final PasswordChangeRequest request) {
+        memberFacade.updatePassword(memberId, request.currentPassword(), request.newPassword(),
+                request.confirmPassword());
         return ResponseEntity.ok().body(EdukitResponse.success());
     }
 }

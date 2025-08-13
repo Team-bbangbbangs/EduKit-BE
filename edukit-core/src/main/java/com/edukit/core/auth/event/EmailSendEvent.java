@@ -2,13 +2,12 @@ package com.edukit.core.auth.event;
 
 import com.edukit.core.common.event.TeacherVerificationEmailEvent;
 
-public record MemberSignedUpEvent(
+public record EmailSendEvent(
         String email,
         String memberUuid,
         String verificationCode
 ) implements TeacherVerificationEmailEvent {
-
-    public static MemberSignedUpEvent of(final String email, final String memberUuid, final String verificationCode) {
-        return new MemberSignedUpEvent(email, memberUuid, verificationCode);
+    public static EmailSendEvent of(final String email, final String memberUuid, final String verificationCode) {
+        return new EmailSendEvent(email, memberUuid, verificationCode);
     }
 }
