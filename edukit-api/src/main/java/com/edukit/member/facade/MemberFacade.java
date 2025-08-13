@@ -90,6 +90,8 @@ public class MemberFacade {
         Member member = memberService.getMemberById(memberId);
         validatePassword(member, currentPassword, newPassword);
         member.updatePassword(passwordEncoder.encode(newPassword));
+
+        refreshTokenStoreService.delete(member.getMemberUuid());
     }
 
     private void validatePassword(final Member member, final String currentPassword, final String newPassword) {
