@@ -1,21 +1,18 @@
 package com.edukit.studentrecord.controller;
 
+import com.edukit.common.EdukitResponse;
 import com.edukit.common.annotation.MemberId;
 import com.edukit.studentrecord.controller.request.StudentRecordPromptRequest;
-import com.edukit.auth.facade.AuthFacade;
 import com.edukit.studentrecord.facade.StudentRecordAIFacade;
-import com.edukit.studentrecord.facade.response.StudentRecordCreateResponse;
 import com.edukit.studentrecord.facade.response.StudentRecordTaskResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.MediaType;
-import org.springframework.http.codec.ServerSentEvent;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import reactor.core.publisher.Flux;
 
 @RestController
 @RequestMapping("/api/v2/student-records")
@@ -23,8 +20,18 @@ import reactor.core.publisher.Flux;
 public class StudentRecordAIController {
 
     private final StudentRecordAIFacade studentRecordAIFacade;
-    private final AuthFacade authFacade;
 
+    @PostMapping("/ai-generate/{recordId}")
+    public ResponseEntity<EdukitResponse<StudentRecordTaskResponse>> aiGenerateStudentRecord(
+            @MemberId final long memberId,
+            @PathVariable final long recordId,
+            @RequestBody @Valid final StudentRecordPromptRequest request) {
+        StudentRecordTaskResponse response = studentRecordAIFacade.getStreamingPrompt(memberId, recordId,
+                request.byteCount(), request.prompt());
+        return ResponseEntity.ok(EdukitResponse.success(response));
+    }
+
+    /*
     @PostMapping(value = "/ai-generate/{recordId}/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<ServerSentEvent<StudentRecordCreateResponse>> aiGenerateStudentRecordStream(
             @MemberId final long memberId,
@@ -59,4 +66,6 @@ public class StudentRecordAIController {
                         .comment("스트리밍 중 오류가 발생했습니다: " + throwable.getMessage())
                         .build()));
     }
+
+     */
 }
