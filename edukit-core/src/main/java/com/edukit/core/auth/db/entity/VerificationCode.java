@@ -86,6 +86,7 @@ public class VerificationCode {
 
     public void verified() {
         this.status = VerificationStatus.VERIFIED;
+        this.attempts++;
     }
 
     public void expire() {
