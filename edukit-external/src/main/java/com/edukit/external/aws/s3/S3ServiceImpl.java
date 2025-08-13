@@ -2,6 +2,7 @@ package com.edukit.external.aws.s3;
 
 import com.edukit.core.common.service.FileStorageService;
 import com.edukit.core.common.service.response.UploadPresignedUrlResponse;
+import com.edukit.external.aws.s3.config.AwsS3Properties;
 import com.edukit.external.aws.s3.exception.S3ErrorCode;
 import com.edukit.external.aws.s3.exception.S3Exception;
 import java.time.Duration;
