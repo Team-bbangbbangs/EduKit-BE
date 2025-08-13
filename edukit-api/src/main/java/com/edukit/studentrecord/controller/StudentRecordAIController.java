@@ -5,6 +5,7 @@ import com.edukit.common.annotation.MemberId;
 import com.edukit.studentrecord.controller.request.StudentRecordPromptRequest;
 import com.edukit.studentrecord.facade.StudentRecordAIFacade;
 import com.edukit.studentrecord.facade.response.StudentRecordTaskResponse;
+import com.edukit.studentrecord.service.StudentRecordSSEService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -20,6 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class StudentRecordAIController {
 
     private final StudentRecordAIFacade studentRecordAIFacade;
+    private final StudentRecordSSEService sseService;
 
     @PostMapping("/ai-generate/{recordId}")
     public ResponseEntity<EdukitResponse<StudentRecordTaskResponse>> aiGenerateStudentRecord(
