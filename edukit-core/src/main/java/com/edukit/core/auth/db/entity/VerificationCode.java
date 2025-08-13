@@ -46,23 +46,29 @@ public class VerificationCode {
     private VerificationCodeType type;
 
     @Column(nullable = false)
+    private int attempts;
+
+    @Column(nullable = false)
     private LocalDateTime createdAt;
 
     @Column(nullable = false)
     private LocalDateTime expiredAt;
 
     private static final int MINUTES_TO_EXPIRE = 10;
+    private static final int INITIAL_ATTEMPT_COUNT = 0;
+    private static final int MAX_ATTEMPT_COUNT = 3;
 
     @Builder(access = AccessLevel.PRIVATE)
     private VerificationCode(final Member member, final String verificationCode, final LocalDateTime createdAt,
                              final LocalDateTime expiredAt, final VerificationStatus status,
-                             final VerificationCodeType type) {
+                             final VerificationCodeType type, final int attempts) {
         this.member = member;
         this.verificationCode = verificationCode;
         this.createdAt = createdAt;
         this.expiredAt = expiredAt;
         this.status = status;
         this.type = type;
+        this.attempts = attempts;
     }
 
     public static VerificationCode create(final Member member, final String verificationCode,
@@ -74,6 +80,7 @@ public class VerificationCode {
                 .type(type)
                 .createdAt(LocalDateTime.now())
                 .expiredAt(LocalDateTime.now().plusMinutes(MINUTES_TO_EXPIRE))
+                .attempts(INITIAL_ATTEMPT_COUNT)
                 .build();
     }
 
