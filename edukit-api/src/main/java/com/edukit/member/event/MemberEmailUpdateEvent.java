@@ -1,4 +1,4 @@
-package com.edukit.core.member.event;
+package com.edukit.member.event;
 
 import com.edukit.core.common.event.TeacherVerificationEmailEvent;
 
