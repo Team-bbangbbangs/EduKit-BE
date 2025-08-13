@@ -79,7 +79,7 @@ create table notice_file
 (
     notice_file_id bigint auto_increment primary key,
     notice_id      bigint       null,
-    file_path      varchar(500) not null,
+    file_key       varchar(500) not null,
     created_at     datetime(6)  not null,
     modified_at    datetime(6)  null,
     constraint FK_notice_file_notice foreign key (notice_id) references notice (notice_id)
