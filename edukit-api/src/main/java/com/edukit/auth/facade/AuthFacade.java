@@ -4,8 +4,8 @@ import com.edukit.auth.facade.response.MemberLoginResponse;
 import com.edukit.auth.facade.response.MemberReissueResponse;
 import com.edukit.auth.facade.response.MemberSignUpResponse;
 import com.edukit.core.auth.db.enums.VerificationCodeType;
-import com.edukit.core.auth.event.EmailSendEventTeacher;
-import com.edukit.core.auth.event.MemberSignedUpEventTeacher;
+import com.edukit.core.auth.event.EmailSendEvent;
+import com.edukit.core.auth.event.MemberSignedUpEvent;
 import com.edukit.core.auth.event.PasswordFindEvent;
 import com.edukit.core.auth.exception.AuthErrorCode;
 import com.edukit.core.auth.exception.AuthException;
@@ -57,7 +57,7 @@ public class AuthFacade {
                 VerificationCodeType.TEACHER_VERIFICATION);
 
         eventPublisher.publishEvent(
-                MemberSignedUpEventTeacher.of(member.getEmail(), member.getMemberUuid(), verificationCode));
+                MemberSignedUpEvent.of(member.getEmail(), member.getMemberUuid(), verificationCode));
         return MemberSignUpResponse.of(authToken.accessToken(), authToken.refreshToken());
     }
 
@@ -127,7 +127,7 @@ public class AuthFacade {
         String verificationCode = verificationCodeService.issueVerificationCode(member,
                 VerificationCodeType.TEACHER_VERIFICATION);
         eventPublisher.publishEvent(
-                EmailSendEventTeacher.of(member.getEmail(), member.getMemberUuid(), verificationCode));
+                EmailSendEvent.of(member.getEmail(), member.getMemberUuid(), verificationCode));
     }
 
     @Transactional
