@@ -29,7 +29,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/v1/auth")
 @RequiredArgsConstructor
-public class AuthController implements AuthApi {
+public class AuthV1Controller implements AuthV1Api {
 
     private final AuthFacade authFacade;
     private final RefreshTokenCookieHandler cookieHandler;

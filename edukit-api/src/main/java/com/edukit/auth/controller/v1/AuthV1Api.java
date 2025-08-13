@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 
 @Tag(name = "인증/인가", description = "회원가입, 로그인, 토큰 관리 및 이메일 인증 API")
-public interface AuthApi {
+public interface AuthV1Api {
 
     @Operation(
             summary = "회원가입"

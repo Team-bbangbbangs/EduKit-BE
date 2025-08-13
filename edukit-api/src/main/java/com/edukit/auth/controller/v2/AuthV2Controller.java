@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/v2/auth")
 @RequiredArgsConstructor
-public class AuthController {
+public class AuthV2Controller {
 
     private final AuthFacade authFacade;
 
