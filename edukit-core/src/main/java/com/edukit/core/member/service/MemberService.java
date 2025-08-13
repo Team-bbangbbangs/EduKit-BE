@@ -54,7 +54,8 @@ public class MemberService {
     }
 
     @Transactional
-    public void updateMemberProfileAndFlush(final Member member, final Subject subject, final School school, final String nickname) {
+    public void updateMemberProfileAndFlush(final Member member, final Subject subject, final School school,
+                                            final String nickname) {
         validateNickname(nickname, member);
         member.updateProfile(subject, school, nickname);
         memberRepository.flush();
@@ -151,6 +152,11 @@ public class MemberService {
     }
 
     public void updateEmail(final Member member, final String email) {
-        member.updateEmailAndChangeVerifyStatus(email);
+        try {
+            member.updateEmailAndChangeVerifyStatus(email);
+            memberRepository.flush();
+        } catch (DataIntegrityViolationException e) {
+            throw new MemberException(MemberErrorCode.DUPLICATED_EMAIL);
+        }
     }
 }
