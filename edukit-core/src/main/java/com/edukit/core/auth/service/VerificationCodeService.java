@@ -8,8 +8,6 @@ import com.edukit.core.auth.exception.AuthErrorCode;
 import com.edukit.core.auth.exception.AuthException;
 import com.edukit.core.auth.util.RandomCodeGenerator;
 import com.edukit.core.member.db.entity.Member;
-import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -30,10 +28,15 @@ public class VerificationCodeService {
     }
 
     @Transactional
-    public void checkVerificationCode(final Member member, final String inputCode, final VerificationCodeType verificationCodeType) {
+    public void checkVerificationCode(final Member member, final String inputCode,
+                                      final VerificationCodeType verificationCodeType) {
         VerificationCode verificationCode = getValidVerificationCodeByMember(member.getId(), verificationCodeType);
-        checkVerified(verificationCode, inputCode);
-        verificationCode.verified();
+        try {
+            checkVerified(verificationCode, inputCode);
+            verificationCode.verified();
+        } finally {
+            verificationCodeRepository.incrementAttempts(verificationCode.getId());
+        }
     }
 
     private VerificationCode getValidVerificationCodeByMember(final long memberId,
@@ -43,23 +46,17 @@ public class VerificationCodeService {
                 .orElseThrow(() -> new AuthException(AuthErrorCode.VERIFICATION_CODE_NOT_FOUND));
     }
 
-    private void checkVerified(final VerificationCode code, final String inputCode) {
-        try {
-            validateCode(code, inputCode);
-        } catch (AuthException e) {
-            code.expire();
-            throw e;
-        }
-    }
 
-    private void validateCode(final VerificationCode code, final String inputCode) {
+    private void checkVerified(final VerificationCode code, final String inputCode) {
+        if (code.isVerificationAttemptLimitExceeded()) {
+            code.invalidate(VerificationStatus.LOCKED);
+            throw new AuthException(AuthErrorCode.VERIFICATION_CODE_ATTEMPT_LIMIT_EXCEEDED);
+        }
         if (code.isExpired()) {
+            code.invalidate(VerificationStatus.EXPIRED);
             throw new AuthException(AuthErrorCode.INVALID_TOKEN);
         }
-        if (!MessageDigest.isEqual(
-                code.getVerificationCode().getBytes(StandardCharsets.UTF_8),
-                inputCode.getBytes(StandardCharsets.UTF_8))
-        ) {
+        if (!code.getVerificationCode().equals(inputCode) || code.isVerified()) {
             throw new AuthException(AuthErrorCode.INVALID_TOKEN);
         }
     }
