@@ -30,19 +30,19 @@ public class Student extends BaseTimeEntity {
     private Member member;
 
     @Column(nullable = false)
-    private String grade;
+    private int grade;
 
     @Column(nullable = false)
-    private String classNumber;
+    private int classNumber;
 
     @Column(nullable = false)
-    private String studentNumber;
+    private int studentNumber;
 
     @Column(nullable = false)
     private String studentName;
 
     @Builder(access = AccessLevel.PRIVATE)
-    public Student(final Member member, final String grade, final String classNumber, final String studentNumber,
+    public Student(final Member member, final int grade, final int classNumber, final int studentNumber,
                    final String studentName) {
         this.member = member;
         this.grade = grade;
@@ -50,9 +50,9 @@ public class Student extends BaseTimeEntity {
         this.studentNumber = studentNumber;
         this.studentName = studentName;
     }
-    
-    public static Student create(final Member member, final String grade, final String classNumber, 
-                                final String studentNumber, final String studentName) {
+
+    public static Student create(final Member member, final int grade, final int classNumber,
+                                 final int studentNumber, final String studentName) {
         return Student.builder()
                 .member(member)
                 .grade(grade)

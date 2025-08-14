@@ -50,9 +50,9 @@ public class StudentService {
                 studentRows.size(),
                 (ps, row) -> {
                     ps.setLong(1, member.getId());
-                    ps.setString(2, row.grade());
-                    ps.setString(3, row.classNumber());
-                    ps.setString(4, row.studentNumber());
+                    ps.setInt(2, row.grade());
+                    ps.setInt(3, row.classNumber());
+                    ps.setInt(4, row.studentNumber());
                     ps.setString(5, row.studentName());
                     ps.setTimestamp(6, timestamp);
                     ps.setTimestamp(7, timestamp);

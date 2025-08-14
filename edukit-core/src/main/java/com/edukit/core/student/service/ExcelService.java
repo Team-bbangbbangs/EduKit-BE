@@ -36,6 +36,7 @@ public class ExcelService {
     private static final int CLASS_NUMBER_INDEX = 1;
     private static final int STUDENT_NUMBER_INDEX = 2;
     private static final int STUDENT_NAME_INDEX = 3;
+    private static final int DEFAULT_VALUE = 0;
 
     public void validateExcelFormat(final MultipartFile file) {
         String contentType = file.getContentType();
@@ -89,14 +90,22 @@ public class ExcelService {
 
     private Optional<StudentExcelRow> parseRow(final Row row) {
         try {
-            String grade = ExcelUtils.getCellValueAsStringOrDefault(row.getCell(GRADE_INDEX));
-            String classNumber = ExcelUtils.getCellValueAsStringOrDefault(row.getCell(CLASS_NUMBER_INDEX));
-            String studentNumber = ExcelUtils.getCellValueAsStringOrDefault(row.getCell(STUDENT_NUMBER_INDEX));
+            int grade = parseIntOrDefault(ExcelUtils.getCellValueAsStringOrDefault(row.getCell(GRADE_INDEX)));
+            int classNumber = parseIntOrDefault(ExcelUtils.getCellValueAsStringOrDefault(row.getCell(CLASS_NUMBER_INDEX)));
+            int studentNumber = parseIntOrDefault(ExcelUtils.getCellValueAsStringOrDefault(row.getCell(STUDENT_NUMBER_INDEX)));
             String studentName = ExcelUtils.getCellValueAsStringOrDefault(row.getCell(STUDENT_NAME_INDEX));
 
             return Optional.of(StudentExcelRow.of(grade, classNumber, studentNumber, studentName));
         } catch (Exception e) {
             return Optional.empty();
+        }
+    }
+
+    private int parseIntOrDefault(final String value) {
+        try {
+            return Integer.parseInt(value);
+        } catch (NumberFormatException e) {
+            return DEFAULT_VALUE;
         }
     }
 }
