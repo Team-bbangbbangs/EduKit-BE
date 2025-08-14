@@ -2,6 +2,7 @@ package com.edukit.student.controller;
 
 import com.edukit.common.EdukitResponse;
 import com.edukit.common.annotation.MemberId;
+import com.edukit.student.facade.response.StudentUploadResponse;
 import com.edukit.student.facade.StudentFacade;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
@@ -20,9 +21,9 @@ public class StudentController implements StudentApi {
     private final StudentFacade studentFacade;
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<EdukitResponse<Void>> uploadStudentExcel(@MemberId long memberId,
-                                                                   @RequestParam("file") final MultipartFile file) {
-        studentFacade.createStudentsFromExcel(memberId, file);
-        return ResponseEntity.ok().body(EdukitResponse.success());
+    public ResponseEntity<EdukitResponse<StudentUploadResponse>> uploadStudentExcel(@MemberId long memberId,
+                                                                                    @RequestParam("file") final MultipartFile file) {
+        StudentUploadResponse response = studentFacade.createStudentsFromExcel(memberId, file);
+        return ResponseEntity.ok().body(EdukitResponse.success(response));
     }
 }

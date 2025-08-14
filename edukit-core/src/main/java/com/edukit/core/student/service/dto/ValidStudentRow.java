@@ -1,14 +1,14 @@
 package com.edukit.core.student.service.dto;
 
-public record StudentExcelRow(
+public record ValidStudentRow(
         int grade,
         int classNumber,
         int studentNumber,
         String studentName
 ) {
-    public static StudentExcelRow of(final int grade, final int classNumber, final int studentNumber,
+    public static ValidStudentRow of(final int grade, final int classNumber, final int studentNumber,
                                      final String studentName
     ) {
-        return new StudentExcelRow(grade, classNumber, studentNumber, studentName);
+        return new ValidStudentRow(grade, classNumber, studentNumber, studentName);
     }
 }
