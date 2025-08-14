@@ -145,9 +145,9 @@ create table student
     student_id     bigint auto_increment primary key,
     member_id      bigint       not null,
     student_name   varchar(255) not null,
-    student_number varchar(255) not null,
-    grade          varchar(255) not null,
-    class_number   varchar(255) not null,
+    student_number int not null,
+    grade          int not null,
+    class_number   int not null,
     created_at     datetime(6)  not null,
     modified_at    datetime(6)  null,
     constraint FK_student_member foreign key (member_id) references member (member_id)
