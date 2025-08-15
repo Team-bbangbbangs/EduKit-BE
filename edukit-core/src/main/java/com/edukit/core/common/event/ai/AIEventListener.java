@@ -1,5 +1,6 @@
 package com.edukit.core.common.event.ai;
 
+import com.edukit.core.common.event.ai.dto.DraftGenerationEvent;
 import com.edukit.core.common.service.AIService;
 import com.edukit.core.common.service.SqsService;
 import com.edukit.core.common.service.response.OpenAIVersionResponse;
@@ -23,13 +24,20 @@ public class AIEventListener {
 
     @Async("aiTaskExecutor")
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
-    public void handleAIResponseGenerateEvent(final AIResponseGenerateEvent event) {
-        Flux<OpenAIVersionResponse> response = aiService.getVersionedStreamingResponse(event.requestPrompt());
-        response
-                .doOnNext(messageQueueService::sendMessage)
-                .doOnError(error -> {
-                    log.error("Error processing AI response: {}", error.getMessage());
-                })
-                .subscribe();
+    public void handleAIResponseGenerateEvent(final AIResponseGenerateEvent generateEvent) {
+        Flux<OpenAIVersionResponse> response = aiService.getVersionedStreamingResponse(generateEvent.requestPrompt());
+
+        response.subscribe(version -> {
+            DraftGenerationEvent event = DraftGenerationEvent.of(
+                    generateEvent.taskId(),
+                    generateEvent.recordId(),
+                    generateEvent.requestPrompt(),
+                    generateEvent.byteCount(),
+                    version.versionNumber(),
+                    version.content(),
+                    version.isLast()
+            );
+            messageQueueService.sendMessage(event);
+        });
     }
 }
