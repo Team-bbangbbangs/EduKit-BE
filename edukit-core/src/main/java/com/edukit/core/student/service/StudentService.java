@@ -3,7 +3,7 @@ package com.edukit.core.student.service;
 import com.edukit.core.member.db.entity.Member;
 import com.edukit.core.student.db.entity.Student;
 import com.edukit.core.student.db.repository.StudentRepository;
-import com.edukit.core.student.service.dto.StudentExcelRow;
+import com.edukit.core.student.service.dto.ValidStudentRow;
 import com.edukit.core.student.service.dto.StudentKey;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
@@ -23,10 +23,10 @@ public class StudentService {
     private final JdbcTemplate jdbcTemplate;
 
     @Transactional
-    public void createStudent(final Set<StudentExcelRow> studentRows, final Member member) {
+    public void createStudent(final Set<ValidStudentRow> studentRows, final Member member) {
         Set<StudentKey> existingKeys = getExistingStudents(member);
 
-        List<StudentExcelRow> newStudentRows = studentRows.stream()
+        List<ValidStudentRow> newStudentRows = studentRows.stream()
                 .filter(row -> !existingKeys.contains(
                         StudentKey.from(row.grade(), row.classNumber(), row.studentNumber())))
                 .toList();
@@ -36,7 +36,7 @@ public class StudentService {
         }
     }
 
-    private void bulkInsertStudents(final List<StudentExcelRow> studentRows, final Member member) {
+    private void bulkInsertStudents(final List<ValidStudentRow> studentRows, final Member member) {
         String sql = """
                 INSERT INTO student (member_id, grade, class_number, student_number, student_name, created_at, modified_at)
                 VALUES (?, ?, ?, ?, ?, ?, ?)
@@ -50,9 +50,9 @@ public class StudentService {
                 studentRows.size(),
                 (ps, row) -> {
                     ps.setLong(1, member.getId());
-                    ps.setString(2, row.grade());
-                    ps.setString(3, row.classNumber());
-                    ps.setString(4, row.studentNumber());
+                    ps.setInt(2, row.grade());
+                    ps.setInt(3, row.classNumber());
+                    ps.setInt(4, row.studentNumber());
                     ps.setString(5, row.studentName());
                     ps.setTimestamp(6, timestamp);
                     ps.setTimestamp(7, timestamp);

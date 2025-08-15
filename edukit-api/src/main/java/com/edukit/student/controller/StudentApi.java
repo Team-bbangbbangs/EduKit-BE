@@ -2,6 +2,7 @@ package com.edukit.student.controller;
 
 import com.edukit.common.EdukitResponse;
 import com.edukit.common.annotation.MemberId;
+import com.edukit.student.facade.response.StudentUploadResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
@@ -49,7 +50,7 @@ public interface StudentApi {
             )
     })
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    ResponseEntity<EdukitResponse<Void>> uploadStudentExcel(
+    ResponseEntity<EdukitResponse<StudentUploadResponse>> uploadStudentExcel(
             @MemberId long memberId,
             @RequestParam("file") final MultipartFile file
     );
