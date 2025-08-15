@@ -6,6 +6,7 @@ import com.edukit.core.studentrecord.db.enums.StudentRecordType;
 import com.edukit.studentrecord.controller.request.StudentRecordUpdateRequest;
 import com.edukit.studentrecord.facade.StudentRecordFacade;
 import com.edukit.studentrecord.facade.response.StudentRecordsGetResponse;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -19,7 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/v2/student-records")
 @RequiredArgsConstructor
-public class StudentRecordController {
+public class StudentRecordController implements StudentRecordApi {
 
     private final StudentRecordFacade studentRecordFacade;
 
@@ -42,7 +43,7 @@ public class StudentRecordController {
     @PostMapping("/{recordId}")
     public ResponseEntity<EdukitResponse<Void>> updateStudentRecord(@MemberId final long memberId,
                                                                     @PathVariable final long recordId,
-                                                                    @RequestBody final StudentRecordUpdateRequest request) {
+                                                                    @RequestBody @Valid final StudentRecordUpdateRequest request) {
         studentRecordFacade.updateStudentRecord(memberId, recordId, request.description());
         return ResponseEntity.ok().body(EdukitResponse.success());
     }
