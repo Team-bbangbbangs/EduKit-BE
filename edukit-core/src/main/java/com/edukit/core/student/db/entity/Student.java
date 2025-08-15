@@ -2,6 +2,7 @@ package com.edukit.core.student.db.entity;
 
 import com.edukit.core.common.domain.BaseTimeEntity;
 import com.edukit.core.member.db.entity.Member;
+import com.edukit.core.student.utils.KoreanNormalizer;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -41,24 +42,29 @@ public class Student extends BaseTimeEntity {
     @Column(nullable = false)
     private String studentName;
 
+    @Column(nullable = false)
+    private String studentNameNormalized;
+
     @Builder(access = AccessLevel.PRIVATE)
     public Student(final Member member, final int grade, final int classNumber, final int studentNumber,
-                   final String studentName) {
+                   final String studentName, final String studentNameNormalized) {
         this.member = member;
         this.grade = grade;
         this.classNumber = classNumber;
         this.studentNumber = studentNumber;
         this.studentName = studentName;
+        this.studentNameNormalized = studentNameNormalized;
     }
 
     public static Student create(final Member member, final int grade, final int classNumber,
-                                 final int studentNumber, final String studentName) {
+                                final int studentNumber, final String studentName) {
         return Student.builder()
                 .member(member)
                 .grade(grade)
                 .classNumber(classNumber)
                 .studentNumber(studentNumber)
                 .studentName(studentName)
+                .studentNameNormalized(KoreanNormalizer.toNormalized(studentName))
                 .build();
     }
 }
