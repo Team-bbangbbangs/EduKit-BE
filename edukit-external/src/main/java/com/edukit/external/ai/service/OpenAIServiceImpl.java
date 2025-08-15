@@ -6,12 +6,10 @@ import com.edukit.external.ai.exception.OpenAiErrorCode;
 import com.edukit.external.ai.exception.OpenAiException;
 import java.util.concurrent.atomic.AtomicInteger;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 
-@Slf4j
 @Service
 @RequiredArgsConstructor
 public class OpenAIServiceImpl implements AIService {
@@ -22,7 +20,8 @@ public class OpenAIServiceImpl implements AIService {
             당신은 중고등학교 생활기록부 작성을 보조하는 AI 어시스턴트입니다.
             학생의 정보를 바탕으로 생활기록부를 작성합니다.
             """;
-    private static final int TOTAL_VERSIONS = 3;
+    private static final int TOTAL_VERSION = 3;
+
 
     public Flux<OpenAIVersionResponse> getVersionedStreamingResponse(final String prompt) {
         return Flux.create(sink -> {
@@ -64,7 +63,7 @@ public class OpenAIServiceImpl implements AIService {
                                 String finalBuffer = buffer.toString();
 
                                 // 아직 처리하지 않은 버전이 있다면 처리
-                                if (currentVersion.get() < TOTAL_VERSIONS) {
+                                if (currentVersion.get() < TOTAL_VERSION) {
                                     String version3Content = extractCompleteVersion(finalBuffer, 3);
 
                                     if (!version3Content.isEmpty()) {
@@ -82,7 +81,7 @@ public class OpenAIServiceImpl implements AIService {
         });
     }
 
-    private boolean isVersionComplete(final String buffer, final int currentVersion) {
+    private boolean isVersionComplete(String buffer, int currentVersion) {
         String currentVersionPattern = "===VERSION_" + (currentVersion + 1) + "===";
 
         if (!buffer.contains(currentVersionPattern)) {
@@ -97,7 +96,7 @@ public class OpenAIServiceImpl implements AIService {
         return false;
     }
 
-    private String extractCompleteVersion(final String buffer, int versionNumber) {
+    private String extractCompleteVersion(String buffer, int versionNumber) {
         String versionPattern = "===VERSION_" + versionNumber + "===";
         String nextVersionPattern = "===VERSION_" + (versionNumber + 1) + "===";
 
@@ -112,7 +111,24 @@ public class OpenAIServiceImpl implements AIService {
         if (endIndex != -1) {
             return buffer.substring(contentStart, endIndex).trim();
         } else {
+            // 다음 버전이 없으면 끝까지 (주로 3번째 버전에서 발생)
             return buffer.substring(contentStart).trim();
         }
     }
+
+    /* v1.0.0
+    public OpenAIResponse getMultipleChatResponses(final String prompt) {
+        try {
+            return chatClient.prompt()
+                    .system(SYSTEM_INSTRUCTIONS)
+                    .user(prompt)
+                    .call()
+                    .entity(OpenAIResponse.class);
+        } catch (ResourceAccessException ex) { // 타임 아웃
+            throw new OpenAiException(OpenAiErrorCode.OPEN_AI_TIMEOUT, ex);
+        } catch (Exception e) { // 기타 예외 처리
+            throw new OpenAiException(OpenAiErrorCode.OPEN_AI_INTERNAL_ERROR, e);
+        }
+    }
+     */
 }
