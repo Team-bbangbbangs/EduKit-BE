@@ -2,7 +2,7 @@ package com.edukit.core.studentrecord.service;
 
 import com.edukit.core.member.db.entity.Member;
 import com.edukit.core.student.db.entity.Student;
-import com.edukit.core.student.utils.KoreanSearchUtils;
+import com.edukit.core.student.utils.KoreanNormalizer;
 import com.edukit.core.studentrecord.db.entity.StudentRecord;
 import com.edukit.core.studentrecord.db.entity.StudentRecordAITask;
 import com.edukit.core.studentrecord.db.enums.StudentRecordType;
@@ -56,18 +56,18 @@ public class StudentRecordService {
                                                           final Integer grade, final Integer classNumber,
                                                           final String search, final Long lastRecordId,
                                                           final int pageSize) {
-        String normalizedSearch = KoreanSearchUtils.toSearchText(search);
+        String searchNormalized = KoreanNormalizer.toNormalized(search);
         Pageable pageable = PageRequest.of(0, pageSize, Sort.unsorted());   //페이지 사이즈 용도
 
         if (lastRecordId == null) {
             return studentRecordRepository.findStudentRecordsByFilters(member, studentRecordType, grade, classNumber,
-                    normalizedSearch, search, pageable);
+                    searchNormalized, search, pageable);
         }
 
         StudentRecord lastRecord = getRecordDetailById(lastRecordId);
         Student lastStudent = lastRecord.getStudent();
         return studentRecordRepository.findStudentRecordsByFilters(member, studentRecordType, grade, classNumber,
-                normalizedSearch, search, lastRecord.getId(), lastStudent.getGrade(),
+                searchNormalized, search, lastRecord.getId(), lastStudent.getGrade(),
                 lastStudent.getClassNumber(), lastStudent.getStudentNumber(), lastStudent.getStudentName(), pageable);
     }
 

@@ -2,7 +2,7 @@ package com.edukit.core.student.db.entity;
 
 import com.edukit.core.common.domain.BaseTimeEntity;
 import com.edukit.core.member.db.entity.Member;
-import com.edukit.core.student.utils.KoreanSearchUtils;
+import com.edukit.core.student.utils.KoreanNormalizer;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -64,7 +64,7 @@ public class Student extends BaseTimeEntity {
                 .classNumber(classNumber)
                 .studentNumber(studentNumber)
                 .studentName(studentName)
-                .studentNameNormalized(KoreanSearchUtils.toSearchText(studentName))
+                .studentNameNormalized(KoreanNormalizer.toNormalized(studentName))
                 .build();
     }
 }

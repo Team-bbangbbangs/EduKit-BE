@@ -18,8 +18,8 @@ public interface StudentRecordRepository extends JpaRepository<StudentRecord, Lo
                   AND sr.studentRecordType = :studentRecordType
                   AND (:grade IS NULL OR s.grade = :grade)
                   AND (:classNumber IS NULL OR s.classNumber = :classNumber)
-                  AND (:normalizedSearch IS NULL
-                     OR s.studentNameNormalized LIKE CONCAT('%', :normalizedSearch, '%')
+                  AND (:searchNormalized IS NULL
+                     OR s.studentNameNormalized LIKE CONCAT('%', :searchNormalized, '%')
                      OR CAST(s.studentNumber AS string) LIKE CONCAT('%', :search, '%')
                   )
                   ORDER BY s.grade ASC, s.classNumber ASC, s.studentNumber ASC, s.studentName ASC, s.id ASC
@@ -28,7 +28,7 @@ public interface StudentRecordRepository extends JpaRepository<StudentRecord, Lo
                                                     @Param("studentRecordType") StudentRecordType studentRecordType,
                                                     @Param("grade") Integer grade,
                                                     @Param("classNumber") Integer classNumber,
-                                                    @Param("normalizedSearch") String normalizedSearch,
+                                                    @Param("searchNormalized") String searchNormalized,
                                                     @Param("search") String search,
                                                     Pageable pageable);
 
@@ -39,8 +39,8 @@ public interface StudentRecordRepository extends JpaRepository<StudentRecord, Lo
                   AND sr.studentRecordType = :studentRecordType
                   AND (:grade IS NULL OR s.grade = :grade)
                   AND (:classNumber IS NULL OR s.classNumber = :classNumber)
-                  AND (:normalizedSearch IS NULL
-                     OR s.studentNameNormalized LIKE CONCAT('%', :normalizedSearch, '%')
+                  AND (:searchNormalized IS NULL
+                     OR s.studentNameNormalized LIKE CONCAT('%', :searchNormalized, '%')
                      OR CAST(s.studentNumber AS string) LIKE CONCAT('%', :search, '%')
                   )
                   AND (s.grade > :cursorGrade
@@ -55,7 +55,7 @@ public interface StudentRecordRepository extends JpaRepository<StudentRecord, Lo
                                                     @Param("studentRecordType") StudentRecordType studentRecordType,
                                                     @Param("grade") Integer grade,
                                                     @Param("classNumber") Integer classNumber,
-                                                    @Param("normalizedSearch") String normalizedSearch,
+                                                    @Param("searchNormalized") String searchNormalized,
                                                     @Param("search") String search,
                                                     @Param("cursorId") Long cursorId,
                                                     @Param("cursorGrade") int cursorGrade,

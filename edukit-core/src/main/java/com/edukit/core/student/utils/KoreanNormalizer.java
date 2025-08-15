@@ -1,6 +1,6 @@
 package com.edukit.core.student.utils;
 
-public class KoreanSearchUtils {
+public class KoreanNormalizer {
     private static final int JUNGSUNG_COUNT = 21; // 중성 개수
     private static final int JONGSUNG_COUNT = 28; // 종성 개수
     private static final int HANGUL_START = 0xAC00; // 한글 시작 유니코드
@@ -21,7 +21,8 @@ public class KoreanSearchUtils {
         ' ', 'ㄱ', 'ㄲ', 'ㄳ', 'ㄴ', 'ㄵ', 'ㄶ', 'ㄷ', 'ㄹ', 'ㄺ', 'ㄻ', 'ㄼ', 'ㄽ', 'ㄾ', 'ㄿ', 'ㅀ', 'ㅁ', 'ㅂ', 'ㅄ', 'ㅅ', 'ㅆ', 'ㅇ', 'ㅈ', 'ㅊ', 'ㅋ', 'ㅌ', 'ㅍ', 'ㅎ'
     };
 
-    public static String toSearchText(String text) {
+    // 한글을 음소로 분해 (ex. 홍길동 -> ㅎㅗㅇㄱㅣㄹㄷㅗㅇ)
+    public static String toNormalized(String text) {
         if (text == null || text.isBlank()) {
             return null;
         }
@@ -29,7 +30,6 @@ public class KoreanSearchUtils {
         StringBuilder result = new StringBuilder();
         for (char c : text.toCharArray()) {
             if (isKorean(c)) {
-                // 한글은 음소로 분해 (초성, 중성, 종성)
                 int unicode = c - HANGUL_START;
                 int jong = unicode % JONGSUNG_COUNT;
                 int jung = (unicode / JONGSUNG_COUNT) % JUNGSUNG_COUNT;
