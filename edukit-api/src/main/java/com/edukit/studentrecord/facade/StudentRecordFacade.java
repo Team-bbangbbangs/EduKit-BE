@@ -3,6 +3,7 @@ package com.edukit.studentrecord.facade;
 import com.edukit.core.member.db.entity.Member;
 import com.edukit.core.member.service.MemberService;
 import com.edukit.core.student.db.entity.Student;
+import com.edukit.core.student.service.ExcelService;
 import com.edukit.core.studentrecord.db.entity.StudentRecord;
 import com.edukit.core.studentrecord.db.enums.StudentRecordType;
 import com.edukit.core.studentrecord.service.StudentRecordService;
@@ -19,6 +20,7 @@ public class StudentRecordFacade {
 
     private final StudentRecordService studentRecordService;
     private final MemberService memberService;
+    private final ExcelService excelService;
 
     @Transactional(readOnly = true)
     public StudentRecordsGetResponse getStudentRecords(final long memberId, final StudentRecordType recordType,
@@ -42,5 +44,10 @@ public class StudentRecordFacade {
     public void updateStudentRecord(final long memberId, final long recordId, final String description) {
         StudentRecord studentRecord = studentRecordService.getRecordDetail(memberId, recordId);
         studentRecordService.updateStudentRecord(studentRecord, description);
+    }
+
+    public byte[] downloadStudentRecordExcel(final long memberId, final StudentRecordType recordType) {
+        List<StudentRecord> studentRecords = studentRecordService.getAllStudentRecordsByType(memberId, recordType);
+        return excelService.generateStudentRecordExcel(studentRecords, recordType);
     }
 }

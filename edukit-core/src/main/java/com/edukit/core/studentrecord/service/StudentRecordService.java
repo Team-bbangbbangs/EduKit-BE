@@ -75,4 +75,9 @@ public class StudentRecordService {
     public void updateStudentRecord(final StudentRecord studentRecord, final String description) {
         studentRecord.updateDescription(description);
     }
+
+    @Transactional(readOnly = true)
+    public List<StudentRecord> getAllStudentRecordsByType(final long memberId, final StudentRecordType recordType) {
+        return studentRecordRepository.findByMemberIdAndStudentRecordType(memberId, recordType);
+    }
 }

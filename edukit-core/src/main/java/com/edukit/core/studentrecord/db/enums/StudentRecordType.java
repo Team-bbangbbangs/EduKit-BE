@@ -3,16 +3,21 @@ package com.edukit.core.studentrecord.db.enums;
 import com.edukit.core.studentrecord.exception.StudentRecordErrorCode;
 import com.edukit.core.studentrecord.exception.StudentRecordException;
 import java.util.Arrays;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 
+@Getter
+@RequiredArgsConstructor
 public enum StudentRecordType {
-    SUBJECT,    // 세부능력 및 특기사항
-    BEHAVIOR,   // 행동특성 및 종합의견
-    CAREER,     // 창의적 체험활동 - 진로
-    FREE,       // 창의적 체험활동 - 자율
-    CLUB        // 창의적 체험활동 - 동아리
-    ;
+    SUBJECT("세부능력 및 특기사항"),
+    BEHAVIOR("행동특성 및 종합의견"),
+    CAREER("창의적 체험활동 - 진로"),
+    FREE("창의적 체험활동 - 자율"),
+    CLUB("창의적 체험활동 - 동아리");
 
-    public static StudentRecordType from(String value) {
+    private final String description;
+
+    public static StudentRecordType from(final String value) {
         return Arrays.stream(values())
                 .filter(type -> type.name().equalsIgnoreCase(value))
                 .findFirst()

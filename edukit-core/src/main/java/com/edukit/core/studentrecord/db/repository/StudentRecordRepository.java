@@ -63,4 +63,14 @@ public interface StudentRecordRepository extends JpaRepository<StudentRecord, Lo
                                                     @Param("cursorStudentNumber") int cursorStudentNumber,
                                                     @Param("cursorStudentName") String cursorStudentName,
                                                     Pageable pageable);
+
+    @Query("""
+              SELECT sr FROM StudentRecord sr
+              JOIN FETCH sr.student s
+              WHERE s.member.id = :memberId
+                AND sr.studentRecordType = :studentRecordType
+              ORDER BY s.grade, s.classNumber, s.studentNumber, s.studentName, s.id
+            """)
+    List<StudentRecord> findByMemberIdAndStudentRecordType(@Param("memberId") Long memberId,
+                                                           @Param("studentRecordType") StudentRecordType type);
 }

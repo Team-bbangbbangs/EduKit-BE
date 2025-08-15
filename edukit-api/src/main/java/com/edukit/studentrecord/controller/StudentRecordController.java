@@ -21,8 +21,9 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class StudentRecordController {
 
-    private static final String DEFAULT_PAGE_SIZE = "10";
     private final StudentRecordFacade studentRecordFacade;
+
+    private static final String DEFAULT_PAGE_SIZE = "10";
 
     @GetMapping("/{recordType}")
     public ResponseEntity<EdukitResponse<StudentRecordsGetResponse>> getStudentRecords(@MemberId final long memberId,
@@ -44,5 +45,16 @@ public class StudentRecordController {
                                                                     @RequestBody final StudentRecordUpdateRequest request) {
         studentRecordFacade.updateStudentRecord(memberId, recordId, request.description());
         return ResponseEntity.ok().body(EdukitResponse.success());
+    }
+
+
+    @GetMapping("/{recordType}/excel")
+    public ResponseEntity<byte[]> downloadStudentRecordExcel(@MemberId final long memberId,
+                                                             @PathVariable final StudentRecordType recordType) {
+        byte[] excelData = studentRecordFacade.downloadStudentRecordExcel(memberId, recordType);
+        return ResponseEntity.ok()
+                .header("Content-Disposition", "attachment; filename=\"" + recordType.name() + ".xlsx\"")
+                .header("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+                .body(excelData);
     }
 }
