@@ -3,8 +3,8 @@ package com.edukit.core.student.service;
 import com.edukit.core.member.db.entity.Member;
 import com.edukit.core.student.db.entity.Student;
 import com.edukit.core.student.db.repository.StudentRepository;
-import com.edukit.core.student.service.dto.ValidStudentRow;
 import com.edukit.core.student.service.dto.StudentKey;
+import com.edukit.core.student.service.dto.ValidStudentRow;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -29,6 +29,14 @@ public class StudentService {
         List<ValidStudentRow> newStudentRows = studentRows.stream()
                 .filter(row -> !existingKeys.contains(
                         StudentKey.from(row.grade(), row.classNumber(), row.studentNumber())))
+                .collect(Collectors.toMap(
+                        row -> StudentKey.from(row.grade(), row.classNumber(), row.studentNumber()),
+                        row -> row,
+                        (a, b) -> a,
+                        java.util.LinkedHashMap::new
+                ))
+                .values()
+                .stream()
                 .toList();
 
         if (!newStudentRows.isEmpty()) {

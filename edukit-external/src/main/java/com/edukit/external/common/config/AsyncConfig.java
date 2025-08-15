@@ -35,6 +35,22 @@ public class AsyncConfig implements AsyncConfigurer {
         return executor;
     }
 
+    @Bean(name = "aiTaskExecutor")
+    public Executor aiTaskExecutor() {
+        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+        executor.setCorePoolSize(Runtime.getRuntime().availableProcessors() * 2);
+        executor.setMaxPoolSize(Runtime.getRuntime().availableProcessors() * 3);
+        executor.setQueueCapacity(50000);
+        executor.setThreadNamePrefix("ai-async-");
+        executor.setAwaitTerminationSeconds(5);
+        executor.setWaitForTasksToCompleteOnShutdown(true);
+
+        executor.setTaskDecorator(new MdcTaskDecorator());
+        executor.initialize();
+        executor.getThreadPoolExecutor().prestartAllCoreThreads();
+        return executor;
+    }
+
     @Override
     public AsyncUncaughtExceptionHandler getAsyncUncaughtExceptionHandler() {
         return customAsyncExceptionHandler;
