@@ -32,7 +32,7 @@ public class AIEventListener {
             DraftGenerationEvent event = DraftGenerationEvent.of(
                     generateEvent.taskId(),
                     generateEvent.recordId(),
-                    generateEvent.requestPrompt(),
+                    generateEvent.userPrompt(),
                     generateEvent.byteCount(),
                     version.versionNumber(),
                     version.content(),

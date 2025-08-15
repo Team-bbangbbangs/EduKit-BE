@@ -4,6 +4,8 @@ public interface AIResponseGenerateEvent {
 
     long taskId();
 
+    String userPrompt();
+
     String requestPrompt();
 
     int byteCount();

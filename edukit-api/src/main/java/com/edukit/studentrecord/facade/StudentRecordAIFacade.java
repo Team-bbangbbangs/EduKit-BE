@@ -26,7 +26,7 @@ public class StudentRecordAIFacade {
                 userPrompt);
         long taskId = studentRecordService.createAITask(studentRecord, userPrompt);
 
-        eventPublisher.publishEvent(AITaskCreateEvent.of(taskId, requestPrompt, byteCount, studentRecord.getId()));
+        eventPublisher.publishEvent(AITaskCreateEvent.of(taskId, userPrompt, requestPrompt, byteCount, studentRecord.getId()));
         return StudentRecordTaskResponse.of(taskId);
     }
 }
