@@ -1,9 +1,9 @@
 package com.edukit.external.ai.service;
 
 import com.edukit.core.common.service.AIService;
+import com.edukit.core.common.service.response.OpenAIVersionResponse;
 import com.edukit.external.ai.exception.OpenAiErrorCode;
 import com.edukit.external.ai.exception.OpenAiException;
-import com.edukit.core.common.service.response.OpenAIVersionResponse;
 import io.github.resilience4j.circuitbreaker.CallNotPermittedException;
 import io.github.resilience4j.circuitbreaker.CircuitBreaker;
 import io.github.resilience4j.reactor.circuitbreaker.operator.CircuitBreakerOperator;
@@ -137,20 +137,4 @@ public class OpenAIServiceImpl implements AIService {
             return buffer.substring(contentStart).trim();
         }
     }
-
-    /* v1.0.0
-    public OpenAIResponse getMultipleChatResponses(final String prompt) {
-        try {
-            return chatClient.prompt()
-                    .system(SYSTEM_INSTRUCTIONS)
-                    .user(prompt)
-                    .call()
-                    .entity(OpenAIResponse.class);
-        } catch (ResourceAccessException ex) { // 타임 아웃
-            throw new OpenAiException(OpenAiErrorCode.OPEN_AI_TIMEOUT, ex);
-        } catch (Exception e) { // 기타 예외 처리
-            throw new OpenAiException(OpenAiErrorCode.OPEN_AI_INTERNAL_ERROR, e);
-        }
-    }
-     */
 }
