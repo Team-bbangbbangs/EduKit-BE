@@ -3,8 +3,10 @@ package com.edukit.core.student.service;
 import com.edukit.core.member.db.entity.Member;
 import com.edukit.core.student.db.entity.Student;
 import com.edukit.core.student.db.repository.StudentRepository;
-import com.edukit.core.student.service.dto.StudentKey;
+import com.edukit.core.student.exception.StudentErrorCode;
+import com.edukit.core.student.exception.StudentException;
 import com.edukit.core.student.service.dto.ValidStudentRow;
+import com.edukit.core.student.service.dto.StudentKey;
 import com.edukit.core.student.utils.KoreanNormalizer;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
@@ -35,6 +37,14 @@ public class StudentService {
         if (!newStudentRows.isEmpty()) {
             bulkInsertStudents(newStudentRows, member);
         }
+    }
+
+    @Transactional
+    public Student createStudent(final int grade, final int classNumber, final int studentNumber,
+                                 final String studentName, final Member member) {
+        Student student = Student.create(member, grade, classNumber, studentNumber, studentName);
+        validateStudent(student, member);
+        return studentRepository.save(student);
     }
 
     private void bulkInsertStudents(final List<ValidStudentRow> studentRows, final Member member) {
@@ -68,5 +78,13 @@ public class StudentService {
                 .map(student -> StudentKey.from(student.getGrade(), student.getClassNumber(),
                         student.getStudentNumber()))
                 .collect(Collectors.toSet());
+    }
+
+    private void validateStudent(final Student student, final Member member) {
+        Set<StudentKey> existingKeys = getExistingStudents(member);
+        if (existingKeys.contains(
+                StudentKey.from(student.getGrade(), student.getClassNumber(), student.getStudentNumber()))) {
+            throw new StudentException(StudentErrorCode.STUDENT_ALREADY_EXIST_ERROR);
+        }
     }
 }

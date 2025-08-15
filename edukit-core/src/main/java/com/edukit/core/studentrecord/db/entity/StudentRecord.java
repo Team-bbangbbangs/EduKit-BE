@@ -46,6 +46,14 @@ public class StudentRecord extends BaseTimeEntity {
         this.description = description;
     }
 
+    public static StudentRecord create(final Student student, final StudentRecordType studentRecordType) {
+        return StudentRecord.builder()
+                .student(student)
+                .studentRecordType(studentRecordType)
+                .description("")
+                .build();
+    }
+
     public void updateDescription(final String description) {
         this.description = description;
     }
