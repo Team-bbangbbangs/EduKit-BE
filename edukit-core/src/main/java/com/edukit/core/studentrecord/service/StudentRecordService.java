@@ -64,7 +64,7 @@ public class StudentRecordService {
                     searchNormalized, search, pageable);
         }
 
-        StudentRecord lastRecord = getRecordDetailById(lastRecordId);
+        StudentRecord lastRecord = getRecordDetail(member.getId(), lastRecordId);
         Student lastStudent = lastRecord.getStudent();
         return studentRecordRepository.findStudentRecordsByFilters(member, studentRecordType, grade, classNumber,
                 searchNormalized, search, lastRecord.getId(), lastStudent.getGrade(),
