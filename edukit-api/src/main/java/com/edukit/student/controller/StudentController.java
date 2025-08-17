@@ -4,6 +4,7 @@ import com.edukit.common.EdukitResponse;
 import com.edukit.common.annotation.MemberId;
 import com.edukit.core.studentrecord.db.enums.StudentRecordType;
 import com.edukit.student.controller.request.StudentCreateRequest;
+import com.edukit.student.controller.request.StudentUpdateRequest;
 import com.edukit.student.facade.StudentFacade;
 import com.edukit.student.facade.response.StudentUploadResponse;
 import jakarta.validation.Valid;
@@ -11,6 +12,8 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -38,6 +41,16 @@ public class StudentController implements StudentApi {
         List<StudentRecordType> recordTypes = request.recordTypes().stream().map(StudentRecordType::from).toList();
         studentFacade.createStudent(memberId, request.grade(), request.classNumber(), request.studentNumber(),
                 request.studentName(), recordTypes);
+        return ResponseEntity.ok().body(EdukitResponse.success());
+    }
+
+    @PatchMapping("/{studentId}")
+    public ResponseEntity<EdukitResponse<Void>> updateStudent(@MemberId final long memberId,
+                                                              @PathVariable final long studentId,
+                                                              @RequestBody @Valid final StudentUpdateRequest request) {
+        List<StudentRecordType> recordTypes = request.recordTypes().stream().map(StudentRecordType::from).toList();
+        studentFacade.updateStudent(memberId, studentId, request.grade(), request.classNumber(),
+                request.studentNumber(), request.studentName(), recordTypes);
         return ResponseEntity.ok().body(EdukitResponse.success());
     }
 }

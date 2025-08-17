@@ -6,6 +6,7 @@ import com.edukit.core.student.db.entity.Student;
 import com.edukit.core.student.service.ExcelService;
 import com.edukit.core.student.service.StudentService;
 import com.edukit.core.student.service.dto.ExcelParseResult;
+import com.edukit.core.studentrecord.db.entity.StudentRecord;
 import com.edukit.core.studentrecord.db.enums.StudentRecordType;
 import com.edukit.core.studentrecord.service.StudentRecordService;
 import com.edukit.student.facade.response.StudentUploadResponse;
@@ -50,5 +51,16 @@ public class StudentFacade {
         if (!recordTypes.isEmpty()) {
             studentRecordService.createStudentRecords(student, recordTypes);
         }
+    }
+
+    @Transactional
+    public void updateStudent(final long memberId, final long studentId, final int grade, final int classNumber,
+                              final int studentNumber, final String studentName,
+                              final List<StudentRecordType> recordTypes) {
+        Student student = studentService.getStudent(studentId, memberId);
+        studentService.updateStudent(student, grade, classNumber, studentNumber, studentName);
+
+        List<StudentRecord> studentRecords = studentRecordService.getStudentRecordsByStudent(student);
+        studentRecordService.updateStudentRecord(recordTypes, studentRecords, student);
     }
 }

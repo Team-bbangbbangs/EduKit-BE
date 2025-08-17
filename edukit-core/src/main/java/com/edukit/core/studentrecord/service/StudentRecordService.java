@@ -6,6 +6,7 @@ import com.edukit.core.student.utils.KoreanNormalizer;
 import com.edukit.core.studentrecord.db.entity.StudentRecord;
 import com.edukit.core.studentrecord.db.entity.StudentRecordAITask;
 import com.edukit.core.studentrecord.db.enums.StudentRecordType;
+import com.edukit.core.studentrecord.db.repository.StudentRecordAIResultRepository;
 import com.edukit.core.studentrecord.db.repository.StudentRecordAITaskRepository;
 import com.edukit.core.studentrecord.db.repository.StudentRecordRepository;
 import com.edukit.core.studentrecord.exception.StudentRecordErrorCode;
@@ -13,7 +14,6 @@ import com.edukit.core.studentrecord.exception.StudentRecordException;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import org.apache.commons.math3.analysis.function.Add;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -27,6 +27,7 @@ public class StudentRecordService {
 
     private final StudentRecordRepository studentRecordRepository;
     private final StudentRecordAITaskRepository aiTaskRepository;
+    private final StudentRecordAIResultRepository aiResultRepository;
 
     @Transactional(readOnly = true)
     public StudentRecord getRecordDetail(final long memberId, final long recordId) {
@@ -81,6 +82,18 @@ public class StudentRecordService {
         return studentRecordRepository.findByMemberIdAndStudentRecordType(memberId, recordType);
     }
 
+    @Transactional(readOnly = true)
+    public List<StudentRecord> getStudentRecordsByStudent(final Student student) {
+        return studentRecordRepository.findAllByStudent(student);
+    }
+
+    @Transactional
+    public void updateStudentRecord(final List<StudentRecordType> newTypes, final List<StudentRecord> existingRecords,
+                                    final Student student) {
+        createRecordsForNewTypes(newTypes, existingRecords, student);
+        deleteRecordsForRemovedTypes(newTypes, existingRecords);
+    }
+
     private StudentRecord getRecordDetailById(final long recordId) {
         return studentRecordRepository.findById(recordId)
                 .orElseThrow(() -> new StudentRecordException(StudentRecordErrorCode.STUDENT_RECORD_NOT_FOUND));
@@ -96,6 +109,34 @@ public class StudentRecordService {
         Set<StudentRecordType> uniqueTypes = new HashSet<>(recordTypes);
         if (uniqueTypes.size() != recordTypes.size()) {
             throw new StudentRecordException(StudentRecordErrorCode.DUPLICATE_RECORD_TYPE);
+        }
+    }
+
+    private void createRecordsForNewTypes(final List<StudentRecordType> newTypes,
+                                          final List<StudentRecord> existingRecords, final Student student) {
+        List<StudentRecordType> existingTypes = existingRecords.stream()
+                .map(StudentRecord::getStudentRecordType).toList();
+        List<StudentRecord> recordsToCreate = newTypes.stream()
+                .filter(it -> !existingTypes.contains(it))
+                .map(it -> StudentRecord.create(student, it))
+                .toList();
+
+        if (!recordsToCreate.isEmpty()) {
+            studentRecordRepository.saveAll(recordsToCreate);
+        }
+    }
+
+    private void deleteRecordsForRemovedTypes(final List<StudentRecordType> newTypes,
+                                              final List<StudentRecord> existingRecords) {
+        List<Long> recordIds = existingRecords.stream()
+                .filter(it -> !newTypes.contains(it.getStudentRecordType()))
+                .map(StudentRecord::getId)
+                .toList();
+
+        if (!recordIds.isEmpty()) {
+            aiResultRepository.deleteAllByStudentRecordIds(recordIds);
+            aiTaskRepository.deleteAllByStudentRecordIdIn(recordIds);
+            studentRecordRepository.deleteAllByIdInBatch(recordIds);
         }
     }
 }

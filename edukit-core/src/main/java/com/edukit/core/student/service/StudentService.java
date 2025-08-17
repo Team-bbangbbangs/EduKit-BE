@@ -5,8 +5,8 @@ import com.edukit.core.student.db.entity.Student;
 import com.edukit.core.student.db.repository.StudentRepository;
 import com.edukit.core.student.exception.StudentErrorCode;
 import com.edukit.core.student.exception.StudentException;
-import com.edukit.core.student.service.dto.ValidStudentRow;
 import com.edukit.core.student.service.dto.StudentKey;
+import com.edukit.core.student.service.dto.ValidStudentRow;
 import com.edukit.core.student.utils.KoreanNormalizer;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
@@ -45,6 +45,18 @@ public class StudentService {
         Student student = Student.create(member, grade, classNumber, studentNumber, studentName);
         validateStudent(student, member);
         return studentRepository.save(student);
+    }
+
+
+    public Student getStudent(final long studentId, final long memberId) {
+        return studentRepository.findByIdAndMemberId(studentId, memberId)
+                .orElseThrow(() -> new StudentException(StudentErrorCode.STUDENT_NOT_FOUND));
+    }
+
+    @Transactional
+    public void updateStudent(final Student student, final int grade, final int classNumber, final int studentNumber,
+                              final String studentName) {
+         student.update(grade, classNumber, studentNumber, studentName);
     }
 
     private void bulkInsertStudents(final List<ValidStudentRow> studentRows, final Member member) {

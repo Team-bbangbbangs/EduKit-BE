@@ -67,4 +67,11 @@ public class Student extends BaseTimeEntity {
                 .studentNameNormalized(KoreanNormalizer.toNormalized(studentName))
                 .build();
     }
+
+    public void update(final int grade, final int classNumber, final int studentNumber, final String studentName) {
+        this.grade = grade;
+        this.classNumber = classNumber;
+        this.studentNumber = studentNumber;
+        this.studentName = studentName;
+    }
 }

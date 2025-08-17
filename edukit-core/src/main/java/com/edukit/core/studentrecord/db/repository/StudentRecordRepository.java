@@ -1,6 +1,7 @@
 package com.edukit.core.studentrecord.db.repository;
 
 import com.edukit.core.member.db.entity.Member;
+import com.edukit.core.student.db.entity.Student;
 import com.edukit.core.studentrecord.db.entity.StudentRecord;
 import com.edukit.core.studentrecord.db.enums.StudentRecordType;
 import java.util.List;
@@ -73,4 +74,6 @@ public interface StudentRecordRepository extends JpaRepository<StudentRecord, Lo
             """)
     List<StudentRecord> findByMemberIdAndStudentRecordType(@Param("memberId") Long memberId,
                                                            @Param("studentRecordType") StudentRecordType type);
+
+    List<StudentRecord> findAllByStudent(Student student);
 }
