@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
 import reactor.core.publisher.Flux;
+import reactor.core.scheduler.Schedulers;
 
 @Slf4j
 @Component
@@ -28,18 +29,31 @@ public class AIEventListener {
         log.info("AI 생기부 생성 시작 taskId: {}, recordId: {}", generateEvent.taskId(), generateEvent.recordId());
         Flux<OpenAIVersionResponse> response = aiService.getVersionedStreamingResponse(generateEvent.requestPrompt());
 
-        response.subscribe(version -> {
-            DraftGenerationEvent event = DraftGenerationEvent.of(
-                    generateEvent.taskId(),
-                    generateEvent.recordId(),
-                    generateEvent.userPrompt(),
-                    generateEvent.byteCount(),
-                    version.versionNumber(),
-                    version.content(),
-                    version.isLast()
-            );
-            log.info("Task ID: {} VERSION {} 생성 완료! SQS 전송 시작", generateEvent.taskId(), version.versionNumber());
-            messageQueueService.sendMessage(event);
-        });
+        response
+                .publishOn(Schedulers.boundedElastic())
+                .subscribe(
+                        version -> {
+                            DraftGenerationEvent event = DraftGenerationEvent.of(
+                                    generateEvent.taskId(),
+                                    generateEvent.recordId(),
+                                    generateEvent.userPrompt(),
+                                    generateEvent.byteCount(),
+                                    version.versionNumber(),
+                                    version.content(),
+                                    version.isLast()
+                            );
+                            log.info("Task ID: {} VERSION {} 생성 완료! SQS 전송 시작", generateEvent.taskId(),
+                                    version.versionNumber());
+                            messageQueueService.sendMessage(event);
+                        },
+                        error -> {
+                            log.error("AI 응답 생성 중 오류 발생 - taskId: {}, recordId: {}",
+                                    generateEvent.taskId(), generateEvent.recordId(), error);
+                        },
+                        () -> {
+                            log.info("AI 응답 생성 완료 - taskId: {}, recordId: {}",
+                                    generateEvent.taskId(), generateEvent.recordId());
+                        }
+                );
     }
 }
