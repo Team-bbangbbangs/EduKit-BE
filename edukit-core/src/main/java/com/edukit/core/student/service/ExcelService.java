@@ -134,37 +134,42 @@ public class ExcelService {
                                              final StudentRecordType recordType) {
         try (SXSSFWorkbook wb = new SXSSFWorkbook(200);
              ByteArrayOutputStream os = new ByteArrayOutputStream()) {
-
             wb.setCompressTempFiles(true);
 
             SXSSFSheet sheet = wb.createSheet(recordType.getDescription());
-
-            int rowIdx = HEADER_ROW_INDEX;
-            Row header = sheet.createRow(rowIdx++);
-            header.createCell(GRADE_INDEX).setCellValue("학년");
-            header.createCell(CLASS_NUMBER_INDEX).setCellValue("반");
-            header.createCell(STUDENT_NUMBER_INDEX).setCellValue("번호");
-            header.createCell(STUDENT_NAME_INDEX).setCellValue("이름");
-            header.createCell(STUDENT_RECORD_INDEX).setCellValue(recordType.getDescription());
-
-            for (int i = 0; i <= 4; i++) {
-                sheet.setColumnWidth(i, 4000);
-            }
-
-            for (StudentRecord record : studentRecords) {
-                Student student = record.getStudent();
-                Row row = sheet.createRow(rowIdx++);
-                row.createCell(GRADE_INDEX).setCellValue(student.getGrade());
-                row.createCell(CLASS_NUMBER_INDEX).setCellValue(student.getClassNumber());
-                row.createCell(STUDENT_NUMBER_INDEX).setCellValue(student.getStudentNumber());
-                row.createCell(STUDENT_NAME_INDEX).setCellValue(student.getStudentName());
-                row.createCell(STUDENT_RECORD_INDEX).setCellValue(record.getDescription());
-            }
+            int nextRowIdx = createHeaderRow(sheet, recordType);
+            fillDataRows(sheet, nextRowIdx, studentRecords);
 
             wb.write(os);
             return os.toByteArray();
         } catch (IOException e) {
             throw new StudentException(StudentErrorCode.EXCEL_FILE_CREATE_FAIL, e);
+        } catch (RuntimeException e) {
+            throw new StudentException(StudentErrorCode.EXCEL_FILE_FORMAT_ERROR, e);
+        }
+    }
+
+    private int createHeaderRow(SXSSFSheet sheet, StudentRecordType recordType) {
+        int rowIdx = HEADER_ROW_INDEX;
+        Row header = sheet.createRow(rowIdx++);
+        header.createCell(GRADE_INDEX).setCellValue("학년");
+        header.createCell(CLASS_NUMBER_INDEX).setCellValue("반");
+        header.createCell(STUDENT_NUMBER_INDEX).setCellValue("번호");
+        header.createCell(STUDENT_NAME_INDEX).setCellValue("이름");
+        header.createCell(STUDENT_RECORD_INDEX).setCellValue(recordType.getDescription());
+        return rowIdx;
+    }
+
+    private void fillDataRows(SXSSFSheet sheet, int startRowIdx, List<StudentRecord> records) {
+        int rowIdx = startRowIdx;
+        for (StudentRecord record : records) {
+            Student student = record.getStudent();
+            Row row = sheet.createRow(rowIdx++);
+            row.createCell(GRADE_INDEX).setCellValue(student.getGrade());
+            row.createCell(CLASS_NUMBER_INDEX).setCellValue(student.getClassNumber());
+            row.createCell(STUDENT_NUMBER_INDEX).setCellValue(student.getStudentNumber());
+            row.createCell(STUDENT_NAME_INDEX).setCellValue(student.getStudentName());
+            row.createCell(STUDENT_RECORD_INDEX).setCellValue(record.getDescription());
         }
     }
 }

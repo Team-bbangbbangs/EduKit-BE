@@ -24,7 +24,7 @@ public class KoreanNormalizer {
     // 한글을 음소로 분해 (ex. 홍길동 -> ㅎㅗㅇㄱㅣㄹㄷㅗㅇ)
     public static String toNormalized(String text) {
         if (text == null || text.isBlank()) {
-            return null;
+            return "";
         }
         
         StringBuilder result = new StringBuilder();
