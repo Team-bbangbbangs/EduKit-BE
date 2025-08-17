@@ -8,6 +8,7 @@ import com.edukit.studentrecord.facade.StudentRecordFacade;
 import com.edukit.studentrecord.facade.response.StudentRecordsGetResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ContentDisposition;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -25,6 +26,7 @@ public class StudentRecordController implements StudentRecordApi {
     private final StudentRecordFacade studentRecordFacade;
 
     private static final String DEFAULT_PAGE_SIZE = "10";
+    private static final String XLSX_CONTENT_TYPE = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
 
     @GetMapping("/{recordType}")
     public ResponseEntity<EdukitResponse<StudentRecordsGetResponse>> getStudentRecords(@MemberId final long memberId,
@@ -34,10 +36,9 @@ public class StudentRecordController implements StudentRecordApi {
                                                                                        @RequestParam(required = false) final String search,
                                                                                        @RequestParam(required = false) final Long lastRecordId,
                                                                                        @RequestParam(required = false, defaultValue = DEFAULT_PAGE_SIZE) final int pageSize) {
-        return ResponseEntity.ok().body(EdukitResponse.success(
-                studentRecordFacade.getStudentRecords(memberId, recordType, grade, classNumber, search, lastRecordId,
-                        pageSize)
-        ));
+        StudentRecordsGetResponse response = studentRecordFacade.getStudentRecords(memberId, recordType, grade,
+                classNumber, search, lastRecordId, pageSize);
+        return ResponseEntity.ok().body(EdukitResponse.success(response));
     }
 
     @PostMapping("/{recordId}")
@@ -53,9 +54,13 @@ public class StudentRecordController implements StudentRecordApi {
     public ResponseEntity<byte[]> downloadStudentRecordExcel(@MemberId final long memberId,
                                                              @PathVariable final StudentRecordType recordType) {
         byte[] excelData = studentRecordFacade.downloadStudentRecordExcel(memberId, recordType);
+        ContentDisposition contentDisposition = ContentDisposition
+                .attachment()
+                .filename(recordType.name() + ".xlsx")
+                .build();
         return ResponseEntity.ok()
-                .header("Content-Disposition", "attachment; filename=\"" + recordType.name() + ".xlsx\"")
-                .header("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+                .header("Content-Disposition", contentDisposition.toString())
+                .header("Content-Type", XLSX_CONTENT_TYPE)
                 .body(excelData);
     }
 }
