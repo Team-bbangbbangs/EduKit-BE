@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -45,7 +46,11 @@ public class StudentService {
                                  final String studentName, final Member member) {
         Student student = Student.create(member, grade, classNumber, studentNumber, studentName);
         validateStudent(student, member);
-        return studentRepository.save(student);
+        try {
+            return studentRepository.save(student);
+        } catch (DataIntegrityViolationException e) {
+            throw new StudentException(StudentErrorCode.STUDENT_ALREADY_EXIST_ERROR, e);
+        }
     }
 
 
@@ -65,7 +70,7 @@ public class StudentService {
     @Transactional
     public void updateStudent(final Student student, final int grade, final int classNumber, final int studentNumber,
                               final String studentName) {
-         student.update(grade, classNumber, studentNumber, studentName);
+        student.update(grade, classNumber, studentNumber, studentName);
     }
 
     @Transactional
