@@ -2,6 +2,8 @@ package com.edukit.external.aws.sqs;
 
 import com.edukit.core.common.service.SqsService;
 import com.edukit.external.aws.sqs.config.AwsSqsProperties;
+import com.edukit.external.aws.sqs.exception.SQSErrorCode;
+import com.edukit.external.aws.sqs.exception.SQSException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
@@ -36,10 +38,10 @@ public class SqsServiceImpl implements SqsService {
 
         } catch (JsonProcessingException e) {
             log.error("SQS 메시지 직렬화 실패", e);
-            throw new RuntimeException("SQS 메시지 전송 실패", e);
+            throw new SQSException(SQSErrorCode.MESSAGE_SEND_FAIL, e);
         } catch (Exception e) {
             log.error("SQS 메시지 전송 실패", e);
-            throw new RuntimeException("SQS 메시지 전송 실패", e);
+            throw new SQSException(SQSErrorCode.MESSAGE_SEND_FAIL, e);
         }
     }
 }
