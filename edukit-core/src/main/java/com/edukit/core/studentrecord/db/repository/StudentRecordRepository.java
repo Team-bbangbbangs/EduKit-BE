@@ -7,6 +7,7 @@ import com.edukit.core.studentrecord.db.enums.StudentRecordType;
 import java.util.List;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -76,4 +77,8 @@ public interface StudentRecordRepository extends JpaRepository<StudentRecord, Lo
                                                            @Param("studentRecordType") StudentRecordType type);
 
     List<StudentRecord> findAllByStudent(Student student);
+
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Query("delete from StudentRecord sr where sr.student.id in :studentIds")
+    void deleteAllByStudentIds(@Param("studentIds") List<Long> studentIds);
 }

@@ -63,4 +63,13 @@ public class StudentFacade {
         List<StudentRecord> studentRecords = studentRecordService.getStudentRecordsByStudent(student);
         studentRecordService.updateStudentRecord(recordTypes, studentRecords, student);
     }
+
+    @Transactional
+    public void deleteStudents(final long memberId, final List<Long> studentsIds) {
+        List<Student> students = studentService.getStudents(studentsIds, memberId);
+        List<Long> studentIds = students.stream().map(Student::getId).toList();
+
+        studentRecordService.deleteStudentRecords(studentIds);
+        studentService.deleteStudents(studentIds);
+    }
 }

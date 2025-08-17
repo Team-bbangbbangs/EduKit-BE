@@ -11,4 +11,8 @@ public interface StudentRecordAITaskRepository extends JpaRepository<StudentReco
     @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Query("delete from StudentRecordAITask t where t.studentRecord.id in :recordIds")
     void deleteAllByStudentRecordIdIn(@Param("recordIds") List<Long> recordIds);
+
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Query("delete from StudentRecordAITask t where t.studentRecord.student.id in :studentIds")
+    void deleteAllByStudentIds(@Param("studentIds") List<Long> studentIds);
 }

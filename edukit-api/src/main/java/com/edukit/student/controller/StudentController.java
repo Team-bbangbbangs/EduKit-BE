@@ -4,6 +4,7 @@ import com.edukit.common.EdukitResponse;
 import com.edukit.common.annotation.MemberId;
 import com.edukit.core.studentrecord.db.enums.StudentRecordType;
 import com.edukit.student.controller.request.StudentCreateRequest;
+import com.edukit.student.controller.request.StudentDeleteRequest;
 import com.edukit.student.controller.request.StudentUpdateRequest;
 import com.edukit.student.facade.StudentFacade;
 import com.edukit.student.facade.response.StudentUploadResponse;
@@ -12,6 +13,7 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -51,6 +53,13 @@ public class StudentController implements StudentApi {
         List<StudentRecordType> recordTypes = request.recordTypes().stream().map(StudentRecordType::from).toList();
         studentFacade.updateStudent(memberId, studentId, request.grade(), request.classNumber(),
                 request.studentNumber(), request.studentName(), recordTypes);
+        return ResponseEntity.ok().body(EdukitResponse.success());
+    }
+
+    @DeleteMapping
+    public ResponseEntity<EdukitResponse<Void>> deleteStudents(@MemberId final long memberId,
+                                                               @RequestBody @Valid final StudentDeleteRequest request) {
+        studentFacade.deleteStudents(memberId, request.studentIds());
         return ResponseEntity.ok().body(EdukitResponse.success());
     }
 }

@@ -11,4 +11,8 @@ public interface StudentRecordAIResultRepository extends JpaRepository<StudentRe
     @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Query("delete from StudentRecordAIResult r where r.studentRecordAITask.studentRecord.id in :recordIds")
     void deleteAllByStudentRecordIds(@Param("recordIds") List<Long> recordIds);
+
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Query("delete from StudentRecordAIResult r where r.studentRecordAITask.studentRecord.student.id in :studentIds")
+    void deleteAllByStudentIds(@Param("studentIds") List<Long> studentIds);
 }

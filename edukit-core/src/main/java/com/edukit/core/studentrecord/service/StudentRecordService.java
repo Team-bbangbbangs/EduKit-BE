@@ -94,6 +94,13 @@ public class StudentRecordService {
         deleteRecordsForRemovedTypes(newTypes, existingRecords);
     }
 
+    @Transactional
+    public void deleteStudentRecords(final List<Long> studentIds) {
+        aiResultRepository.deleteAllByStudentIds(studentIds);
+        aiTaskRepository.deleteAllByStudentIds(studentIds);
+        studentRecordRepository.deleteAllByStudentIds(studentIds);
+    }
+
     private StudentRecord getRecordDetailById(final long recordId) {
         return studentRecordRepository.findById(recordId)
                 .orElseThrow(() -> new StudentRecordException(StudentRecordErrorCode.STUDENT_RECORD_NOT_FOUND));

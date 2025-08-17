@@ -1,6 +1,7 @@
 package com.edukit.core.student.service;
 
 import com.edukit.core.member.db.entity.Member;
+import com.edukit.core.member.exception.MemberException;
 import com.edukit.core.student.db.entity.Student;
 import com.edukit.core.student.db.repository.StudentRepository;
 import com.edukit.core.student.exception.StudentErrorCode;
@@ -53,10 +54,23 @@ public class StudentService {
                 .orElseThrow(() -> new StudentException(StudentErrorCode.STUDENT_NOT_FOUND));
     }
 
+    public List<Student> getStudents(final List<Long> studentIds, final long memberId) {
+        List<Student> students = studentRepository.findByIdInAndMemberId(studentIds, memberId);
+        if (students.size() != studentIds.size()) {
+            throw new MemberException(StudentErrorCode.STUDENT_NOT_FOUND);
+        }
+        return students;
+    }
+
     @Transactional
     public void updateStudent(final Student student, final int grade, final int classNumber, final int studentNumber,
                               final String studentName) {
          student.update(grade, classNumber, studentNumber, studentName);
+    }
+
+    @Transactional
+    public void deleteStudents(final List<Long> studentIds) {
+        studentRepository.deleteAllByIdInBatch(studentIds);
     }
 
     private void bulkInsertStudents(final List<ValidStudentRow> studentRows, final Member member) {
