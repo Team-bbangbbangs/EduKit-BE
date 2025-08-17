@@ -1,5 +1,6 @@
 package com.edukit.core.common.event.ai;
 
+import com.edukit.common.exception.ExternalException;
 import com.edukit.core.common.event.ai.dto.DraftGenerationEvent;
 import com.edukit.core.common.service.AIService;
 import com.edukit.core.common.service.SqsService;
@@ -44,7 +45,12 @@ public class AIEventListener {
                             );
                             log.info("Task ID: {} VERSION {} 생성 완료! SQS 전송 시작", generateEvent.taskId(),
                                     version.versionNumber());
-                            messageQueueService.sendMessage(event);
+                            try {
+                                messageQueueService.sendMessage(event);
+                            } catch (ExternalException e) {
+                                log.error("SQS 메시지 전송 실패 - taskId: {}, recordId: {}, error: {}",
+                                        generateEvent.taskId(), generateEvent.recordId(), e.getMessage());
+                            }
                         },
                         error -> {
                             log.error("AI 응답 생성 중 오류 발생 - taskId: {}, recordId: {}",

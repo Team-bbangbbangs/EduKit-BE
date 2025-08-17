@@ -2,7 +2,7 @@ package com.edukit.common.advice;
 
 import com.edukit.common.EdukitResponse;
 import com.edukit.common.exception.BusinessException;
-import com.edukit.common.exception.ExternalApiException;
+import com.edukit.common.exception.ExternalException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -31,8 +31,8 @@ public class GlobalExceptionHandler {
         return EdukitResponse.fail(e.getErrorCode());
     }
 
-    @ExceptionHandler(ExternalApiException.class)
-    public EdukitResponse<Void> handleExternalApiException(final ExternalApiException e) {
+    @ExceptionHandler(ExternalException.class)
+    public EdukitResponse<Void> handleExternalApiException(final ExternalException e) {
         log.warn("External API exception occurred: {}", e.getMessage());
         return EdukitResponse.fail(e.getErrorCode());
     }
