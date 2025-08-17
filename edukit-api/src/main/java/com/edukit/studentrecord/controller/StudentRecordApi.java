@@ -35,7 +35,7 @@ public interface StudentRecordApi {
                                             value = """
                                                       {
                                                         "code": "SR-40403",
-                                                        "message": "유효하지 않는 생활기록부 항목입니다."
+                                                        "message": "유효하지 않은 생활기록부 항목입니다."
                                                       }
                                                     """
                                     )
@@ -127,7 +127,7 @@ public interface StudentRecordApi {
                                             value = """
                                                       {
                                                         "code": "SR-40403",
-                                                        "message": "유효하지 않는 생활기록부 항목입니다."
+                                                        "message": "유효하지 않은 생활기록부 항목입니다."
                                                       }
                                                     """
                                     ),
