@@ -1,8 +1,8 @@
 package com.edukit.external.aws.mail.exception;
 
-import com.edukit.common.exception.ExternalApiException;
+import com.edukit.common.exception.ExternalException;
 
-public class MailException extends ExternalApiException {
+public class MailException extends ExternalException {
 
     public MailException(final MailErrorCode errorCode) {
         super(errorCode);

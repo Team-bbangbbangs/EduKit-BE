@@ -26,7 +26,7 @@ public class StudentRecordAIController {
             @MemberId final long memberId,
             @PathVariable final long recordId,
             @RequestBody @Valid final StudentRecordPromptRequest request) {
-        StudentRecordTaskResponse response = studentRecordAIFacade.getTaskId(memberId, recordId,
+        StudentRecordTaskResponse response = studentRecordAIFacade.createTaskId(memberId, recordId,
                 request.byteCount(), request.prompt());
         return ResponseEntity.ok(EdukitResponse.success(response));
     }

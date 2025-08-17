@@ -18,15 +18,15 @@ public class StudentRecordAIFacade {
     private final ApplicationEventPublisher eventPublisher;
 
     @Transactional
-    public StudentRecordTaskResponse getTaskId(final long memberId, final long recordId, final int byteCount,
-                                               final String userPrompt) {
+    public StudentRecordTaskResponse createTaskId(final long memberId, final long recordId, final int byteCount,
+                                                  final String userPrompt) {
         StudentRecord studentRecord = studentRecordService.getRecordDetail(memberId, recordId);
 
-        String requestPrompt = AIPromptGenerator.createStreamingPrompt(studentRecord.getStudentRecordType(), byteCount,
-                userPrompt);
-        long taskId = studentRecordService.createAITask(studentRecord, userPrompt);
+        String requestPrompt = AIPromptGenerator.createStreamingPrompt(studentRecord.getStudentRecordType(), byteCount, userPrompt);
+        long taskId = studentRecordService.createAITask(userPrompt);
 
-        eventPublisher.publishEvent(AITaskCreateEvent.of(taskId, userPrompt, requestPrompt, byteCount, studentRecord.getId()));
+        eventPublisher.publishEvent(
+                AITaskCreateEvent.of(taskId, userPrompt, requestPrompt, byteCount, studentRecord.getId()));
         return StudentRecordTaskResponse.of(taskId);
     }
 }
