@@ -44,6 +44,7 @@ public class ExcelService {
     private static final int STUDENT_NUMBER_INDEX = 2;
     private static final int STUDENT_NAME_INDEX = 3;
     private static final int STUDENT_RECORD_INDEX = 4;
+    private static final int STUDENT_RECORD_COLUMN_WIDTH = 4000;
 
     public void validateExcelFormat(final MultipartFile file) {
         String contentType = file.getContentType();
@@ -137,6 +138,7 @@ public class ExcelService {
             wb.setCompressTempFiles(true);
 
             SXSSFSheet sheet = wb.createSheet(recordType.getDescription());
+            setColumnWidths(sheet);
             int nextRowIdx = createHeaderRow(sheet, recordType);
             fillDataRows(sheet, nextRowIdx, studentRecords);
 
@@ -146,6 +148,12 @@ public class ExcelService {
             throw new StudentException(StudentErrorCode.EXCEL_FILE_CREATE_FAIL, e);
         } catch (RuntimeException e) {
             throw new StudentException(StudentErrorCode.EXCEL_FILE_FORMAT_ERROR, e);
+        }
+    }
+
+    private void setColumnWidths(SXSSFSheet sheet) {
+        for (int i = 0; i <= STUDENT_RECORD_INDEX; i++) {
+            sheet.setColumnWidth(i, STUDENT_RECORD_COLUMN_WIDTH);
         }
     }
 
