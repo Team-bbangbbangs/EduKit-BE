@@ -47,7 +47,7 @@ public interface StudentRecordRepository extends JpaRepository<StudentRecord, Lo
                        OR (s.grade = :cursorGrade AND s.classNumber > :cursorClassNumber)
                        OR (s.grade = :cursorGrade AND s.classNumber = :cursorClassNumber AND s.studentNumber > :cursorStudentNumber)
                        OR (s.grade = :cursorGrade AND s.classNumber = :cursorClassNumber AND s.studentNumber = :cursorStudentNumber AND s.studentName > :cursorStudentName)
-                       OR (s.grade = :cursorGrade AND s.classNumber = :cursorClassNumber AND s.studentNumber = :cursorStudentNumber AND s.studentName = :cursorStudentName AND s.id > :cursorId)
+                       OR (s.grade = :cursorGrade AND s.classNumber = :cursorClassNumber AND s.studentNumber = :cursorStudentNumber AND s.studentName = :cursorStudentName AND sr.id > :cursorId)
                   )
                   ORDER BY s.grade ASC, s.classNumber ASC, s.studentNumber ASC, s.studentName ASC, s.id ASC
             """)
@@ -69,7 +69,7 @@ public interface StudentRecordRepository extends JpaRepository<StudentRecord, Lo
               JOIN FETCH sr.student s
               WHERE s.member.id = :memberId
                 AND sr.studentRecordType = :studentRecordType
-              ORDER BY s.grade, s.classNumber, s.studentNumber, s.studentName, s.id
+              ORDER BY s.grade, s.classNumber, s.studentNumber, s.studentName, sr.id
             """)
     List<StudentRecord> findByMemberIdAndStudentRecordType(@Param("memberId") Long memberId,
                                                            @Param("studentRecordType") StudentRecordType type);
