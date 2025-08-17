@@ -73,5 +73,6 @@ public class Student extends BaseTimeEntity {
         this.classNumber = classNumber;
         this.studentNumber = studentNumber;
         this.studentName = studentName;
+        this.studentNameNormalized = KoreanNormalizer.toNormalized(studentName);
     }
 }
