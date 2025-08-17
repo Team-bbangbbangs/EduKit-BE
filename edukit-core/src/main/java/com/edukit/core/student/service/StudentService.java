@@ -5,6 +5,7 @@ import com.edukit.core.student.db.entity.Student;
 import com.edukit.core.student.db.repository.StudentRepository;
 import com.edukit.core.student.service.dto.ValidStudentRow;
 import com.edukit.core.student.service.dto.StudentKey;
+import com.edukit.core.student.utils.KoreanNormalizer;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -38,8 +39,8 @@ public class StudentService {
 
     private void bulkInsertStudents(final List<ValidStudentRow> studentRows, final Member member) {
         String sql = """
-                INSERT INTO student (member_id, grade, class_number, student_number, student_name, created_at, modified_at)
-                VALUES (?, ?, ?, ?, ?, ?, ?)
+                INSERT INTO student (member_id, grade, class_number, student_number, student_name, student_name_normalized, created_at, modified_at)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
                 """;
 
         LocalDateTime now = LocalDateTime.now();
@@ -54,10 +55,10 @@ public class StudentService {
                     ps.setInt(3, row.classNumber());
                     ps.setInt(4, row.studentNumber());
                     ps.setString(5, row.studentName());
-                    ps.setTimestamp(6, timestamp);
+                    ps.setString(6, KoreanNormalizer.toNormalized(row.studentName()));
                     ps.setTimestamp(7, timestamp);
+                    ps.setTimestamp(8, timestamp);
                 });
-
     }
 
     private Set<StudentKey> getExistingStudents(final Member member) {
