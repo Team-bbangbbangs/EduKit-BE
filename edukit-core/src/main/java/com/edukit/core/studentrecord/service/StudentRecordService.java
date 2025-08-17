@@ -6,7 +6,6 @@ import com.edukit.core.student.utils.KoreanNormalizer;
 import com.edukit.core.studentrecord.db.entity.StudentRecord;
 import com.edukit.core.studentrecord.db.entity.StudentRecordAITask;
 import com.edukit.core.studentrecord.db.enums.StudentRecordType;
-import com.edukit.core.studentrecord.db.repository.StudentRecordAIResultRepository;
 import com.edukit.core.studentrecord.db.repository.StudentRecordAITaskRepository;
 import com.edukit.core.studentrecord.db.repository.StudentRecordRepository;
 import com.edukit.core.studentrecord.exception.StudentRecordErrorCode;
@@ -27,7 +26,6 @@ public class StudentRecordService {
 
     private final StudentRecordRepository studentRecordRepository;
     private final StudentRecordAITaskRepository aiTaskRepository;
-    private final StudentRecordAIResultRepository aiResultRepository;
 
     @Transactional(readOnly = true)
     public StudentRecord getRecordDetail(final long memberId, final long recordId) {
@@ -95,13 +93,6 @@ public class StudentRecordService {
         deleteRecordsForRemovedTypes(newTypes, existingRecords);
     }
 
-    @Transactional
-    public void deleteStudentRecords(final List<Long> studentIds) {
-        aiResultRepository.deleteAllByStudentIds(studentIds);
-        aiTaskRepository.deleteAllByStudentIds(studentIds);
-        studentRecordRepository.deleteAllByStudentIds(studentIds);
-    }
-
     private StudentRecord getRecordDetailById(final long recordId) {
         return studentRecordRepository.findById(recordId)
                 .orElseThrow(() -> new StudentRecordException(StudentRecordErrorCode.STUDENT_RECORD_NOT_FOUND));
@@ -142,8 +133,6 @@ public class StudentRecordService {
                 .toList();
 
         if (!recordIds.isEmpty()) {
-            aiResultRepository.deleteAllByStudentRecordIds(recordIds);
-            aiTaskRepository.deleteAllByStudentRecordIdIn(recordIds);
             studentRecordRepository.deleteAllByIdInBatch(recordIds);
         }
     }
