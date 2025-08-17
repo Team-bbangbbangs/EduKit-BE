@@ -33,8 +33,8 @@ public class StudentRecordService {
     }
 
     @Transactional
-    public long createAITask(final StudentRecord studentRecord, final String prompt) {
-        StudentRecordAITask aiTask = StudentRecordAITask.create(studentRecord, prompt);
+    public long createAITask(final String prompt) {
+        StudentRecordAITask aiTask = StudentRecordAITask.create(prompt);
         aiTaskRepository.save(aiTask);
         return aiTask.getId();
     }
