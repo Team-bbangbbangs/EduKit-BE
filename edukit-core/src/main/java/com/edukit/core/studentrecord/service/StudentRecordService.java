@@ -90,6 +90,7 @@ public class StudentRecordService {
     @Transactional
     public void updateStudentRecord(final List<StudentRecordType> newTypes, final List<StudentRecord> existingRecords,
                                     final Student student) {
+        validateRecordTypes(newTypes);
         createRecordsForNewTypes(newTypes, existingRecords, student);
         deleteRecordsForRemovedTypes(newTypes, existingRecords);
     }
