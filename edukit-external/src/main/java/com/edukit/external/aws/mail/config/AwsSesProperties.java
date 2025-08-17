@@ -1,4 +1,4 @@
-package com.edukit.external.aws.mail.setting;
+package com.edukit.external.aws.mail.config;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 

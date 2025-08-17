@@ -1,6 +1,5 @@
 package com.edukit.external.aws.s3.config;
 
-import com.edukit.external.aws.s3.AwsS3Properties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

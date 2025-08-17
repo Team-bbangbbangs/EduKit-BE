@@ -7,7 +7,7 @@ import com.edukit.core.auth.service.VerificationCodeService;
 import com.edukit.core.auth.util.PasswordValidator;
 import com.edukit.core.member.db.entity.Member;
 import com.edukit.core.member.db.enums.School;
-import com.edukit.core.member.event.MemberEmailUpdateEvent;
+import com.edukit.member.event.MemberEmailUpdateEvent;
 import com.edukit.core.member.exception.MemberErrorCode;
 import com.edukit.core.member.exception.MemberException;
 import com.edukit.core.member.service.MemberService;
