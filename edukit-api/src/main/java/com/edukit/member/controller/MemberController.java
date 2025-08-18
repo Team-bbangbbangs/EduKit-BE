@@ -7,7 +7,6 @@ import com.edukit.member.controller.request.MemberEmailUpdateRequest;
 import com.edukit.member.controller.request.MemberProfileUpdateRequest;
 import com.edukit.member.controller.request.PasswordChangeRequest;
 import com.edukit.member.facade.MemberFacade;
-import com.edukit.member.facade.response.MemberNicknameValidationResponse;
 import com.edukit.member.facade.response.MemberProfileGetResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -43,11 +42,12 @@ public class MemberController implements MemberApi {
     }
 
     @GetMapping("/nickname")
-    public ResponseEntity<EdukitResponse<MemberNicknameValidationResponse>> validateNickname(
+    public ResponseEntity<EdukitResponse<Void>> validateNickname(
             @MemberId final long memberId,
             @RequestParam final String nickname
     ) {
-        return ResponseEntity.ok().body(EdukitResponse.success(memberFacade.validateNickname(memberId, nickname)));
+        memberFacade.validateNickname(memberId, nickname);
+        return ResponseEntity.ok().body(EdukitResponse.success());
     }
 
     @DeleteMapping("/withdraw")

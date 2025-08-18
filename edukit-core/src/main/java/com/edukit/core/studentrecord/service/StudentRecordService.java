@@ -10,7 +10,9 @@ import com.edukit.core.studentrecord.db.repository.StudentRecordAITaskRepository
 import com.edukit.core.studentrecord.db.repository.StudentRecordRepository;
 import com.edukit.core.studentrecord.exception.StudentRecordErrorCode;
 import com.edukit.core.studentrecord.exception.StudentRecordException;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -39,15 +41,12 @@ public class StudentRecordService {
         return aiTask.getId();
     }
 
-    private StudentRecord getRecordDetailById(final long recordId) {
-        return studentRecordRepository.findById(recordId)
-                .orElseThrow(() -> new StudentRecordException(StudentRecordErrorCode.STUDENT_RECORD_NOT_FOUND));
-    }
-
-    private void validatePermission(final Student student, final long memberId) {
-        if (student.getMember().getId() != memberId) {
-            throw new StudentRecordException(StudentRecordErrorCode.PERMISSION_DENIED);
-        }
+    @Transactional
+    public void createStudentRecords(final Student student, final List<StudentRecordType> recordTypes) {
+        validateRecordTypes(recordTypes);
+        List<StudentRecord> studentRecords = recordTypes.stream()
+                .map(recordType -> StudentRecord.create(student, recordType)).toList();
+        studentRecordRepository.saveAll(studentRecords);
     }
 
     @Transactional(readOnly = true)
@@ -79,5 +78,62 @@ public class StudentRecordService {
     @Transactional(readOnly = true)
     public List<StudentRecord> getAllStudentRecordsByType(final long memberId, final StudentRecordType recordType) {
         return studentRecordRepository.findByMemberIdAndStudentRecordType(memberId, recordType);
+    }
+
+    @Transactional(readOnly = true)
+    public List<StudentRecord> getStudentRecordsByStudent(final Student student) {
+        return studentRecordRepository.findAllByStudent(student);
+    }
+
+    @Transactional
+    public void updateStudentRecord(final List<StudentRecordType> newTypes, final List<StudentRecord> existingRecords,
+                                    final Student student) {
+        validateRecordTypes(newTypes);
+        createRecordsForNewTypes(newTypes, existingRecords, student);
+        deleteRecordsForRemovedTypes(newTypes, existingRecords);
+    }
+
+    private StudentRecord getRecordDetailById(final long recordId) {
+        return studentRecordRepository.findById(recordId)
+                .orElseThrow(() -> new StudentRecordException(StudentRecordErrorCode.STUDENT_RECORD_NOT_FOUND));
+    }
+
+    private void validatePermission(final Student student, final long memberId) {
+        if (student.getMember().getId() != memberId) {
+            throw new StudentRecordException(StudentRecordErrorCode.PERMISSION_DENIED);
+        }
+    }
+
+    private void validateRecordTypes(final List<StudentRecordType> recordTypes) {
+        Set<StudentRecordType> uniqueTypes = new HashSet<>(recordTypes);
+        if (uniqueTypes.size() != recordTypes.size()) {
+            throw new StudentRecordException(StudentRecordErrorCode.DUPLICATE_RECORD_TYPE);
+        }
+    }
+
+    private void createRecordsForNewTypes(final List<StudentRecordType> newTypes,
+                                          final List<StudentRecord> existingRecords, final Student student) {
+        List<StudentRecordType> existingTypes = existingRecords.stream()
+                .map(StudentRecord::getStudentRecordType).toList();
+        List<StudentRecord> recordsToCreate = newTypes.stream()
+                .filter(it -> !existingTypes.contains(it))
+                .map(it -> StudentRecord.create(student, it))
+                .toList();
+
+        if (!recordsToCreate.isEmpty()) {
+            studentRecordRepository.saveAll(recordsToCreate);
+        }
+    }
+
+    private void deleteRecordsForRemovedTypes(final List<StudentRecordType> newTypes,
+                                              final List<StudentRecord> existingRecords) {
+        List<Long> recordIds = existingRecords.stream()
+                .filter(it -> !newTypes.contains(it.getStudentRecordType()))
+                .map(StudentRecord::getId)
+                .toList();
+
+        if (!recordIds.isEmpty()) {
+            studentRecordRepository.deleteAllByIdInBatch(recordIds);
+        }
     }
 }

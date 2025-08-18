@@ -7,13 +7,12 @@ import com.edukit.core.auth.service.VerificationCodeService;
 import com.edukit.core.auth.util.PasswordValidator;
 import com.edukit.core.member.db.entity.Member;
 import com.edukit.core.member.db.enums.School;
-import com.edukit.member.event.MemberEmailUpdateEvent;
 import com.edukit.core.member.exception.MemberErrorCode;
 import com.edukit.core.member.exception.MemberException;
 import com.edukit.core.member.service.MemberService;
 import com.edukit.core.subject.db.entity.Subject;
 import com.edukit.core.subject.service.SubjectService;
-import com.edukit.member.facade.response.MemberNicknameValidationResponse;
+import com.edukit.member.event.MemberEmailUpdateEvent;
 import com.edukit.member.facade.response.MemberProfileGetResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
@@ -55,12 +54,9 @@ public class MemberFacade {
         }
     }
 
-    public MemberNicknameValidationResponse validateNickname(final long memberId, final String nickname) {
+    public void validateNickname(final long memberId, final String nickname) {
         Member member = memberService.getMemberById(memberId);
-        return MemberNicknameValidationResponse.of(
-                memberService.isNicknameInvalid(nickname),
-                memberService.isNicknameDuplicated(nickname, member)
-        );
+        memberService.validateNickname(nickname, member);
     }
 
     @Transactional

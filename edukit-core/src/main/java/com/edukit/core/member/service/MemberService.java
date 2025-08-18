@@ -93,9 +93,10 @@ public class MemberService {
     }
 
     private void validateNicknameDuplicated(final String nickname, final Member member) {
-        if (isNicknameDuplicated(nickname, member)) {
-            throw new MemberException(MemberErrorCode.DUPLICATED_NICKNAME);
+        if (member.getNickname().equals(nickname)) {
+            return;
         }
+        validateNicknameDuplicated(nickname);
     }
 
     private void validateNicknameDuplicated(final String nickname) {
@@ -104,20 +105,13 @@ public class MemberService {
         }
     }
 
-    public boolean isNicknameInvalid(final String nickname) {
+    private boolean isNicknameInvalid(final String nickname) {
         return nickname.isBlank()
                 || !NICKNAME_PATTERN.matcher(nickname).matches()
                 || nicknameBannedWordRepository.existsBannedWordIn(nickname);
     }
 
-    public boolean isNicknameDuplicated(final String nickname, final Member member) {
-        if (member.getNickname().equals(nickname)) {
-            return true;
-        }
-        return isNicknameDuplicated(nickname);
-    }
-
-    public boolean isNicknameDuplicated(final String nickname) {
+    private boolean isNicknameDuplicated(final String nickname) {
         return memberRepository.existsByNicknameIgnoreCase(nickname);
     }
 

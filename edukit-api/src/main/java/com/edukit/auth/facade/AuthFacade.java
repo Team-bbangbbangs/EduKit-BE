@@ -1,12 +1,12 @@
 package com.edukit.auth.facade;
 
+import com.edukit.auth.event.EmailSendEvent;
+import com.edukit.auth.event.MemberSignedUpEvent;
+import com.edukit.auth.event.PasswordFindEvent;
 import com.edukit.auth.facade.response.MemberLoginResponse;
 import com.edukit.auth.facade.response.MemberReissueResponse;
 import com.edukit.auth.facade.response.MemberSignUpResponse;
 import com.edukit.core.auth.db.enums.VerificationCodeType;
-import com.edukit.auth.event.EmailSendEvent;
-import com.edukit.auth.event.MemberSignedUpEvent;
-import com.edukit.auth.event.PasswordFindEvent;
 import com.edukit.core.auth.exception.AuthErrorCode;
 import com.edukit.core.auth.exception.AuthException;
 import com.edukit.core.auth.service.AuthService;
@@ -21,7 +21,6 @@ import com.edukit.core.member.db.enums.School;
 import com.edukit.core.member.service.MemberService;
 import com.edukit.core.subject.db.entity.Subject;
 import com.edukit.core.subject.service.SubjectService;
-import com.edukit.member.facade.response.MemberNicknameValidationResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -148,10 +147,7 @@ public class AuthFacade {
                 PasswordFindEvent.of(member.getEmail(), member.getMemberUuid(), verificationCode));
     }
 
-    public MemberNicknameValidationResponse validateNickname(final String nickname) {
-        return MemberNicknameValidationResponse.of(
-                memberService.isNicknameInvalid(nickname),
-                memberService.isNicknameDuplicated(nickname)
-        );
+    public void validateNickname(final String nickname) {
+        memberService.validateNickname(nickname);
     }
 }
