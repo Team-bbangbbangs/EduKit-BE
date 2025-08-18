@@ -406,7 +406,7 @@ public interface AuthV1Api {
     );
 
     @Operation(
-            summary = "닉네임 유효성 검사"
+            summary = "닉네임 검증"
     )
     @ApiResponses({
             @ApiResponse(responseCode = "200"),
