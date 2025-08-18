@@ -12,7 +12,6 @@ import com.edukit.common.EdukitResponse;
 import com.edukit.common.annotation.MemberId;
 import com.edukit.common.security.handler.RefreshTokenCookieHandler;
 import com.edukit.core.member.db.enums.School;
-import com.edukit.member.facade.response.MemberNicknameValidationResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
@@ -99,10 +98,8 @@ public class AuthV1Controller implements AuthV1Api {
     }
 
     @GetMapping("/nickname")
-    public ResponseEntity<EdukitResponse<MemberNicknameValidationResponse>> validateNickname(
-            @RequestParam final String nickname
-    ) {
-        MemberNicknameValidationResponse response = authFacade.validateNickname(nickname);
-        return ResponseEntity.ok().body(EdukitResponse.success(response));
+    public ResponseEntity<EdukitResponse<Void>> validateNickname(@RequestParam final String nickname) {
+        authFacade.validateNickname(nickname);
+        return ResponseEntity.ok().body(EdukitResponse.success());
     }
 }

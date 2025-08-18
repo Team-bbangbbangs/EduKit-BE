@@ -5,7 +5,6 @@ import com.edukit.common.annotation.MemberId;
 import com.edukit.member.controller.request.MemberEmailUpdateRequest;
 import com.edukit.member.controller.request.MemberProfileUpdateRequest;
 import com.edukit.member.controller.request.PasswordChangeRequest;
-import com.edukit.member.facade.response.MemberNicknameValidationResponse;
 import com.edukit.member.facade.response.MemberProfileGetResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -157,12 +156,42 @@ public interface MemberApi {
                                                         "message": "존재하지 않는 회원입니다. 회원가입을 진행해주세요."
                                                       }
                                                     """
+                                    ),
+                                    @ExampleObject(
+                                            name = "닉네임 파라미터 누락",
+                                            description = "nickname 파라미터가 누락된 경우",
+                                            value = """
+                                                      {
+                                                        "code": "FAIL-400",
+                                                        "message": "필수 요청 파라미터가 누락되었습니다."
+                                                      }
+                                                    """
+                                    ),
+                                    @ExampleObject(
+                                            name = "유효하지 않은 닉네임",
+                                            description = "닉네임 형식이 올바르지 않거나 금지어가 포함된 경우",
+                                            value = """
+                                                      {
+                                                        "code": "M-40004",
+                                                        "message": "입력하신 닉네임은 유효하지 않습니다."
+                                                      }
+                                                    """
+                                    ),
+                                    @ExampleObject(
+                                            name = "중복된 닉네임",
+                                            description = "다른 회원이 이미 사용중인 닉네임인 경우",
+                                            value = """
+                                                      {
+                                                        "code": "M-40005",
+                                                        "message": "입력하신 닉네임은 중복된 닉네임입니다."
+                                                      }
+                                                    """
                                     )
                             }
                     )
             )
     })
-    ResponseEntity<EdukitResponse<MemberNicknameValidationResponse>> validateNickname(
+    ResponseEntity<EdukitResponse<Void>> validateNickname(
             @MemberId final long memberId,
             @RequestParam final String nickname
     );
