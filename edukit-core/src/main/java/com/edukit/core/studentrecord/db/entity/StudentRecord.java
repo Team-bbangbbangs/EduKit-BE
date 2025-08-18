@@ -39,6 +39,8 @@ public class StudentRecord extends BaseTimeEntity {
     @Column(nullable = false, columnDefinition = "TEXT")
     private String description;
 
+    private static final String EMPTY_DESCRIPTION = "";
+
     @Builder(access = AccessLevel.PRIVATE)
     public StudentRecord(final Student student, final StudentRecordType studentRecordType, final String description) {
         this.student = student;
@@ -50,7 +52,7 @@ public class StudentRecord extends BaseTimeEntity {
         return StudentRecord.builder()
                 .student(student)
                 .studentRecordType(studentRecordType)
-                .description("")
+                .description(EMPTY_DESCRIPTION)
                 .build();
     }
 
