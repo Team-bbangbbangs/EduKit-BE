@@ -117,7 +117,7 @@ public class MemberService {
         return isNicknameDuplicated(nickname);
     }
 
-    private boolean isNicknameDuplicated(final String nickname) {
+    public boolean isNicknameDuplicated(final String nickname) {
         return memberRepository.existsByNicknameIgnoreCase(nickname);
     }
 

@@ -7,6 +7,7 @@ import com.edukit.auth.facade.response.MemberReissueResponse;
 import com.edukit.auth.facade.response.MemberSignUpResponse;
 import com.edukit.common.EdukitResponse;
 import com.edukit.common.annotation.MemberId;
+import com.edukit.member.facade.response.MemberNicknameValidationResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
@@ -402,5 +403,32 @@ public interface AuthV1Api {
     ResponseEntity<EdukitResponse<Void>> verifyEmail(
             @RequestParam("id") final String memberUuid,
             @RequestParam("code") final String verificationCode
+    );
+
+    @Operation(
+            summary = "닉네임 검증"
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200"),
+            @ApiResponse(
+                    responseCode = "ERROR",
+                    content = @Content(
+                            examples = {
+                                    @ExampleObject(
+                                            name = "닉네임 파라미터 누락",
+                                            description = "nickname 파라미터가 누락된 경우",
+                                            value = """
+                                                      {
+                                                        "code": "FAIL-400",
+                                                        "message": "필수 요청 파라미터가 누락되었습니다."
+                                                      }
+                                                    """
+                                    )
+                            }
+                    )
+            )
+    })
+    ResponseEntity<EdukitResponse<MemberNicknameValidationResponse>> validateNickname(
+            @RequestParam final String nickname
     );
 }

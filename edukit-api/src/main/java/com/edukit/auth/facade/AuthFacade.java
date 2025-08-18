@@ -21,6 +21,7 @@ import com.edukit.core.member.db.enums.School;
 import com.edukit.core.member.service.MemberService;
 import com.edukit.core.subject.db.entity.Subject;
 import com.edukit.core.subject.service.SubjectService;
+import com.edukit.member.facade.response.MemberNicknameValidationResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -145,5 +146,12 @@ public class AuthFacade {
                 VerificationCodeType.PASSWORD_RESET);
         eventPublisher.publishEvent(
                 PasswordFindEvent.of(member.getEmail(), member.getMemberUuid(), verificationCode));
+    }
+
+    public MemberNicknameValidationResponse validateNickname(final String nickname) {
+        return MemberNicknameValidationResponse.of(
+                memberService.isNicknameInvalid(nickname),
+                memberService.isNicknameDuplicated(nickname)
+        );
     }
 }
