@@ -27,7 +27,7 @@ public class AIEventListener {
     @Async("aiTaskExecutor")
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void handleAIResponseGenerateEvent(final AIResponseGenerateEvent generateEvent) {
-        log.info("AI 생기부 생성 시작 taskId: {}, recordId: {}", generateEvent.taskId(), generateEvent.recordId());
+        log.info("AI 생기부 생성 시작 taskId: {}", generateEvent.taskId());
         Flux<OpenAIVersionResponse> response = aiService.getVersionedStreamingResponse(generateEvent.requestPrompt());
 
         response
@@ -36,29 +36,27 @@ public class AIEventListener {
                         version -> {
                             DraftGenerationEvent event = DraftGenerationEvent.of(
                                     generateEvent.taskId(),
-                                    generateEvent.recordId(),
                                     generateEvent.userPrompt(),
                                     generateEvent.byteCount(),
                                     version.versionNumber(),
-                                    version.content(),
-                                    version.isLast()
+                                    version.content()
                             );
                             log.info("Task ID: {} VERSION {} 생성 완료! SQS 전송 시작", generateEvent.taskId(),
                                     version.versionNumber());
                             try {
                                 messageQueueService.sendMessage(event);
                             } catch (ExternalException e) {
-                                log.error("SQS 메시지 전송 실패 - taskId: {}, recordId: {}, error: {}",
-                                        generateEvent.taskId(), generateEvent.recordId(), e.getMessage());
+                                log.error("SQS 메시지 전송 실패 - taskId: {}, error: {}",
+                                        generateEvent.taskId(), e.getMessage());
                             }
                         },
                         error -> {
-                            log.error("AI 응답 생성 중 오류 발생 - taskId: {}, recordId: {}",
-                                    generateEvent.taskId(), generateEvent.recordId(), error);
+                            log.error("AI 응답 생성 중 오류 발생 - taskId: {}",
+                                    generateEvent.taskId(), error);
                         },
                         () -> {
-                            log.info("AI 응답 생성 완료 - taskId: {}, recordId: {}",
-                                    generateEvent.taskId(), generateEvent.recordId());
+                            log.info("AI 응답 생성 완료 - taskId: {}",
+                                    generateEvent.taskId());
                         }
                 );
     }
