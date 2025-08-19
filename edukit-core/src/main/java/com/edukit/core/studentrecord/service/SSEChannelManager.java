@@ -1,13 +1,18 @@
 package com.edukit.core.studentrecord.service;
 
-
 import com.edukit.common.ServerInstanceManager;
+import com.edukit.core.common.event.ai.dto.AIResponseMessage;
 import com.edukit.core.common.service.RedisService;
+import java.io.IOException;
 import java.time.Duration;
+import java.util.concurrent.ConcurrentHashMap;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.stereotype.Service;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @ConditionalOnBean(RedisService.class)
@@ -15,12 +20,15 @@ public class SSEChannelManager {
 
     private final RedisService redisService;
     private final ServerInstanceManager serverInstanceManager;
+    private final ConcurrentHashMap<String, SseEmitter> activeChannels = new ConcurrentHashMap<>();
 
     private static final String SSE_CHANNEL_PREFIX = "sse-channel:";
 
-    public void storeChannel(final String taskId) {
+    public void registerTaskChannel(final String taskId, final SseEmitter emitter) {
         String serverId = serverInstanceManager.getServerId();
         redisService.store(sseChannelKey(taskId), serverId, Duration.ofHours(1));
+        activeChannels.put(taskId, emitter);
+        log.info("Registered SSE channel for taskId: {} on server: {}", taskId, serverId);
     }
 
     public String get(final String channelId) {
@@ -28,11 +36,32 @@ public class SSEChannelManager {
     }
 
     public boolean hasActivateChannel(final String channelId) {
-        return redisService.get(sseChannelKey(channelId)) != null;
+        return activeChannels.containsKey(channelId);
+    }
+
+    public void sendMessage(String taskId, AIResponseMessage message) {
+        SseEmitter emitter = activeChannels.get(taskId);
+        if (emitter != null) {
+            try {
+                emitter.send(SseEmitter.event()
+                        .name("ai-response")
+                        .data(message));
+                log.info("Sent message to SSE channel for taskId: {}", taskId);
+            } catch (IOException e) {
+                log.error("Failed to send message to SSE channel for taskId: {}", taskId, e);
+                removeChannel(taskId);
+            }
+        }
     }
 
     public void deleteChannel(final String channelId) {
         redisService.delete(sseChannelKey(channelId));
+    }
+
+    public void removeChannel(String taskId) {
+        activeChannels.remove(taskId);
+        deleteChannel(taskId);
+        log.info("Removed SSE channel for taskId: {}", taskId);
     }
 
     private String sseChannelKey(final String channelId) {

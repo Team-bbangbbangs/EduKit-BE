@@ -36,15 +36,11 @@ public class StudentRecordAIFacade {
 
     public SseEmitter createChannel(final long taskId) {
         SseEmitter emitter = new SseEmitter(Long.MAX_VALUE);
-        sseChannelManager.storeChannel(String.valueOf(taskId));
+        sseChannelManager.registerTaskChannel(String.valueOf(taskId), emitter);
         return emitter;
     }
 
-    public void sendMessage(final long taskId, final String message) {
-
-    }
-
     public void closeChannel(final long taskId) {
-        sseChannelManager.deleteChannel(String.valueOf(taskId));
+        sseChannelManager.removeChannel(String.valueOf(taskId));
     }
 }
