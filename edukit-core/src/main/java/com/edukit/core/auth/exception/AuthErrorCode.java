@@ -20,7 +20,7 @@ public enum AuthErrorCode implements ErrorCode {
     PASSWORD_CONFIRM_MISMATCH("A-40010", "새 비밀번호와 비밀번호 확인이 일치하지 않습니다."),
     VERIFICATION_CODE_NOT_FOUND("A-40411", "유효한 인증 코드가 존재하지 않습니다."),
     DUPLICATED_NICKNAME("M-40012", "입력하신 닉네임은 중복된 닉네임입니다."),
-    VERIFICATION_CODE_ATTEMPT_LIMIT_EXCEEDED("M-40013", "인증 코드 시도 횟수를 초과했습니다. 인증 코드를 새로 발급받아주세요.");
+    VERIFICATION_CODE_ATTEMPT_LIMIT_EXCEEDED("A-40013", "인증 코드 시도 횟수를 초과했습니다. 인증 코드를 새로 발급받아주세요.");
 
     private final String code;
     private final String message;
