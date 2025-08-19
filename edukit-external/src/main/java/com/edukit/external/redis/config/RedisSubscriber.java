@@ -16,9 +16,11 @@ public class RedisSubscriber {
     private final RedisMessageListenerContainer container;
     private final MessageListenerAdapter listenerAdapter;
 
+    private static final String REDIS_CHANNEL = "ai-response";
+
     @PostConstruct
     public void init() {
-        container.addMessageListener(listenerAdapter, new ChannelTopic("ai-response"));
+        container.addMessageListener(listenerAdapter, new ChannelTopic(REDIS_CHANNEL));
         log.info("Subscribed to Redis channel: ai-response");
     }
 }
