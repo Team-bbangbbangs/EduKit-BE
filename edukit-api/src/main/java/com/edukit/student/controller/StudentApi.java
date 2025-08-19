@@ -55,7 +55,7 @@ public interface StudentApi {
                     )
             )
     })
-    @PostMapping(value = "excel", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping(value = "/excel", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     ResponseEntity<EdukitResponse<StudentUploadResponse>> uploadStudentExcel(
             @MemberId long memberId,
             @RequestParam("file") final MultipartFile file

@@ -30,7 +30,7 @@ public class StudentController implements StudentApi {
 
     private final StudentFacade studentFacade;
 
-    @PostMapping(value = "excel", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping(value = "/excel", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<EdukitResponse<StudentUploadResponse>> uploadStudentExcel(@MemberId final long memberId,
                                                                                     @RequestParam("file") final MultipartFile file) {
         StudentUploadResponse response = studentFacade.createStudentsFromExcel(memberId, file);
