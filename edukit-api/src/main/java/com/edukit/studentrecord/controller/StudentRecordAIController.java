@@ -7,12 +7,15 @@ import com.edukit.studentrecord.facade.StudentRecordAIFacade;
 import com.edukit.studentrecord.facade.response.StudentRecordTaskResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 @RestController
 @RequestMapping("/api/v2/student-records")
@@ -29,5 +32,24 @@ public class StudentRecordAIController {
         StudentRecordTaskResponse response = studentRecordAIFacade.createTaskId(memberId, recordId,
                 request.byteCount(), request.prompt());
         return ResponseEntity.ok(EdukitResponse.success(response));
+    }
+
+    @GetMapping(value = "/stream/{taskId}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public SseEmitter streamStudentRecordResponse(@PathVariable final long taskId) {
+
+        SseEmitter emitter = studentRecordAIFacade.createChannel(taskId);
+
+        emitter.onCompletion(() -> {
+            studentRecordAIFacade.closeChannel(taskId);
+        });
+        emitter.onTimeout(() -> {
+            emitter.completeWithError(new RuntimeException("SSE Timeout"));
+            studentRecordAIFacade.closeChannel(taskId);
+        });
+        emitter.onError((throwable) -> {
+            studentRecordAIFacade.closeChannel(taskId);
+        });
+
+        return emitter;
     }
 }

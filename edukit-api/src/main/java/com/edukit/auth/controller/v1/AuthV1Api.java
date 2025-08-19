@@ -390,7 +390,7 @@ public interface AuthV1Api {
                                             description = "인증 코드 입력 시도 횟수를 초과한 경우",
                                             value = """
                                                       {
-                                                        "code": "M-40013",
+                                                        "code": "A-40013",
                                                         "message": "인증 코드 시도 횟수를 초과했습니다. 인증 코드를 새로 발급받아주세요."
                                                       }
                                                     """
