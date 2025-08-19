@@ -32,12 +32,12 @@ public class SSEChannelManager {
         log.info("Registered SSE channel for taskId: {} on server: {}", taskId, serverId);
     }
 
-    public String get(final String channelId) {
-        return redisService.get(sseChannelKey(channelId));
+    public String get(final String taskId) {
+        return redisService.get(sseChannelKey(taskId));
     }
 
-    public boolean hasActivateChannel(final String channelId) {
-        return activeChannels.containsKey(channelId);
+    public boolean hasActivateChannel(final String taskId) {
+        return activeChannels.containsKey(taskId);
     }
 
     public void sendMessage(final String taskId, final AIResponseMessage message) {
@@ -55,8 +55,8 @@ public class SSEChannelManager {
         }
     }
 
-    public void deleteChannel(final String channelId) {
-        redisService.delete(sseChannelKey(channelId));
+    public void deleteChannel(final String taskId) {
+        redisService.delete(sseChannelKey(taskId));
     }
 
     public void removeChannel(String taskId) {
@@ -65,7 +65,7 @@ public class SSEChannelManager {
         log.info("Removed SSE channel for taskId: {}", taskId);
     }
 
-    private String sseChannelKey(final String channelId) {
-        return SSE_CHANNEL_PREFIX + channelId;
+    private String sseChannelKey(final String taskId) {
+        return SSE_CHANNEL_PREFIX + taskId;
     }
 }
