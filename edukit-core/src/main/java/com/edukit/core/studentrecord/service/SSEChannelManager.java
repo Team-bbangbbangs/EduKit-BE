@@ -23,6 +23,7 @@ public class SSEChannelManager {
     private final ConcurrentHashMap<String, SseEmitter> activeChannels = new ConcurrentHashMap<>();
 
     private static final String SSE_CHANNEL_PREFIX = "sse-channel:";
+    private static final String REDIS_CHANNEL = "ai-response";
 
     public void registerTaskChannel(final String taskId, final SseEmitter emitter) {
         String serverId = serverInstanceManager.getServerId();
@@ -39,12 +40,12 @@ public class SSEChannelManager {
         return activeChannels.containsKey(channelId);
     }
 
-    public void sendMessage(String taskId, AIResponseMessage message) {
+    public void sendMessage(final String taskId, final AIResponseMessage message) {
         SseEmitter emitter = activeChannels.get(taskId);
         if (emitter != null) {
             try {
                 emitter.send(SseEmitter.event()
-                        .name("ai-response")
+                        .name(REDIS_CHANNEL)
                         .data(message));
                 log.info("Sent message to SSE channel for taskId: {}", taskId);
             } catch (IOException e) {
