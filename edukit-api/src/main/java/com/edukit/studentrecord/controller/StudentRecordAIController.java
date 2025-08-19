@@ -38,17 +38,18 @@ public class StudentRecordAIController {
     public SseEmitter streamStudentRecordResponse(
             @MemberId final long memberId,
             @PathVariable final long taskId) {
-        SseEmitter emitter = new SseEmitter(Long.MAX_VALUE);
 
-        // sseEmitterManager.add(taskId, emitter);
+        SseEmitter emitter = studentRecordAIFacade.createChannel(taskId);
 
         emitter.onCompletion(() -> {
-            // sseEmitterManager.remove(taskId);
+            studentRecordAIFacade.closeChannel(taskId);
         });
         emitter.onTimeout(() -> {
-            // sseEmitterManager.remove(taskId);
             emitter.completeWithError(new RuntimeException("SSE Timeout"));
-            // sseEmitterManager.remove(taskId);
+            studentRecordAIFacade.closeChannel(taskId);
+        });
+        emitter.onError((throwable) -> {
+            studentRecordAIFacade.closeChannel(taskId);
         });
 
         return emitter;

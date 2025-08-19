@@ -23,6 +23,10 @@ public class SSEChannelManager {
         redisService.store(sseChannelKey(taskId), serverId, Duration.ofHours(1));
     }
 
+    public String get(final String channelId) {
+        return redisService.get(sseChannelKey(channelId));
+    }
+
     public boolean hasActivateChannel(final String channelId) {
         return redisService.get(sseChannelKey(channelId)) != null;
     }
