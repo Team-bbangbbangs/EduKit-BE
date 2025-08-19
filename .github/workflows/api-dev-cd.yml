@@ -101,6 +101,7 @@ jobs:
           ECR_IMAGE_URI=${{ secrets.ECR_REGISTRY_URI }}/${{ secrets.ECR_REPOSITORY_NAME }}
           IMAGE_TAG=${{ needs.build.outputs.IMAGE_TAG }}
           MONITORING_INSTANCE=${{ secrets.MONITORING_INSTANCE }}
+          SERVER_ID=${{ matrix.runner }}
           EOF
 
       - name: Login to AWS ECR
