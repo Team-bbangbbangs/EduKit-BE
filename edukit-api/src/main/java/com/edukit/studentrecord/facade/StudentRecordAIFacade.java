@@ -25,7 +25,8 @@ public class StudentRecordAIFacade {
                                                   final String userPrompt) {
         StudentRecord studentRecord = studentRecordService.getRecordDetail(memberId, recordId);
 
-        String requestPrompt = AIPromptGenerator.createStreamingPrompt(studentRecord.getStudentRecordType(), byteCount, userPrompt);
+        String requestPrompt = AIPromptGenerator.createStreamingPrompt(studentRecord.getStudentRecordType(), byteCount,
+                userPrompt);
         long taskId = studentRecordService.createAITask(userPrompt);
 
         eventPublisher.publishEvent(
@@ -35,7 +36,7 @@ public class StudentRecordAIFacade {
 
 
     public SseEmitter createChannel(final long taskId) {
-        SseEmitter emitter = new SseEmitter(Long.MAX_VALUE);
+        SseEmitter emitter = new SseEmitter(10 * 60 * 1000L);
         sseChannelManager.registerTaskChannel(String.valueOf(taskId), emitter);
         return emitter;
     }
