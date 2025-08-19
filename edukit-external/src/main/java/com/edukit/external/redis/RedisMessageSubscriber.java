@@ -32,6 +32,7 @@ public class RedisMessageSubscriber implements MessageListener {
 
             if (sseChannelManager.hasActivateChannel(taskId)) {
                 sseChannelManager.sendMessage(taskId, responseMessage);
+                log.info("Message sent to active SSE channel for taskId: {}", taskId);
             } else {
                 String targetServerId = sseChannelManager.get(taskId);
 

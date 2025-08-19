@@ -6,13 +6,12 @@ public record AITaskCreateEvent(
         long taskId,
         String userPrompt,
         String requestPrompt,
-        int byteCount,
-        long recordId
+        int byteCount
 
 ) implements AIResponseGenerateEvent {
 
     public static AITaskCreateEvent of(final long taskId, final String userPrompt, final String requestPrompt,
-                                       final int byteCount, final long recordId) {
-        return new AITaskCreateEvent(taskId, userPrompt, requestPrompt, byteCount, recordId);
+                                       final int byteCount) {
+        return new AITaskCreateEvent(taskId, userPrompt, requestPrompt, byteCount);
     }
 }

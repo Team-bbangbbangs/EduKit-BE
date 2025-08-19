@@ -9,6 +9,4 @@ public interface AIResponseGenerateEvent {
     String requestPrompt();
 
     int byteCount();
-
-    long recordId();
 }

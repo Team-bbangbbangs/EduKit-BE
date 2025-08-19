@@ -29,11 +29,9 @@ public class StudentRecordAIFacade {
                 userPrompt);
         long taskId = studentRecordService.createAITask(userPrompt);
 
-        eventPublisher.publishEvent(
-                AITaskCreateEvent.of(taskId, userPrompt, requestPrompt, byteCount, studentRecord.getId()));
+        eventPublisher.publishEvent(AITaskCreateEvent.of(taskId, userPrompt, requestPrompt, byteCount));
         return StudentRecordTaskResponse.of(taskId);
     }
-
 
     public SseEmitter createChannel(final long taskId) {
         SseEmitter emitter = new SseEmitter(10 * 60 * 1000L);
