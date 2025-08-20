@@ -115,7 +115,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(NoHandlerFoundException.class)
     public EdukitResponse<Void> handleNoHandlerFoundException(final NoHandlerFoundException e) {
         log.warn("No handler found exception occurred: {} {}", e.getHttpMethod(), e.getRequestURL());
-        return EdukitResponse.fail("FAIL-404", "존재하지 않는 요청 경로입니다.");
+        return EdukitResponse.fail("FAIL-400", "존재하지 않는 요청 경로입니다.");
     }
 
     // Generic exception handler
