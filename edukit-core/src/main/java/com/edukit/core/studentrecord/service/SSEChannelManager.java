@@ -20,7 +20,7 @@ public class SSEChannelManager {
 
     private final RedisStoreService redisStoreService;
     private final ServerInstanceManager serverInstanceManager;
-    private final StudentRecordService studentRecordService;
+    private final AITaskService aiTaskService;
     private final ConcurrentHashMap<String, SseEmitter> activeChannels = new ConcurrentHashMap<>();
 
     private static final String SSE_CHANNEL_PREFIX = "sse-channel:";
@@ -79,7 +79,7 @@ public class SSEChannelManager {
     private void completeTask(final String taskId) {
         try {
             Long taskIdLong = Long.valueOf(taskId);
-            studentRecordService.completeAITask(taskIdLong);
+            aiTaskService.completeAITask(taskIdLong);
             log.info("Completed AI task for taskId: {}", taskId);
 
             SseEmitter emitter = activeChannels.get(taskId);
@@ -90,7 +90,7 @@ public class SSEChannelManager {
 
             removeChannel(taskId);
             redisStoreService.delete(responseCountKey(taskId));
-            
+
         } catch (Exception e) {
             log.error("Failed to complete task for taskId: {}", taskId, e);
         }

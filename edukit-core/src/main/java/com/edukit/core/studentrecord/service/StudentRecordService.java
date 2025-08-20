@@ -4,9 +4,7 @@ import com.edukit.core.member.db.entity.Member;
 import com.edukit.core.student.db.entity.Student;
 import com.edukit.core.student.utils.KoreanNormalizer;
 import com.edukit.core.studentrecord.db.entity.StudentRecord;
-import com.edukit.core.studentrecord.db.entity.StudentRecordAITask;
 import com.edukit.core.studentrecord.db.enums.StudentRecordType;
-import com.edukit.core.studentrecord.db.repository.StudentRecordAITaskRepository;
 import com.edukit.core.studentrecord.db.repository.StudentRecordRepository;
 import com.edukit.core.studentrecord.exception.StudentRecordErrorCode;
 import com.edukit.core.studentrecord.exception.StudentRecordException;
@@ -25,27 +23,12 @@ import org.springframework.transaction.annotation.Transactional;
 public class StudentRecordService {
 
     private final StudentRecordRepository studentRecordRepository;
-    private final StudentRecordAITaskRepository aiTaskRepository;
 
     @Transactional(readOnly = true)
     public StudentRecord getRecordDetail(final long memberId, final long recordId) {
         StudentRecord existingDetail = getRecordDetailById(recordId);
         validatePermission(existingDetail.getStudent(), memberId);
         return existingDetail;
-    }
-
-    @Transactional
-    public StudentRecordAITask createAITask(final String prompt) {
-        StudentRecordAITask aiTask = StudentRecordAITask.create(prompt);
-        aiTaskRepository.save(aiTask);
-        return aiTask;
-    }
-
-    @Transactional
-    public void completeAITask(final Long taskId) {
-        StudentRecordAITask aiTask = aiTaskRepository.findById(taskId)
-                .orElseThrow(() -> new StudentRecordException(StudentRecordErrorCode.AI_TASK_NOT_FOUND));
-        aiTask.complete();
     }
 
     @Transactional
