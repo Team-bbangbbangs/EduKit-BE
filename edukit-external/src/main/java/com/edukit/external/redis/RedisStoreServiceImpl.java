@@ -23,4 +23,12 @@ public class RedisStoreServiceImpl implements RedisStoreService {
     public void delete(final String key) {
         redisTemplate.delete(key);
     }
+
+    public Long increment(final String key, final Duration ttl) {
+        Long count = redisTemplate.opsForValue().increment(key);
+        if (count == 1) {
+            redisTemplate.expire(key, ttl);
+        }
+        return count;
+    }
 }

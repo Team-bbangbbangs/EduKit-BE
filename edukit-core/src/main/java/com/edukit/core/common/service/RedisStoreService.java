@@ -9,4 +9,6 @@ public interface RedisStoreService {
     String get(String key);
 
     void delete(String key);
+
+    Long increment(String key, Duration ttl);
 }

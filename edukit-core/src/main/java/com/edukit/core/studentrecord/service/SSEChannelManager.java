@@ -20,10 +20,14 @@ public class SSEChannelManager {
 
     private final RedisStoreService redisStoreService;
     private final ServerInstanceManager serverInstanceManager;
+    private final StudentRecordService studentRecordService;
     private final ConcurrentHashMap<String, SseEmitter> activeChannels = new ConcurrentHashMap<>();
 
     private static final String SSE_CHANNEL_PREFIX = "sse-channel:";
+    private static final String RESPONSE_COUNT_PREFIX = "response-count:";
     private static final String REDIS_CHANNEL = "ai-response";
+    private static final int MAX_RESPONSE_COUNT = 3;
+    private static final Duration RESPONSE_COUNT_TTL = Duration.ofMinutes(5);
 
     public void registerTaskChannel(final String taskId, final SseEmitter emitter) {
         String serverId = serverInstanceManager.getServerId();
@@ -48,6 +52,13 @@ public class SSEChannelManager {
                         .name(REDIS_CHANNEL)
                         .data(message));
                 log.info("Sent message to SSE channel for taskId: {}", taskId);
+
+                Long responseCount = redisStoreService.increment(responseCountKey(taskId), RESPONSE_COUNT_TTL);
+                log.info("Response count for taskId {}: {}", taskId, responseCount);
+
+                if (responseCount >= MAX_RESPONSE_COUNT) {
+                    completeTask(taskId);
+                }
             } catch (IOException e) {
                 log.error("Failed to send message to SSE channel for taskId: {}", taskId, e);
                 removeChannel(taskId);
@@ -65,7 +76,31 @@ public class SSEChannelManager {
         redisStoreService.delete(sseChannelKey(taskId));
     }
 
+    private void completeTask(final String taskId) {
+        try {
+            Long taskIdLong = Long.valueOf(taskId);
+            studentRecordService.completeAITask(taskIdLong);
+            log.info("Completed AI task for taskId: {}", taskId);
+
+            SseEmitter emitter = activeChannels.get(taskId);
+            if (emitter != null) {
+                emitter.complete();
+                log.info("Completed SSE channel for taskId: {}", taskId);
+            }
+
+            removeChannel(taskId);
+            redisStoreService.delete(responseCountKey(taskId));
+            
+        } catch (Exception e) {
+            log.error("Failed to complete task for taskId: {}", taskId, e);
+        }
+    }
+
     private String sseChannelKey(final String taskId) {
         return SSE_CHANNEL_PREFIX + taskId;
+    }
+
+    private String responseCountKey(final String taskId) {
+        return RESPONSE_COUNT_PREFIX + taskId;
     }
 }

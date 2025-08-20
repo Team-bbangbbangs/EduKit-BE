@@ -55,4 +55,9 @@ public class StudentRecordAITask {
         this.status = AITaskStatus.IN_PROGRESS;
         this.startedAt = LocalDateTime.now();
     }
+
+    public void complete() {
+        this.status = AITaskStatus.COMPLETED;
+        this.completedAt = LocalDateTime.now();
+    }
 }

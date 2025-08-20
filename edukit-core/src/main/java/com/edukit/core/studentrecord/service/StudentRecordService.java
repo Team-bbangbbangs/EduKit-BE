@@ -42,6 +42,13 @@ public class StudentRecordService {
     }
 
     @Transactional
+    public void completeAITask(final Long taskId) {
+        StudentRecordAITask aiTask = aiTaskRepository.findById(taskId)
+                .orElseThrow(() -> new StudentRecordException(StudentRecordErrorCode.STUDENT_RECORD_NOT_FOUND));
+        aiTask.complete();
+    }
+
+    @Transactional
     public void createStudentRecords(final Student student, final List<StudentRecordType> recordTypes) {
         validateRecordTypes(recordTypes);
         List<StudentRecord> studentRecords = recordTypes.stream()
