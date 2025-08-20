@@ -1,6 +1,6 @@
 package com.edukit.core.studentrecord.service;
 
-import com.edukit.common.ServerInstanceManager;
+import com.edukit.common.infra.ServerInstanceManager;
 import com.edukit.core.common.event.ai.dto.AIResponseMessage;
 import com.edukit.core.common.service.RedisStreamService;
 import com.edukit.core.studentrecord.exception.StudentRecordErrorCode;
