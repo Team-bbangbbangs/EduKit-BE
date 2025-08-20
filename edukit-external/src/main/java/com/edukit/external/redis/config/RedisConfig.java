@@ -1,10 +1,5 @@
 package com.edukit.external.redis.config;
 
-import com.edukit.common.ServerInstanceManager;
-import com.edukit.core.studentrecord.service.RedisStreamConsumer;
-import com.edukit.core.studentrecord.service.SSEChannelManager;
-import com.edukit.external.redis.RedisStreamServiceImpl;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -32,15 +27,5 @@ public class RedisConfig {
         redisStandaloneConfiguration.setHostName(host);
         redisStandaloneConfiguration.setPort(port);
         return new LettuceConnectionFactory(redisStandaloneConfiguration);
-    }
-
-    @Bean
-    public RedisStreamConsumer redisStreamConsumer(
-            final RedisStreamServiceImpl redisService,
-            final ServerInstanceManager serverInstanceManager,
-            final SSEChannelManager sseChannelManager,
-            final ObjectMapper objectMapper
-    ) {
-        return new RedisStreamConsumer(redisService, serverInstanceManager, sseChannelManager, objectMapper);
     }
 }

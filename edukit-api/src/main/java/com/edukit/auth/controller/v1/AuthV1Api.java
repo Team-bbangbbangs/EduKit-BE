@@ -26,7 +26,25 @@ public interface AuthV1Api {
             summary = "회원가입"
     )
     @ApiResponses({
-            @ApiResponse(responseCode = "200"),
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "회원가입 성공",
+                    content = @Content(
+                            examples = @ExampleObject(
+                                    name = "성공 응답",
+                                    value = """
+                                            {
+                                              "code": "SUCCESS",
+                                              "message": "요청이 성공했습니다.",
+                                              "data": {
+                                                "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+                                                "isAdmin": false
+                                              }
+                                            }
+                                            """
+                            )
+                    )
+            ),
             @ApiResponse(
                     responseCode = "ERROR",
                     content = @Content(
@@ -141,7 +159,25 @@ public interface AuthV1Api {
             summary = "로그인"
     )
     @ApiResponses({
-            @ApiResponse(responseCode = "200"),
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "로그인 성공",
+                    content = @Content(
+                            examples = @ExampleObject(
+                                    name = "성공 응답",
+                                    value = """
+                                            {
+                                              "code": "SUCCESS",
+                                              "message": "요청이 성공했습니다.",
+                                              "data": {
+                                                "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+                                                "isAdmin": false
+                                              }
+                                            }
+                                            """
+                            )
+                    )
+            ),
             @ApiResponse(
                     responseCode = "ERROR",
                     content = @Content(
@@ -203,7 +239,21 @@ public interface AuthV1Api {
             summary = "로그아웃"
     )
     @ApiResponses({
-            @ApiResponse(responseCode = "200"),
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "로그아웃 성공",
+                    content = @Content(
+                            examples = @ExampleObject(
+                                    name = "성공 응답",
+                                    value = """
+                                            {
+                                              "code": "SUCCESS",
+                                              "message": "요청이 성공했습니다."
+                                            }
+                                            """
+                            )
+                    )
+            ),
             @ApiResponse(
                     responseCode = "ERROR",
                     content = @Content(
@@ -248,7 +298,25 @@ public interface AuthV1Api {
             summary = "토큰 갱신"
     )
     @ApiResponses({
-            @ApiResponse(responseCode = "200"),
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "토큰 갱신 성공",
+                    content = @Content(
+                            examples = @ExampleObject(
+                                    name = "성공 응답",
+                                    value = """
+                                            {
+                                              "code": "SUCCESS",
+                                              "message": "요청이 성공했습니다.",
+                                              "data": {
+                                                "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+                                                "isAdmin": false
+                                              }
+                                            }
+                                            """
+                            )
+                    )
+            ),
             @ApiResponse(
                     responseCode = "ERROR",
                     content = @Content(
@@ -305,7 +373,21 @@ public interface AuthV1Api {
             summary = "교사 인증 이메일 발송"
     )
     @ApiResponses({
-            @ApiResponse(responseCode = "200"),
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "인증 이메일 발송 성공",
+                    content = @Content(
+                            examples = @ExampleObject(
+                                    name = "성공 응답",
+                                    value = """
+                                            {
+                                              "code": "SUCCESS",
+                                              "message": "요청이 성공했습니다."
+                                            }
+                                            """
+                            )
+                    )
+            ),
             @ApiResponse(
                     responseCode = "ERROR",
                     content = @Content(
@@ -350,7 +432,21 @@ public interface AuthV1Api {
             summary = "이메일 인증 처리"
     )
     @ApiResponses({
-            @ApiResponse(responseCode = "200"),
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "이메일 인증 성공",
+                    content = @Content(
+                            examples = @ExampleObject(
+                                    name = "성공 응답",
+                                    value = """
+                                            {
+                                              "code": "SUCCESS",
+                                              "message": "요청이 성공했습니다."
+                                            }
+                                            """
+                            )
+                    )
+            ),
             @ApiResponse(
                     responseCode = "ERROR",
                     content = @Content(
@@ -408,7 +504,21 @@ public interface AuthV1Api {
             summary = "닉네임 검증"
     )
     @ApiResponses({
-            @ApiResponse(responseCode = "200"),
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "닉네임 검증 성공",
+                    content = @Content(
+                            examples = @ExampleObject(
+                                    name = "성공 응답",
+                                    value = """
+                                            {
+                                              "code": "SUCCESS",
+                                              "message": "요청이 성공했습니다."
+                                            }
+                                            """
+                            )
+                    )
+            ),
             @ApiResponse(
                     responseCode = "ERROR",
                     content = @Content(

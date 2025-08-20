@@ -38,7 +38,7 @@ public interface StudentRecordAIApi {
                                     value = """
                                             {
                                               "code": "SUCCESS",
-                                              "message": "success",
+                                              "message": "요청이 성공했습니다.",
                                               "data": {
                                                 "taskId": 123
                                               }
@@ -104,6 +104,16 @@ public interface StudentRecordAIApi {
                                                     {
                                                       "code": "R-50001",
                                                       "message": "Redis 메시지 처리 중 오류가 발생했습니다."
+                                                    }
+                                                    """
+                                    ),
+                                    @ExampleObject(
+                                            name = "AI 작업 완료 실패",
+                                            description = "AI 작업 완료 중 오류가 발생한 경우",
+                                            value = """
+                                                    {
+                                                      "code": "SR-50007",
+                                                      "message": "AI 작업 완료에 실패했습니다."
                                                     }
                                                     """
                                     )
@@ -181,12 +191,23 @@ public interface StudentRecordAIApi {
                                                       "message": "Redis 메시지 처리 중 오류가 발생했습니다."
                                                     }
                                                     """
+                                    ),
+                                    @ExampleObject(
+                                            name = "AI 작업 완료 실패",
+                                            description = "AI 작업 완료 중 오류가 발생한 경우",
+                                            value = """
+                                                    {
+                                                      "code": "SR-50007",
+                                                      "message": "AI 작업 완료에 실패했습니다."
+                                                    }
+                                                    """
                                     )
                             }
                     )
             )
     })
     SseEmitter streamStudentRecordResponse(
+            @Parameter(hidden = true) @MemberId final long memberId,
             @Parameter(
                     name = "taskId",
                     description = "AI 생성 작업 ID",

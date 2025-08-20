@@ -35,9 +35,9 @@ public class StudentRecordAIController implements StudentRecordAIApi {
     }
 
     @GetMapping(value = "/stream/{taskId}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public SseEmitter streamStudentRecordResponse(@PathVariable final long taskId) {
+    public SseEmitter streamStudentRecordResponse(@MemberId final long memberId, @PathVariable final long taskId) {
 
-        SseEmitter emitter = studentRecordAIFacade.createChannel(taskId);
+        SseEmitter emitter = studentRecordAIFacade.createChannel(memberId, taskId);
 
         emitter.onCompletion(() -> {
             studentRecordAIFacade.closeChannel(taskId);

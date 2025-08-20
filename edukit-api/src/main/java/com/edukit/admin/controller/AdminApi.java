@@ -40,7 +40,21 @@ public interface AdminApi {
                     """
     )
     @ApiResponses({
-            @ApiResponse(responseCode = "200"),
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "공지사항 생성 성공",
+                    content = @Content(
+                            examples = @ExampleObject(
+                                    name = "성공 응답",
+                                    value = """
+                                            {
+                                              "code": "SUCCESS",
+                                              "message": "요청이 성공했습니다."
+                                            }
+                                            """
+                            )
+                    )
+            ),
             @ApiResponse(
                     responseCode = "ERROR",
                     content = @Content(
@@ -102,7 +116,21 @@ public interface AdminApi {
                     """
     )
     @ApiResponses({
-            @ApiResponse(responseCode = "200"),
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "공지사항 수정 성공",
+                    content = @Content(
+                            examples = @ExampleObject(
+                                    name = "성공 응답",
+                                    value = """
+                                            {
+                                              "code": "SUCCESS",
+                                              "message": "요청이 성공했습니다."
+                                            }
+                                            """
+                            )
+                    )
+            ),
             @ApiResponse(
                     responseCode = "ERROR",
                     content = @Content(
@@ -163,7 +191,21 @@ public interface AdminApi {
 
     @Operation(summary = "공지사항 삭제")
     @ApiResponses({
-            @ApiResponse(responseCode = "200"),
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "공지사항 삭제 성공",
+                    content = @Content(
+                            examples = @ExampleObject(
+                                    name = "성공 응답",
+                                    value = """
+                                            {
+                                              "code": "SUCCESS",
+                                              "message": "요청이 성공했습니다."
+                                            }
+                                            """
+                            )
+                    )
+            ),
             @ApiResponse(
                     responseCode = "ERROR",
                     content = @Content(
@@ -215,7 +257,31 @@ public interface AdminApi {
                     """
     )
     @ApiResponses({
-            @ApiResponse(responseCode = "200"),
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Presigned URL 생성 성공",
+                    content = @Content(
+                            examples = @ExampleObject(
+                                    name = "성공 응답",
+                                    value = """
+                                            {
+                                              "code": "SUCCESS",
+                                              "message": "요청이 성공했습니다.",
+                                              "data": {
+                                                "images": [
+                                                  {
+                                                    "uploadPresignedUrl": "https://s3.amazonaws.com/bucket/key?signature=...",
+                                                    "tmpFileUrl": "https://dev-cdn.edukit.co.kr/tmp/20250725_223935_ea5f18be.jpg",
+                                                    "fileUrl": "https://dev-cdn.edukit.co.kr/notices/20250725_223935_ea5f18be.jpg",
+                                                    "fileKey": "notices/20250725_223935_ea5f18be.jpg"
+                                                  }
+                                                ]
+                                              }
+                                            }
+                                            """
+                            )
+                    )
+            ),
             @ApiResponse(
                     responseCode = "ERROR",
                     content = @Content(

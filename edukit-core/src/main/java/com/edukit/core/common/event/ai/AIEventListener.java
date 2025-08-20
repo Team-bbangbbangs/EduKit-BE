@@ -6,6 +6,7 @@ import com.edukit.core.common.service.AIService;
 import com.edukit.core.common.service.SqsService;
 import com.edukit.core.common.service.response.OpenAIVersionResponse;
 import com.edukit.core.studentrecord.db.entity.StudentRecordAITask;
+import com.edukit.core.studentrecord.service.AITaskService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
@@ -23,6 +24,7 @@ import reactor.core.scheduler.Schedulers;
 public class AIEventListener {
 
     private final AIService aiService;
+    private final AITaskService aiTaskService;
     private final SqsService messageQueueService;
 
     @Async("aiTaskExecutor")
@@ -32,7 +34,7 @@ public class AIEventListener {
         long taskId = task.getId();
 
         log.info("AI 생기부 생성 시작 taskId: {}", taskId);
-        task.start();
+        aiTaskService.startTask(task);
         Flux<OpenAIVersionResponse> response = aiService.getVersionedStreamingResponse(generateEvent.requestPrompt());
 
         response

@@ -24,7 +24,28 @@ public interface MemberApi {
             summary = "회원 프로필 조회"
     )
     @ApiResponses({
-            @ApiResponse(responseCode = "200"),
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "프로필 조회 성공",
+                    content = @Content(
+                            examples = @ExampleObject(
+                                    name = "성공 응답",
+                                    value = """
+                                            {
+                                              "code": "SUCCESS",
+                                              "message": "요청이 성공했습니다.",
+                                              "data": {
+                                                "email": "teacher@sen.go.kr",
+                                                "subject": "수학",
+                                                "isTeacherVerified": true,
+                                                "school": "high",
+                                                "nickname": "김선생"
+                                              }
+                                            }
+                                            """
+                            )
+                    )
+            ),
             @ApiResponse(
                     responseCode = "ERROR",
                     content = @Content(
@@ -69,7 +90,21 @@ public interface MemberApi {
             summary = "회원 프로필 수정"
     )
     @ApiResponses({
-            @ApiResponse(responseCode = "200"),
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "프로필 수정 성공",
+                    content = @Content(
+                            examples = @ExampleObject(
+                                    name = "성공 응답",
+                                    value = """
+                                            {
+                                              "code": "SUCCESS",
+                                              "message": "요청이 성공했습니다."
+                                            }
+                                            """
+                            )
+                    )
+            ),
             @ApiResponse(
                     responseCode = "ERROR",
                     content = @Content(
@@ -142,7 +177,21 @@ public interface MemberApi {
             summary = "닉네임 검증"
     )
     @ApiResponses({
-            @ApiResponse(responseCode = "200"),
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "닉네임 검증 성공",
+                    content = @Content(
+                            examples = @ExampleObject(
+                                    name = "성공 응답",
+                                    value = """
+                                            {
+                                              "code": "SUCCESS",
+                                              "message": "요청이 성공했습니다."
+                                            }
+                                            """
+                            )
+                    )
+            ),
             @ApiResponse(
                     responseCode = "ERROR",
                     content = @Content(
@@ -200,7 +249,21 @@ public interface MemberApi {
             summary = "회원 탈퇴"
     )
     @ApiResponses({
-            @ApiResponse(responseCode = "200"),
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "회원 탈퇴 성공",
+                    content = @Content(
+                            examples = @ExampleObject(
+                                    name = "성공 응답",
+                                    value = """
+                                            {
+                                              "code": "SUCCESS",
+                                              "message": "요청이 성공했습니다."
+                                            }
+                                            """
+                            )
+                    )
+            ),
             @ApiResponse(
                     responseCode = "ERROR",
                     content = @Content(
@@ -225,7 +288,21 @@ public interface MemberApi {
             summary = "이메일 주소 변경"
     )
     @ApiResponses({
-            @ApiResponse(responseCode = "200"),
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "이메일 변경 성공",
+                    content = @Content(
+                            examples = @ExampleObject(
+                                    name = "성공 응답",
+                                    value = """
+                                            {
+                                              "code": "SUCCESS",
+                                              "message": "요청이 성공했습니다."
+                                            }
+                                            """
+                            )
+                    )
+            ),
             @ApiResponse(
                     responseCode = "ERROR",
                     content = @Content(
@@ -289,7 +366,21 @@ public interface MemberApi {
             summary = "비밀번호 변경"
     )
     @ApiResponses({
-            @ApiResponse(responseCode = "200"),
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "비밀번호 변경 성공",
+                    content = @Content(
+                            examples = @ExampleObject(
+                                    name = "성공 응답",
+                                    value = """
+                                            {
+                                              "code": "SUCCESS",
+                                              "message": "요청이 성공했습니다."
+                                            }
+                                            """
+                            )
+                    )
+            ),
             @ApiResponse(
                     responseCode = "ERROR",
                     content = @Content(

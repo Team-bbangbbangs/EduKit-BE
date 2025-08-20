@@ -111,7 +111,7 @@ public class RedisStreamConsumer {
                 String targetServerId = sseChannelManager.get(taskId);
                 if (targetServerId != null && targetServerId.equals(serverInstanceManager.getServerId())) {
                     log.warn("Task {} assigned to current server but no active channel", taskId);
-                    sseChannelManager.deleteChannel(taskId);
+                    sseChannelManager.removeChannel(taskId);
                 }
             }
         } catch (Exception e) {

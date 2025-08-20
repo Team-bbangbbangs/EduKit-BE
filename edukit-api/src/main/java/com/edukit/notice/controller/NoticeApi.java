@@ -18,7 +18,32 @@ import org.springframework.web.bind.annotation.RequestParam;
 public interface NoticeApi {
     @Operation(summary = "공지사항 목록 조회")
     @ApiResponses({
-            @ApiResponse(responseCode = "200"),
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "공지사항 목록 조회 성공",
+                    content = @Content(
+                            examples = @ExampleObject(
+                                    name = "성공 응답",
+                                    value = """
+                                            {
+                                              "code": "SUCCESS",
+                                              "message": "요청이 성공했습니다.",
+                                              "data": {
+                                                "totalPages": 5,
+                                                "notices": [
+                                                  {
+                                                    "noticeId": 1,
+                                                    "category": "ANNOUNCEMENT",
+                                                    "title": "신규 기능 업데이트 안내",
+                                                    "createdAt": "2024-01-15T10:30:00"
+                                                  }
+                                                ]
+                                              }
+                                            }
+                                            """
+                            )
+                    )
+            ),
             @ApiResponse(
                     responseCode = "ERROR",
                     content = @Content(
@@ -57,7 +82,29 @@ public interface NoticeApi {
 
     @Operation(summary = "공지사항 상세 조회")
     @ApiResponses({
-            @ApiResponse(responseCode = "200"),
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "공지사항 상세 조회 성공",
+                    content = @Content(
+                            examples = @ExampleObject(
+                                    name = "성공 응답",
+                                    value = """
+                                            {
+                                              "code": "SUCCESS",
+                                              "message": "요청이 성공했습니다.",
+                                              "data": {
+                                                "noticeId": 1,
+                                                "category": "ANNOUNCEMENT",
+                                                "title": "신규 기능 업데이트 안내",
+                                                "content": "새로운 AI 생활기록부 생성 기능이 추가되었습니다.",
+                                                "createdAt": "2024-01-15T10:30:00",
+                                                "noticeFileIds": [1, 2, 3]
+                                              }
+                                            }
+                                            """
+                            )
+                    )
+            ),
             @ApiResponse(
                     responseCode = "ERROR",
                     content = @Content(

@@ -13,6 +13,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -24,10 +25,38 @@ public interface StudentRecordApi {
             summary = "생활기록부 목록 조회"
     )
     @ApiResponses({
-            @ApiResponse(responseCode = "200"),
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "생활기록부 목록 조회 성공",
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            examples = @ExampleObject(
+                                    name = "성공 응답",
+                                    value = """
+                                            {
+                                              "code": "SUCCESS",
+                                              "message": "요청이 성공했습니다.",
+                                              "data": {
+                                                "studentRecords": [
+                                                  {
+                                                    "recordId": 1,
+                                                    "grade": 2,
+                                                    "classNumber": 3,
+                                                    "studentNumber": 15,
+                                                    "studentName": "홍길동",
+                                                    "description": "수학 수업에 적극적으로 참여하는 모습을 보인다."
+                                                  }
+                                                ]
+                                              }
+                                            }
+                                            """
+                            )
+                    )
+            ),
             @ApiResponse(
                     responseCode = "ERROR",
                     content = @Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE,
                             examples = {
                                     @ExampleObject(
                                             name = "유효하지 않은 생활기록부 항목",
@@ -57,10 +86,26 @@ public interface StudentRecordApi {
             summary = "생활기록부 수정"
     )
     @ApiResponses({
-            @ApiResponse(responseCode = "200"),
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "생활기록부 수정 성공",
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            examples = @ExampleObject(
+                                    name = "성공 응답",
+                                    value = """
+                                            {
+                                              "code": "SUCCESS",
+                                              "message": "요청이 성공했습니다."
+                                            }
+                                            """
+                            )
+                    )
+            ),
             @ApiResponse(
                     responseCode = "ERROR",
                     content = @Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE,
                             examples = {
                                     @ExampleObject(
                                             name = "필수 값 누락",
@@ -120,6 +165,7 @@ public interface StudentRecordApi {
             @ApiResponse(
                     responseCode = "ERROR",
                     content = @Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE,
                             examples = {
                                     @ExampleObject(
                                             name = "유효하지 않은 생활기록부 항목",
