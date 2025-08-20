@@ -1,4 +1,4 @@
-package com.edukit.common;
+package com.edukit.common.infra;
 
 import java.util.UUID;
 import lombok.Getter;
