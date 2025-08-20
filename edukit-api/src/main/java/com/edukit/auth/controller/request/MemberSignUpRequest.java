@@ -14,7 +14,7 @@ public record MemberSignUpRequest(
         @NotNull(message = "비밀번호는 필수 입력값입니다.")
         String password,
         
-        @Schema(description = "담당 과목", example = "MATH")
+        @Schema(description = "담당 과목", example = "수학")
         @NotNull(message = "과목은 필수 입력값입니다.")
         String subject,
         
@@ -22,7 +22,7 @@ public record MemberSignUpRequest(
         @NotNull(message = "닉네임은 필수 입력값입니다.")
         String nickname,
         
-        @Schema(description = "학교 종류", example = "HIGH_SCHOOL", allowableValues = {"HIGH_SCHOOL", "MIDDLE_SCHOOL"})
+        @Schema(description = "학교 종류", example = "high", allowableValues = {"middle", "high"})
         @NotNull(message = "학교는 필수 입력값입니다.")
         String school
 ) {
