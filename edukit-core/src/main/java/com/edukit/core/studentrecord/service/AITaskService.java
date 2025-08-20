@@ -1,5 +1,6 @@
 package com.edukit.core.studentrecord.service;
 
+import com.edukit.core.member.db.entity.Member;
 import com.edukit.core.studentrecord.db.entity.StudentRecordAITask;
 import com.edukit.core.studentrecord.db.repository.StudentRecordAITaskRepository;
 import com.edukit.core.studentrecord.exception.StudentRecordErrorCode;
@@ -15,15 +16,15 @@ public class AITaskService {
     private final StudentRecordAITaskRepository aiTaskRepository;
 
     @Transactional
-    public void startTask(final StudentRecordAITask task) {
-        task.start();
+    public StudentRecordAITask createAITask(final Member member, final String prompt) {
+        StudentRecordAITask aiTask = StudentRecordAITask.create(member, prompt);
+        aiTaskRepository.save(aiTask);
+        return aiTask;
     }
 
     @Transactional
-    public StudentRecordAITask createAITask(final String prompt) {
-        StudentRecordAITask aiTask = StudentRecordAITask.create(prompt);
-        aiTaskRepository.save(aiTask);
-        return aiTask;
+    public void startTask(final StudentRecordAITask task) {
+        task.start();
     }
 
     @Transactional

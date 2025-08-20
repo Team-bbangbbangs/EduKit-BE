@@ -1,5 +1,7 @@
 package com.edukit.studentrecord.facade;
 
+import com.edukit.core.member.db.entity.Member;
+import com.edukit.core.member.service.MemberService;
 import com.edukit.core.studentrecord.db.entity.StudentRecord;
 import com.edukit.core.studentrecord.db.entity.StudentRecordAITask;
 import com.edukit.core.studentrecord.service.AITaskService;
@@ -18,6 +20,7 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 @RequiredArgsConstructor
 public class StudentRecordAIFacade {
 
+    private final MemberService memberService;
     private final StudentRecordService studentRecordService;
     private final AITaskService aiTaskService;
     private final SSEChannelManager sseChannelManager;
@@ -26,11 +29,12 @@ public class StudentRecordAIFacade {
     @Transactional
     public StudentRecordTaskResponse createTaskId(final long memberId, final long recordId, final int byteCount,
                                                   final String userPrompt) {
+        Member member = memberService.getMemberById(memberId);
         StudentRecord studentRecord = studentRecordService.getRecordDetail(memberId, recordId);
 
         String requestPrompt = AIPromptGenerator.createStreamingPrompt(studentRecord.getStudentRecordType(), byteCount,
                 userPrompt);
-        StudentRecordAITask task = aiTaskService.createAITask(userPrompt);
+        StudentRecordAITask task = aiTaskService.createAITask(member, userPrompt);
 
         eventPublisher.publishEvent(AITaskCreateEvent.of(task, userPrompt, requestPrompt, byteCount));
         return StudentRecordTaskResponse.of(task.getId());
