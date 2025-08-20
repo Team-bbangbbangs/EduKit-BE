@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/v2/auth")
 @RequiredArgsConstructor
-public class AuthV2Controller {
+public class AuthV2Controller implements AuthV2Api {
 
     private final AuthFacade authFacade;
 
@@ -26,6 +26,11 @@ public class AuthV2Controller {
         return ResponseEntity.ok(EdukitResponse.success());
     }
 
+
+    /**
+     이거 없앨 지 말지 회의 -> 메일로 임시 비밀번호 제공해주는 쪽으로 변경할 지 의논해야함
+     지금은 비밀번호를 변경할 수 있는 링크를 제공하고 있음
+     */
     @PatchMapping("/password")
     public ResponseEntity<EdukitResponse<Void>> updatePassword(
             @RequestBody @Valid final UpdatePasswordRequest request) {
