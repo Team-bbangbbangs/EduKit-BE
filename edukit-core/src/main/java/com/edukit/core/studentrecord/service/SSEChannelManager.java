@@ -2,7 +2,7 @@ package com.edukit.core.studentrecord.service;
 
 import com.edukit.common.ServerInstanceManager;
 import com.edukit.core.common.event.ai.dto.AIResponseMessage;
-import com.edukit.core.common.service.RedisService;
+import com.edukit.core.common.service.RedisStoreService;
 import java.io.IOException;
 import java.time.Duration;
 import java.util.concurrent.ConcurrentHashMap;
@@ -15,10 +15,10 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-@ConditionalOnBean(RedisService.class)
+@ConditionalOnBean(RedisStoreService.class)
 public class SSEChannelManager {
 
-    private final RedisService redisService;
+    private final RedisStoreService redisStoreService;
     private final ServerInstanceManager serverInstanceManager;
     private final ConcurrentHashMap<String, SseEmitter> activeChannels = new ConcurrentHashMap<>();
 
@@ -27,13 +27,13 @@ public class SSEChannelManager {
 
     public void registerTaskChannel(final String taskId, final SseEmitter emitter) {
         String serverId = serverInstanceManager.getServerId();
-        redisService.store(sseChannelKey(taskId), serverId, Duration.ofHours(1));
+        redisStoreService.store(sseChannelKey(taskId), serverId, Duration.ofHours(1));
         activeChannels.put(taskId, emitter);
         log.info("Registered SSE channel for taskId: {} on server: {}", taskId, serverId);
     }
 
     public String get(final String taskId) {
-        return redisService.get(sseChannelKey(taskId));
+        return redisStoreService.get(sseChannelKey(taskId));
     }
 
     public boolean hasActivateChannel(final String taskId) {
@@ -56,7 +56,7 @@ public class SSEChannelManager {
     }
 
     public void deleteChannel(final String taskId) {
-        redisService.delete(sseChannelKey(taskId));
+        redisStoreService.delete(sseChannelKey(taskId));
     }
 
     public void removeChannel(final String taskId) {

@@ -2,7 +2,7 @@ package com.edukit.core.common.service;
 
 import java.time.Duration;
 
-public interface RedisService {
+public interface RedisStoreService {
 
     void store(String key, String value, Duration ttl);
 

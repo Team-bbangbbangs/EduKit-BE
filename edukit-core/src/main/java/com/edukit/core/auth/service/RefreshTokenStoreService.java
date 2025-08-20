@@ -1,7 +1,7 @@
 package com.edukit.core.auth.service;
 
 import com.edukit.core.auth.service.jwt.setting.JwtProperties;
-import com.edukit.core.common.service.RedisService;
+import com.edukit.core.common.service.RedisStoreService;
 import java.time.Duration;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
@@ -9,25 +9,25 @@ import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
-@ConditionalOnBean(RedisService.class)
+@ConditionalOnBean(RedisStoreService.class)
 public class RefreshTokenStoreService {
 
-    private final RedisService redisService;
+    private final RedisStoreService redisStoreService;
     private final JwtProperties jwtProperties;
 
     private static final String REFRESH_TOKEN_PREFIX = "refresh:";
 
     public void store(final String memberUuid, final String refreshToken) {
         Duration ttl = Duration.ofMillis(jwtProperties.refreshTokenExpiration());
-        redisService.store(refreshKey(memberUuid), refreshToken, ttl);
+        redisStoreService.store(refreshKey(memberUuid), refreshToken, ttl);
     }
 
     public String get(final String memberUuid) {
-        return redisService.get(refreshKey(memberUuid));
+        return redisStoreService.get(refreshKey(memberUuid));
     }
 
     public void delete(final String memberUuid) {
-        redisService.delete(refreshKey(memberUuid));
+        redisStoreService.delete(refreshKey(memberUuid));
     }
 
     private String refreshKey(final String memberUuid) {
