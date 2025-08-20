@@ -38,7 +38,7 @@ public interface StudentRecordAIApi {
                                     value = """
                                             {
                                               "code": "SUCCESS",
-                                              "message": "success",
+                                              "message": "요청이 성공했습니다.",
                                               "data": {
                                                 "taskId": 123
                                               }

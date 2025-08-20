@@ -24,7 +24,33 @@ public interface StudentRecordApi {
             summary = "생활기록부 목록 조회"
     )
     @ApiResponses({
-            @ApiResponse(responseCode = "200"),
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "생활기록부 목록 조회 성공",
+                    content = @Content(
+                            examples = @ExampleObject(
+                                    name = "성공 응답",
+                                    value = """
+                                            {
+                                              "code": "SUCCESS",
+                                              "message": "요청이 성공했습니다.",
+                                              "data": {
+                                                "studentRecords": [
+                                                  {
+                                                    "recordId": 1,
+                                                    "grade": 2,
+                                                    "classNumber": 3,
+                                                    "studentNumber": 15,
+                                                    "studentName": "홍길동",
+                                                    "description": "수학 수업에 적극적으로 참여하는 모습을 보인다."
+                                                  }
+                                                ]
+                                              }
+                                            }
+                                            """
+                            )
+                    )
+            ),
             @ApiResponse(
                     responseCode = "ERROR",
                     content = @Content(
@@ -57,7 +83,21 @@ public interface StudentRecordApi {
             summary = "생활기록부 수정"
     )
     @ApiResponses({
-            @ApiResponse(responseCode = "200"),
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "생활기록부 수정 성공",
+                    content = @Content(
+                            examples = @ExampleObject(
+                                    name = "성공 응답",
+                                    value = """
+                                            {
+                                              "code": "SUCCESS",
+                                              "message": "요청이 성공했습니다."
+                                            }
+                                            """
+                            )
+                    )
+            ),
             @ApiResponse(
                     responseCode = "ERROR",
                     content = @Content(
