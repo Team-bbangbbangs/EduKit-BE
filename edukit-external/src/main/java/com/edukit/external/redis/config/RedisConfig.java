@@ -1,8 +1,8 @@
 package com.edukit.external.redis.config;
 
 import com.edukit.common.ServerInstanceManager;
+import com.edukit.core.studentrecord.service.RedisStreamConsumer;
 import com.edukit.core.studentrecord.service.SSEChannelManager;
-import com.edukit.core.studentrecord.RedisStreamConsumer;
 import com.edukit.external.redis.RedisStreamServiceImpl;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Value;

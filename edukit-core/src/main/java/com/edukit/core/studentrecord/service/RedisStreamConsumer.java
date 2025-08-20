@@ -1,11 +1,10 @@
-package com.edukit.core.studentrecord;
+package com.edukit.core.studentrecord.service;
 
 import com.edukit.common.ServerInstanceManager;
 import com.edukit.core.common.event.ai.dto.AIResponseMessage;
 import com.edukit.core.common.service.RedisStreamService;
 import com.edukit.core.studentrecord.exception.StudentRecordErrorCode;
 import com.edukit.core.studentrecord.exception.StudentRecordException;
-import com.edukit.core.studentrecord.service.SSEChannelManager;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
