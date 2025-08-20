@@ -35,10 +35,10 @@ public class StudentRecordService {
     }
 
     @Transactional
-    public long createAITask(final String prompt) {
+    public StudentRecordAITask createAITask(final String prompt) {
         StudentRecordAITask aiTask = StudentRecordAITask.create(prompt);
         aiTaskRepository.save(aiTask);
-        return aiTask.getId();
+        return aiTask;
     }
 
     @Transactional

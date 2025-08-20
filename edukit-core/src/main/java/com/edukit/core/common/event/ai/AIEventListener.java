@@ -5,6 +5,7 @@ import com.edukit.core.common.event.ai.dto.DraftGenerationEvent;
 import com.edukit.core.common.service.AIService;
 import com.edukit.core.common.service.SqsService;
 import com.edukit.core.common.service.response.OpenAIVersionResponse;
+import com.edukit.core.studentrecord.db.entity.StudentRecordAITask;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
@@ -27,7 +28,11 @@ public class AIEventListener {
     @Async("aiTaskExecutor")
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void handleAIResponseGenerateEvent(final AIResponseGenerateEvent generateEvent) {
-        log.info("AI 생기부 생성 시작 taskId: {}", generateEvent.taskId());
+        StudentRecordAITask task = generateEvent.task();
+        long taskId = task.getId();
+
+        log.info("AI 생기부 생성 시작 taskId: {}", taskId);
+        task.start();
         Flux<OpenAIVersionResponse> response = aiService.getVersionedStreamingResponse(generateEvent.requestPrompt());
 
         response
@@ -35,28 +40,24 @@ public class AIEventListener {
                 .subscribe(
                         version -> {
                             DraftGenerationEvent event = DraftGenerationEvent.of(
-                                    generateEvent.taskId(),
+                                    taskId,
                                     generateEvent.userPrompt(),
                                     generateEvent.byteCount(),
                                     version.versionNumber(),
                                     version.content()
                             );
-                            log.info("Task ID: {} VERSION {} 생성 완료! SQS 전송 시작", generateEvent.taskId(),
-                                    version.versionNumber());
+                            log.info("Task ID: {} VERSION {} 생성 완료! SQS 전송 시작", taskId, version.versionNumber());
                             try {
                                 messageQueueService.sendMessage(event);
                             } catch (ExternalException e) {
-                                log.error("SQS 메시지 전송 실패 - taskId: {}, error: {}",
-                                        generateEvent.taskId(), e.getMessage());
+                                log.error("SQS 메시지 전송 실패 - taskId: {}, error: {}", taskId, e.getMessage());
                             }
                         },
                         error -> {
-                            log.error("AI 응답 생성 중 오류 발생 - taskId: {}",
-                                    generateEvent.taskId(), error);
+                            log.error("AI 응답 생성 중 오류 발생 - taskId: {}", taskId, error);
                         },
                         () -> {
-                            log.info("AI 응답 생성 완료 - taskId: {}",
-                                    generateEvent.taskId());
+                            log.info("AI 응답 생성 완료 - taskId: {}", taskId);
                         }
                 );
     }

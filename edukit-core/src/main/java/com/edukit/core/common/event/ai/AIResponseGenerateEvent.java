@@ -1,8 +1,10 @@
 package com.edukit.core.common.event.ai;
 
+import com.edukit.core.studentrecord.db.entity.StudentRecordAITask;
+
 public interface AIResponseGenerateEvent {
 
-    long taskId();
+    StudentRecordAITask task();
 
     String userPrompt();
 
