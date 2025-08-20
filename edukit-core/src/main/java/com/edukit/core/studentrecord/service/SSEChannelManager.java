@@ -3,6 +3,8 @@ package com.edukit.core.studentrecord.service;
 import com.edukit.common.ServerInstanceManager;
 import com.edukit.core.common.event.ai.dto.AIResponseMessage;
 import com.edukit.core.common.service.RedisStoreService;
+import com.edukit.core.studentrecord.exception.StudentRecordErrorCode;
+import com.edukit.core.studentrecord.exception.StudentRecordException;
 import java.io.IOException;
 import java.time.Duration;
 import java.util.concurrent.ConcurrentHashMap;
@@ -67,8 +69,15 @@ public class SSEChannelManager {
     }
 
     public void removeChannel(final String taskId) {
-        activeChannels.remove(taskId);
-        redisStoreService.delete(sseChannelKey(taskId));
+        SseEmitter emitter = activeChannels.remove(taskId);
+        if (emitter != null) {
+            try {
+                emitter.complete();
+            } catch (Exception e) {
+                log.warn("SSE complete failed for taskId: {}", taskId, e);
+            }
+            redisStoreService.delete(sseChannelKey(taskId));
+        }
         log.info("Removed SSE channel for taskId: {}", taskId);
     }
 
@@ -77,18 +86,11 @@ public class SSEChannelManager {
             Long taskIdLong = Long.valueOf(taskId);
             aiTaskService.completeAITask(taskIdLong);
             log.info("Completed AI task for taskId: {}", taskId);
-
-            SseEmitter emitter = activeChannels.get(taskId);
-            if (emitter != null) {
-                emitter.complete();
-                log.info("Completed SSE channel for taskId: {}", taskId);
-            }
-
-            removeChannel(taskId);
-            redisStoreService.delete(responseCountKey(taskId));
-
         } catch (Exception e) {
             log.error("Failed to complete task for taskId: {}", taskId, e);
+            throw new StudentRecordException(StudentRecordErrorCode.AI_TASK_COMPLETION_FAILED, e);
+        } finally {
+            removeChannel(taskId);
         }
     }
 
