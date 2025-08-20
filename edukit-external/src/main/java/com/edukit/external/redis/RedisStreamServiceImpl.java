@@ -30,5 +30,4 @@ public class RedisStreamServiceImpl implements RedisStreamService {
     public void acknowledgeStreamMessage(final String groupName, final String streamKey, final RecordId messageId) {
         redisTemplate.opsForStream().acknowledge(groupName, streamKey, messageId);
     }
-
 }
