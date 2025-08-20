@@ -48,7 +48,16 @@ public class StudentRecordAITask {
         return StudentRecordAITask.builder()
                 .prompt(prompt)
                 .status(AITaskStatus.PENDING)
-                .startedAt(LocalDateTime.now())
                 .build();
+    }
+
+    public void start() {
+        this.status = AITaskStatus.IN_PROGRESS;
+        this.startedAt = LocalDateTime.now();
+    }
+
+    public void complete() {
+        this.status = AITaskStatus.COMPLETED;
+        this.completedAt = LocalDateTime.now();
     }
 }

@@ -35,10 +35,17 @@ public class StudentRecordService {
     }
 
     @Transactional
-    public long createAITask(final String prompt) {
+    public StudentRecordAITask createAITask(final String prompt) {
         StudentRecordAITask aiTask = StudentRecordAITask.create(prompt);
         aiTaskRepository.save(aiTask);
-        return aiTask.getId();
+        return aiTask;
+    }
+
+    @Transactional
+    public void completeAITask(final Long taskId) {
+        StudentRecordAITask aiTask = aiTaskRepository.findById(taskId)
+                .orElseThrow(() -> new StudentRecordException(StudentRecordErrorCode.STUDENT_RECORD_NOT_FOUND));
+        aiTask.complete();
     }
 
     @Transactional

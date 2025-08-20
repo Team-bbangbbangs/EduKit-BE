@@ -20,7 +20,7 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 @RestController
 @RequestMapping("/api/v2/student-records")
 @RequiredArgsConstructor
-public class StudentRecordAIController {
+public class StudentRecordAIController implements StudentRecordAIApi {
 
     private final StudentRecordAIFacade studentRecordAIFacade;
 
