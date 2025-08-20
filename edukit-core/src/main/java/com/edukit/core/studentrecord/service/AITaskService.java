@@ -33,4 +33,11 @@ public class AITaskService {
                 .orElseThrow(() -> new StudentRecordException(StudentRecordErrorCode.AI_TASK_NOT_FOUND));
         aiTask.complete();
     }
+
+    public void validateUserTask(final long memberId, final long taskId) {
+        boolean exists = aiTaskRepository.existsByIdAndMemberId(taskId, memberId);
+        if (!exists) {
+            throw new StudentRecordException(StudentRecordErrorCode.AI_TASK_NOT_FOUND);
+        }
+    }
 }

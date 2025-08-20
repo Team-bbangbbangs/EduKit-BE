@@ -207,6 +207,7 @@ public interface StudentRecordAIApi {
             )
     })
     SseEmitter streamStudentRecordResponse(
+            @Parameter(hidden = true) @MemberId final long memberId,
             @Parameter(
                     name = "taskId",
                     description = "AI 생성 작업 ID",

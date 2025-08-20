@@ -40,7 +40,9 @@ public class StudentRecordAIFacade {
         return StudentRecordTaskResponse.of(task.getId());
     }
 
-    public SseEmitter createChannel(final long taskId) {
+    public SseEmitter createChannel(final long memberId, final long taskId) {
+        aiTaskService.validateUserTask(memberId, taskId);
+
         SseEmitter emitter = new SseEmitter(10 * 60 * 1000L);
         sseChannelManager.registerTaskChannel(String.valueOf(taskId), emitter);
         return emitter;
