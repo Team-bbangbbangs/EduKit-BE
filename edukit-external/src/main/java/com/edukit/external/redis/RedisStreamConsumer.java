@@ -6,21 +6,19 @@ import com.edukit.core.studentrecord.service.SSEChannelManager;
 import com.edukit.external.redis.exception.RedisErrorCode;
 import com.edukit.external.redis.exception.RedisException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.PreDestroy;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-import jakarta.annotation.PostConstruct;
-import jakarta.annotation.PreDestroy;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.connection.stream.Consumer;
 import org.springframework.data.redis.connection.stream.MapRecord;
 import org.springframework.data.redis.connection.stream.ReadOffset;
 import org.springframework.data.redis.connection.stream.RecordId;
-import org.springframework.data.redis.connection.stream.StreamOffset;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 
 @Slf4j
@@ -28,7 +26,7 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class RedisStreamConsumer {
 
-    private final RedisTemplate<String, String> redisTemplate;
+    private final RedisStreamService redisStreamService;
     private final ServerInstanceManager serverInstanceManager;
     private final SSEChannelManager sseChannelManager;
     private final ObjectMapper objectMapper;
@@ -36,7 +34,7 @@ public class RedisStreamConsumer {
     private static final String STREAM_KEY = "ai-response";
     private static final String CONSUMER_GROUP_PREFIX = "edukit-server-";
     private static final String CONSUMER_NAME = "consumer-1";
-    
+
     private ScheduledExecutorService executorService;
     private String consumerGroupName;
 
@@ -44,7 +42,7 @@ public class RedisStreamConsumer {
     public void initialize() {
         this.consumerGroupName = CONSUMER_GROUP_PREFIX + serverInstanceManager.getServerId();
         this.executorService = Executors.newSingleThreadScheduledExecutor();
-        
+
         createConsumerGroupIfNotExists();
         startConsuming();
     }
@@ -66,7 +64,7 @@ public class RedisStreamConsumer {
 
     private void createConsumerGroupIfNotExists() {
         try {
-            redisTemplate.opsForStream().createGroup(STREAM_KEY, ReadOffset.from("0"), consumerGroupName);
+            redisStreamService.createStreamConsumerGroup(STREAM_KEY, consumerGroupName, ReadOffset.from("0"));
             log.info("Created consumer group: {} for stream: {}", consumerGroupName, STREAM_KEY);
         } catch (Exception e) {
             log.debug("Consumer group {} already exists or stream doesn't exist yet", consumerGroupName);
@@ -81,9 +79,8 @@ public class RedisStreamConsumer {
     private void consumeMessages() {
         try {
             Consumer consumer = Consumer.from(consumerGroupName, CONSUMER_NAME);
-            @SuppressWarnings("unchecked")
-            List<MapRecord<String, Object, Object>> messages = redisTemplate.opsForStream()
-                    .read(consumer, StreamOffset.create(STREAM_KEY, ReadOffset.lastConsumed()));
+            List<MapRecord<String, Object, Object>> messages = redisStreamService.readFromStream(consumer, STREAM_KEY,
+                    ReadOffset.lastConsumed());
 
             for (MapRecord<String, Object, Object> message : messages) {
                 processMessage(message);
@@ -98,7 +95,7 @@ public class RedisStreamConsumer {
         try {
             Map<Object, Object> messageBody = message.getValue();
             String messageJson = (String) messageBody.get("data");
-            
+
             log.info("Received message from Redis Stream: {}", messageJson);
 
             AIResponseMessage responseMessage = objectMapper.readValue(messageJson, AIResponseMessage.class);
@@ -122,7 +119,7 @@ public class RedisStreamConsumer {
 
     private void acknowledgeMessage(final RecordId messageId) {
         try {
-            redisTemplate.opsForStream().acknowledge(consumerGroupName, STREAM_KEY, messageId);
+            redisStreamService.acknowledgeStreamMessage(consumerGroupName, STREAM_KEY, messageId);
             log.debug("Acknowledged message: {}", messageId);
         } catch (Exception e) {
             log.error("Failed to acknowledge message: {}", messageId, e);

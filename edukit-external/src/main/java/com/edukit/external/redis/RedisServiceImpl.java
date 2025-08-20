@@ -17,7 +17,7 @@ public class RedisServiceImpl implements RedisService {
     }
 
     public String get(final String key) {
-        return redisTemplate.opsForValue().get(key);    // null 반환 가능
+        return redisTemplate.opsForValue().get(key);
     }
 
     public void delete(final String key) {

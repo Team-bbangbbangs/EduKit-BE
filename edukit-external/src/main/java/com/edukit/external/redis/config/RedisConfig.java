@@ -3,6 +3,7 @@ package com.edukit.external.redis.config;
 import com.edukit.common.ServerInstanceManager;
 import com.edukit.core.studentrecord.service.SSEChannelManager;
 import com.edukit.external.redis.RedisStreamConsumer;
+import com.edukit.external.redis.RedisStreamService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -36,7 +37,7 @@ public class RedisConfig {
     }
 
     @Bean
-    public RedisTemplate<String, String> redisTemplate(RedisConnectionFactory connectionFactory) {
+    public RedisTemplate<String, String> redisTemplate(final RedisConnectionFactory connectionFactory) {
         RedisTemplate<String, String> template = new RedisTemplate<>();
         template.setConnectionFactory(connectionFactory);
         template.setKeySerializer(new StringRedisSerializer());
@@ -48,11 +49,11 @@ public class RedisConfig {
 
     @Bean
     public RedisStreamConsumer redisStreamConsumer(
-            RedisTemplate<String, String> redisTemplate,
-            ServerInstanceManager serverInstanceManager,
-            SSEChannelManager sseChannelManager,
-            ObjectMapper objectMapper
+            final RedisStreamService redisService,
+            final ServerInstanceManager serverInstanceManager,
+            final SSEChannelManager sseChannelManager,
+            final ObjectMapper objectMapper
     ) {
-        return new RedisStreamConsumer(redisTemplate, serverInstanceManager, sseChannelManager, objectMapper);
+        return new RedisStreamConsumer(redisService, serverInstanceManager, sseChannelManager, objectMapper);
     }
 }
