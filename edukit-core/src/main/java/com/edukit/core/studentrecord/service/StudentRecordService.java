@@ -44,7 +44,7 @@ public class StudentRecordService {
     @Transactional
     public void completeAITask(final Long taskId) {
         StudentRecordAITask aiTask = aiTaskRepository.findById(taskId)
-                .orElseThrow(() -> new StudentRecordException(StudentRecordErrorCode.STUDENT_RECORD_NOT_FOUND));
+                .orElseThrow(() -> new StudentRecordException(StudentRecordErrorCode.AI_TASK_NOT_FOUND));
         aiTask.complete();
     }
 
@@ -102,7 +102,7 @@ public class StudentRecordService {
 
     private StudentRecord getRecordDetailById(final long recordId) {
         return studentRecordRepository.findById(recordId)
-                .orElseThrow(() -> new StudentRecordException(StudentRecordErrorCode.STUDENT_RECORD_NOT_FOUND));
+                .orElseThrow(() -> new StudentRecordException(StudentRecordErrorCode.AI));
     }
 
     private void validatePermission(final Student student, final long memberId) {
