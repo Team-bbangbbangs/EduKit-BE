@@ -19,6 +19,7 @@ import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.HandlerMethodValidationException;
+import org.springframework.web.servlet.NoHandlerFoundException;
 
 @Slf4j
 @RestControllerAdvice
@@ -37,7 +38,6 @@ public class GlobalExceptionHandler {
         return EdukitResponse.fail(e.getErrorCode());
     }
 
-    // Spring MVC exceptions
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public EdukitResponse<Map<String, String>> handleValidationException(final MethodArgumentNotValidException e) {
         log.info("Validation exception occurred: {}", e.getMessage());
@@ -110,6 +110,12 @@ public class GlobalExceptionHandler {
     public EdukitResponse<Void> handleMessageNotReadableException(final HttpMessageNotReadableException e) {
         log.warn("Message not readable exception occurred: {}", e.getMessage());
         return EdukitResponse.fail("FAIL-400", "요청 본문이 올바르지 않습니다.");
+    }
+
+    @ExceptionHandler(NoHandlerFoundException.class)
+    public EdukitResponse<Void> handleNoHandlerFoundException(final NoHandlerFoundException e) {
+        log.warn("No handler found exception occurred: {} {}", e.getHttpMethod(), e.getRequestURL());
+        return EdukitResponse.fail("FAIL-404", "존재하지 않는 요청 경로입니다.");
     }
 
     // Generic exception handler
