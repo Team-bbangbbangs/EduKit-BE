@@ -2,8 +2,8 @@ package com.edukit.external.redis.config;
 
 import com.edukit.common.ServerInstanceManager;
 import com.edukit.core.studentrecord.service.SSEChannelManager;
-import com.edukit.external.redis.RedisStreamConsumer;
-import com.edukit.external.redis.RedisStreamService;
+import com.edukit.core.studentrecord.RedisStreamConsumer;
+import com.edukit.external.redis.RedisStreamServiceImpl;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -49,7 +49,7 @@ public class RedisConfig {
 
     @Bean
     public RedisStreamConsumer redisStreamConsumer(
-            final RedisStreamService redisService,
+            final RedisStreamServiceImpl redisService,
             final ServerInstanceManager serverInstanceManager,
             final SSEChannelManager sseChannelManager,
             final ObjectMapper objectMapper

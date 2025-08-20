@@ -1,10 +1,11 @@
-package com.edukit.external.redis;
+package com.edukit.core.studentrecord;
 
 import com.edukit.common.ServerInstanceManager;
 import com.edukit.core.common.event.ai.dto.AIResponseMessage;
+import com.edukit.core.common.service.RedisStreamService;
+import com.edukit.core.studentrecord.exception.StudentRecordErrorCode;
+import com.edukit.core.studentrecord.exception.StudentRecordException;
 import com.edukit.core.studentrecord.service.SSEChannelManager;
-import com.edukit.external.redis.exception.RedisErrorCode;
-import com.edukit.external.redis.exception.RedisException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
@@ -15,6 +16,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.data.redis.connection.stream.Consumer;
 import org.springframework.data.redis.connection.stream.MapRecord;
 import org.springframework.data.redis.connection.stream.ReadOffset;
@@ -24,9 +26,10 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @Component
 @RequiredArgsConstructor
+@ConditionalOnBean(RedisStreamService.class)
 public class RedisStreamConsumer {
 
-    private final RedisStreamService redisStreamService;
+    private final RedisStreamService redisStreamServiceImpl;
     private final ServerInstanceManager serverInstanceManager;
     private final SSEChannelManager sseChannelManager;
     private final ObjectMapper objectMapper;
@@ -64,7 +67,7 @@ public class RedisStreamConsumer {
 
     private void createConsumerGroupIfNotExists() {
         try {
-            redisStreamService.createStreamConsumerGroup(STREAM_KEY, consumerGroupName, ReadOffset.from("0"));
+            redisStreamServiceImpl.createStreamConsumerGroup(STREAM_KEY, consumerGroupName, ReadOffset.from("0"));
             log.info("Created consumer group: {} for stream: {}", consumerGroupName, STREAM_KEY);
         } catch (Exception e) {
             log.debug("Consumer group {} already exists or stream doesn't exist yet", consumerGroupName);
@@ -79,7 +82,8 @@ public class RedisStreamConsumer {
     private void consumeMessages() {
         try {
             Consumer consumer = Consumer.from(consumerGroupName, CONSUMER_NAME);
-            List<MapRecord<String, Object, Object>> messages = redisStreamService.readFromStream(consumer, STREAM_KEY,
+            List<MapRecord<String, Object, Object>> messages = redisStreamServiceImpl.readFromStream(consumer,
+                    STREAM_KEY,
                     ReadOffset.lastConsumed());
 
             for (MapRecord<String, Object, Object> message : messages) {
@@ -113,13 +117,13 @@ public class RedisStreamConsumer {
             }
         } catch (Exception e) {
             log.error("Error processing Redis Stream message: {}", e.getMessage(), e);
-            throw new RedisException(RedisErrorCode.MESSAGE_PROCESSING_FAILED);
+            throw new StudentRecordException(StudentRecordErrorCode.MESSAGE_PROCESSING_FAILED);
         }
     }
 
     private void acknowledgeMessage(final RecordId messageId) {
         try {
-            redisStreamService.acknowledgeStreamMessage(consumerGroupName, STREAM_KEY, messageId);
+            redisStreamServiceImpl.acknowledgeStreamMessage(consumerGroupName, STREAM_KEY, messageId);
             log.debug("Acknowledged message: {}", messageId);
         } catch (Exception e) {
             log.error("Failed to acknowledge message: {}", messageId, e);

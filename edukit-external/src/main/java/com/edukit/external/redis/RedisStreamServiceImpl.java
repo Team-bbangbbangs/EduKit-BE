@@ -1,5 +1,6 @@
 package com.edukit.external.redis;
 
+import com.edukit.core.common.service.RedisStreamService;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.connection.stream.Consumer;
@@ -12,7 +13,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
-public class RedisStreamService {
+public class RedisStreamServiceImpl implements RedisStreamService {
 
     private final RedisTemplate<String, String> redisTemplate;
 
