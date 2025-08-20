@@ -75,10 +75,11 @@ public class SSEChannelManager {
                 emitter.complete();
             } catch (Exception e) {
                 log.warn("SSE complete failed for taskId: {}", taskId, e);
+            } finally {
+                redisStoreService.delete(sseChannelKey(taskId));
+                log.info("Removed SSE channel for taskId: {}", taskId);
             }
-            redisStoreService.delete(sseChannelKey(taskId));
         }
-        log.info("Removed SSE channel for taskId: {}", taskId);
     }
 
     private void completeTask(final String taskId) {
