@@ -68,12 +68,8 @@ public class SSEChannelManager {
 
     public void removeChannel(final String taskId) {
         activeChannels.remove(taskId);
-        deleteChannel(taskId);
-        log.info("Removed SSE channel for taskId: {}", taskId);
-    }
-
-    public void deleteChannel(final String taskId) {
         redisStoreService.delete(sseChannelKey(taskId));
+        log.info("Removed SSE channel for taskId: {}", taskId);
     }
 
     private void completeTask(final String taskId) {
