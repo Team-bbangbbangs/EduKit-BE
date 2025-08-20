@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
-@Tag(name = "학생", description = "학생 관련 API")
+@Tag(name = "학생 관리", description = "학생 관리 API")
 public interface StudentApi {
 
     @Operation(summary = "Excel 파일로 학생 일괄 업로드")
