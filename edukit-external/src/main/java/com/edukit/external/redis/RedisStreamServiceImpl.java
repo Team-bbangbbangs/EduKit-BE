@@ -1,6 +1,7 @@
 package com.edukit.external.redis;
 
 import com.edukit.core.common.service.RedisStreamService;
+import java.util.Collections;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.connection.stream.Consumer;
@@ -24,7 +25,9 @@ public class RedisStreamServiceImpl implements RedisStreamService {
     @SuppressWarnings("unchecked")
     public List<MapRecord<String, Object, Object>> readFromStream(final Consumer consumer, final String streamKey,
                                                                   final ReadOffset readOffset) {
-        return redisTemplate.opsForStream().read(consumer, StreamOffset.create(streamKey, readOffset));
+        List<MapRecord<String, Object, Object>> records = redisTemplate.opsForStream()
+                .read(consumer, StreamOffset.create(streamKey, readOffset));
+        return records != null ? records : Collections.emptyList();
     }
 
     public void acknowledgeStreamMessage(final String groupName, final String streamKey, final RecordId messageId) {
