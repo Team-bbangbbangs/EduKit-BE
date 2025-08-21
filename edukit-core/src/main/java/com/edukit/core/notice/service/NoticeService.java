@@ -51,12 +51,20 @@ public class NoticeService {
     }
 
     @Transactional
-    public NoticeUpdateResult updateNoticeAndFiles(final long noticeId, final NoticeCategory category, final String title,
-                                           final String content,
-                                           final List<String> addedFileKeys, final List<Long> deletedNoticeFileIds) {
+    public NoticeUpdateResult updateNoticeAndFiles(final long noticeId, final NoticeCategory category,
+                                                   final String title, final String content,
+                                                   final List<String> fileKeys) {
         Notice notice = updateNotice(noticeId, category, title, content);
-        List<NoticeFile> addedNoticeFiles = createNoticeFiles(addedFileKeys, notice);
-        List<NoticeFile> deletedNoticeFiles = deleteNoticeFiles(deletedNoticeFileIds, notice);
+        List<NoticeFile> existNoticeFiles = getNoticeFiles(notice);
+
+        List<String> existNoticeFileKeys = existNoticeFiles.stream().map(NoticeFile::getFileKey).toList();
+        List<String> addedNoticeFileKeys = fileKeys.stream().filter(fileKey -> !existNoticeFileKeys.contains(fileKey))
+                .toList();
+        List<NoticeFile> addedNoticeFiles = createNoticeFiles(addedNoticeFileKeys, notice);
+
+        List<NoticeFile> deletedNoticeFiles = existNoticeFiles.stream()
+                .filter(noticeFile -> !fileKeys.contains(noticeFile.getFileKey())).toList();
+        deleteNoticeFiles(deletedNoticeFiles);
 
         return NoticeUpdateResult.of(addedNoticeFiles, deletedNoticeFiles);
     }
@@ -85,16 +93,8 @@ public class NoticeService {
         return noticeFiles;
     }
 
-    private List<NoticeFile> deleteNoticeFiles(final List<Long> noticeFileIds, final Notice notice) {
-        if (noticeFileIds.isEmpty()) {
-            return List.of();
-        }
-        List<NoticeFile> noticeFiles = noticeFileRepository.findByNoticeAndIdIn(notice, noticeFileIds);
-        if (noticeFiles.size() != noticeFileIds.size()) {
-            throw new NoticeException(NoticeErrorCode.INVALID_NOTICE_FILE_IDS);
-        }
-        noticeFileRepository.deleteAll(noticeFiles);
-        return noticeFiles;
+    private void deleteNoticeFiles(final List<NoticeFile> deletedNoticeFiles) {
+        noticeFileRepository.deleteAllByIdInBatch(deletedNoticeFiles.stream().map(NoticeFile::getId).toList());
     }
 
     @Transactional

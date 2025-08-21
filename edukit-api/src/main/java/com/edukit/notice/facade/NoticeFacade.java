@@ -50,7 +50,7 @@ public class NoticeFacade {
                 notice.getTitle(),
                 notice.getContent(),
                 notice.getCreatedAt(),
-                noticeFiles.stream().map(NoticeFile::getId).toList()
+                noticeFiles.stream().map(NoticeFile::getFileKey).toList()
         );
     }
 
@@ -63,10 +63,8 @@ public class NoticeFacade {
     }
 
     public void updateNotice(final long noticeId, final NoticeCategory category, final String title,
-                             final String content, final List<String> addedFileKeys,
-                             final List<Long> deletedNoticeFileIds) {
-        NoticeUpdateResult result = noticeService.updateNoticeAndFiles(
-                noticeId, category, title, content, addedFileKeys, deletedNoticeFileIds);
+                             final String content, final List<String> fileKeys) {
+        NoticeUpdateResult result = noticeService.updateNoticeAndFiles(noticeId, category, title, content, fileKeys);
         if (result.hasAddedFiles()) {
             storageService.moveFiles(result.addedFileKeys(), TMP_NOTICE_FILE_DIRECTORY, NOTICE_FILE_DIRECTORY);
         }

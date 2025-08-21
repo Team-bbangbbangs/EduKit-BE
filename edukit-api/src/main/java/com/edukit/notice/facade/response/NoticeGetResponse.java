@@ -20,22 +20,22 @@ public record NoticeGetResponse(
         @Schema(description = "생성 날짜", example = "2024-01-15T10:30:00")
         LocalDateTime createdAt,
         
-        @Schema(description = "첨부 파일 ID 목록", example = "[1, 2, 3]")
-        List<Long> noticeFileIds
+        @Schema(description = "첨부된 파일 key 목록", example = "[\"newfile.jpg\"]")
+        List<String> noticeFileKeys
 ) {
     public static NoticeGetResponse of(final long noticeId,
                                        final String category,
                                        final String title,
                                        final String content,
                                        final LocalDateTime createdAt,
-                                       final List<Long> noticeFileIds) {
+                                       final List<String> noticeFileKeys) {
         return new NoticeGetResponse(
                 noticeId,
                 category,
                 title,
                 content,
                 createdAt,
-                noticeFileIds
+                noticeFileKeys
         );
     }
 }
