@@ -55,13 +55,15 @@ public class NoticeService {
                                                    final String title, final String content,
                                                    final List<String> fileKeys) {
         Notice notice = updateNotice(noticeId, category, title, content);
-        List<NoticeFile> existNoticeFiles = getNoticeFiles(notice);
 
+        List<NoticeFile> existNoticeFiles = getNoticeFiles(notice);
+        //파일 추가
         List<String> existNoticeFileKeys = existNoticeFiles.stream().map(NoticeFile::getFileKey).toList();
         List<String> addedNoticeFileKeys = fileKeys.stream().filter(fileKey -> !existNoticeFileKeys.contains(fileKey))
                 .toList();
         List<NoticeFile> addedNoticeFiles = createNoticeFiles(addedNoticeFileKeys, notice);
 
+        //파일 삭제
         List<NoticeFile> deletedNoticeFiles = existNoticeFiles.stream()
                 .filter(noticeFile -> !fileKeys.contains(noticeFile.getFileKey())).toList();
         deleteNoticeFiles(deletedNoticeFiles);
@@ -94,6 +96,9 @@ public class NoticeService {
     }
 
     private void deleteNoticeFiles(final List<NoticeFile> deletedNoticeFiles) {
+        if (deletedNoticeFiles.isEmpty()) {
+            return;
+        }
         noticeFileRepository.deleteAllByIdInBatch(deletedNoticeFiles.stream().map(NoticeFile::getId).toList());
     }
 
