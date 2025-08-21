@@ -106,13 +106,7 @@ public interface AdminApi {
                     
                     **3단계: 공지사항 수정**
                     - category, title, content: 공지사항 정보
-                    - addedFileKeys: **새로 추가된 이미지의 fileKey 목록** (실제 본문에 포함된 것만)
-                    - deletedNoticeFileIds: **삭제할 기존 파일의 ID 목록** (1단계에서 조회한 파일 ID)
-                    
-                    **⚠️ 중요사항**
-                    - addedFileKeys: 새로 업로드한 파일 중 실제 본문에 사용된 것만 포함
-                    - deletedNoticeFileIds: 기존 파일 중 삭제할 파일의 DB ID (fileKey가 아님)
-                    - 두 필드 모두 선택사항이며 각각 독립적으로 처리됩니다
+                    - fileKeys: 최종적으로 본문에 포함된 fileKey 목록
                     """
     )
     @ApiResponses({

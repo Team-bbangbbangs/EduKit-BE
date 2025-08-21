@@ -7,6 +7,4 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface NoticeFileRepository extends JpaRepository<NoticeFile, Long> {
     List<NoticeFile> findByNotice(Notice notice);
-
-    List<NoticeFile> findByNoticeAndIdIn(Notice notice, List<Long> ids);
 }

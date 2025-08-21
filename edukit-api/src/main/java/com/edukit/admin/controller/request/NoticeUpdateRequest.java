@@ -1,5 +1,7 @@
 package com.edukit.admin.controller.request;
 
+import com.fasterxml.jackson.annotation.JsonSetter;
+import com.fasterxml.jackson.annotation.Nulls;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
 import java.util.List;
@@ -17,10 +19,8 @@ public record NoticeUpdateRequest(
         @NotNull(message = "내용은 필수입니다.")
         String content,
         
-        @Schema(description = "추가된 파일 키 목록", example = "[\"newfile.jpg\"]")
-        List<String> addedFileKeys,         //추가된 파일 목록
-        
-        @Schema(description = "삭제된 파일 ID 목록", example = "[1, 2]")
-        List<Long> deletedNoticeFileIds     //삭제된 파일 목록
+        @Schema(description = "게시물에 포함된 파일 키 목록", example = "[\"newfile.jpg\"]")
+        @JsonSetter(nulls = Nulls.AS_EMPTY)
+        List<String> fileKeys
 ) {
 }
