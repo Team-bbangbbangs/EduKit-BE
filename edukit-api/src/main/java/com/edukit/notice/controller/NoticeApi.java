@@ -98,7 +98,7 @@ public interface NoticeApi {
                                                 "title": "신규 기능 업데이트 안내",
                                                 "content": "새로운 AI 생활기록부 생성 기능이 추가되었습니다.",
                                                 "createdAt": "2024-01-15T10:30:00",
-                                                "noticeFileIds": [1, 2, 3]
+                                                "noticeFileKeys": ["file1.jpg", "file2.jpg"]
                                               }
                                             }
                                             """
