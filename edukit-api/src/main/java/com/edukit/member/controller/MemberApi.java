@@ -394,8 +394,7 @@ public interface MemberApi {
                                                         "message": "validation 오류",
                                                         "data": {
                                                           "currentPassword": "현재 비밀번호를 입력해주세요.",
-                                                          "newPassword": "새로운 비밀번호를 입력해주세요.",
-                                                          "confirmPassword": "비밀번호 확인을 입력해주세요."
+                                                          "newPassword": "새로운 비밀번호를 입력해주세요."
                                                         }
                                                       }
                                                     """
@@ -417,16 +416,6 @@ public interface MemberApi {
                                                       {
                                                         "code": "A-40007",
                                                         "message": "유효하지 않은 비밀번호 양식입니다."
-                                                      }
-                                                    """
-                                    ),
-                                    @ExampleObject(
-                                            name = "비밀번호 확인 불일치",
-                                            description = "새 비밀번호와 확인 비밀번호가 다른 경우",
-                                            value = """
-                                                      {
-                                                        "code": "A-40010",
-                                                        "message": "새 비밀번호와 비밀번호 확인이 일치하지 않습니다."
                                                       }
                                                     """
                                     ),
