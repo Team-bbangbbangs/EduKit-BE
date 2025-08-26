@@ -10,11 +10,7 @@ public record PasswordChangeRequest(
         
         @Schema(description = "새로운 비밀번호", example = "newPassword123!")
         @NotNull(message = "새로운 비밀번호를 입력해주세요.")
-        String newPassword,
-        
-        @Schema(description = "비밀번호 확인", example = "newPassword123!")
-        @NotNull(message = "비밀번호 확인을 입력해주세요.")
-        String confirmPassword
+        String newPassword
 ) {
 }
 

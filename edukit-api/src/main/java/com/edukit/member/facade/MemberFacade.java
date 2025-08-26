@@ -78,10 +78,8 @@ public class MemberFacade {
     }
 
     @Transactional
-    public void updatePassword(final long memberId, final String currentPassword, final String newPassword,
-                               final String confirmPassword) {
+    public void updatePassword(final long memberId, final String currentPassword, final String newPassword) {
         PasswordValidator.validatePasswordFormat(newPassword);
-        PasswordValidator.validatePasswordEquality(newPassword, confirmPassword);
 
         Member member = memberService.getMemberById(memberId);
         validatePassword(member, currentPassword, newPassword);
