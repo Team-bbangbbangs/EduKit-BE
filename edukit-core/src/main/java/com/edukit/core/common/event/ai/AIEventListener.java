@@ -9,6 +9,7 @@ import com.edukit.core.studentrecord.db.entity.StudentRecordAITask;
 import com.edukit.core.studentrecord.service.AITaskService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.MDC;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
@@ -41,12 +42,14 @@ public class AIEventListener {
                 .publishOn(Schedulers.boundedElastic())
                 .subscribe(
                         version -> {
+                            String traceId = MDC.get("traceId");
                             DraftGenerationEvent event = DraftGenerationEvent.of(
                                     taskId,
                                     generateEvent.userPrompt(),
                                     generateEvent.byteCount(),
                                     version.versionNumber(),
-                                    version.content()
+                                    version.content(),
+                                    traceId
                             );
                             log.info("Task ID: {} VERSION {} 생성 완료! SQS 전송 시작", taskId, version.versionNumber());
                             try {

@@ -6,9 +6,11 @@ import com.edukit.external.ai.exception.OpenAiErrorCode;
 import com.edukit.external.ai.exception.OpenAiException;
 import java.util.concurrent.atomic.AtomicInteger;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.MDC;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
+import reactor.util.context.Context;
 
 @Service
 @RequiredArgsConstructor
@@ -24,7 +26,10 @@ public class OpenAIServiceImpl implements AIService {
 
 
     public Flux<OpenAIVersionResponse> getVersionedStreamingResponse(final String prompt) {
-        return Flux.create(sink -> {
+        // 현재 스레드의 MDC 컨텍스트를 캡처
+        var mdcContextMap = MDC.getCopyOfContextMap();
+        
+        return Flux.<OpenAIVersionResponse>create(sink -> {
             StringBuilder buffer = new StringBuilder();
             AtomicInteger currentVersion = new AtomicInteger(0);
 
@@ -35,6 +40,9 @@ public class OpenAIServiceImpl implements AIService {
                     .content()
                     .subscribe(
                             chunk -> {
+                                // Reactor 스레드에 MDC 컨텍스트 복원
+                                restoreMdcContext(mdcContextMap);
+                                
                                 buffer.append(chunk);
                                 String currentBuffer = buffer.toString();
 
@@ -60,6 +68,8 @@ public class OpenAIServiceImpl implements AIService {
                             sink::error,
                             () -> {
                                 // 스트림 완료 시 3번째 버전 처리
+                                restoreMdcContext(mdcContextMap);
+                                
                                 String finalBuffer = buffer.toString();
 
                                 // 아직 처리하지 않은 버전이 있다면 처리
@@ -78,7 +88,7 @@ public class OpenAIServiceImpl implements AIService {
                                 sink.complete();
                             }
                     );
-        });
+        }).contextWrite(Context.of("mdc", mdcContextMap));
     }
 
     private boolean isVersionComplete(String buffer, int currentVersion) {
@@ -113,6 +123,12 @@ public class OpenAIServiceImpl implements AIService {
         } else {
             // 다음 버전이 없으면 끝까지 (주로 3번째 버전에서 발생)
             return buffer.substring(contentStart).trim();
+        }
+    }
+    
+    private void restoreMdcContext(final java.util.Map<String, String> mdcContextMap) {
+        if (mdcContextMap != null) {
+            MDC.setContextMap(mdcContextMap);
         }
     }
 }
