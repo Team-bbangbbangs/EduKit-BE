@@ -1,4 +1,4 @@
-package com.edukit.studentrecord.controller.request;
+package com.edukit.studentrecord.facade.response;
 
 public record StudentRecordDetailResponse(
         String description

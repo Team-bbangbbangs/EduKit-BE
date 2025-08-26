@@ -7,7 +7,7 @@ import com.edukit.core.student.service.ExcelService;
 import com.edukit.core.studentrecord.db.entity.StudentRecord;
 import com.edukit.core.studentrecord.db.enums.StudentRecordType;
 import com.edukit.core.studentrecord.service.StudentRecordService;
-import com.edukit.studentrecord.controller.request.StudentRecordDetailResponse;
+import com.edukit.studentrecord.facade.response.StudentRecordDetailResponse;
 import com.edukit.studentrecord.facade.response.StudentRecordsGetResponse;
 import com.edukit.studentrecord.facade.response.StudentRecordsGetResponse.StudentRecordItems;
 import java.util.List;
