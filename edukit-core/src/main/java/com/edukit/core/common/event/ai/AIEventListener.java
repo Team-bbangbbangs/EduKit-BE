@@ -37,10 +37,10 @@ public class AIEventListener {
 
         log.info("AI 생기부 생성 시작 taskId: {}", taskId);
         aiTaskService.startTask(task);
-        
+
         // 현재 MDC 컨텍스트 캡처 (aiTaskExecutor에서 이미 전파됨)
         Map<String, String> mdcContextMap = MDC.getCopyOfContextMap();
-        
+
         Flux<OpenAIVersionResponse> response = aiService.getVersionedStreamingResponse(generateEvent.requestPrompt());
 
         response
@@ -50,35 +50,50 @@ public class AIEventListener {
                         MDC.setContextMap(mdcContextMap);
                     }
                 })
+                .doFinally(signalType -> {
+                    // 스트림 종료 시 MDC 정리 (메모리 누수 방지)
+                    MDC.clear();
+                })
                 .subscribe(
                         version -> {
-                            String traceId = MDC.get("traceId");
-                            DraftGenerationEvent event = DraftGenerationEvent.of(
-                                    taskId,
-                                    generateEvent.userPrompt(),
-                                    generateEvent.byteCount(),
-                                    version.versionNumber(),
-                                    version.content(),
-                                    traceId
-                            );
-                            log.info("Task ID: {} VERSION {} 생성 완료! SQS 전송 시작", taskId, version.versionNumber());
                             try {
+                                String traceId = MDC.get("traceId");
+                                DraftGenerationEvent event = DraftGenerationEvent.of(
+                                        taskId,
+                                        generateEvent.userPrompt(),
+                                        generateEvent.byteCount(),
+                                        version.versionNumber(),
+                                        version.content(),
+                                        traceId
+                                );
+                                log.info("Task ID: {} VERSION {} 생성 완료! SQS 전송 시작", taskId, version.versionNumber());
                                 messageQueueService.sendMessage(event);
                             } catch (ExternalException e) {
                                 log.error("SQS 메시지 전송 실패 - taskId: {}, error: {}", taskId, e.getMessage());
+                            } finally {
+                                // 각 처리 후 MDC 정리
+                                MDC.clear();
                             }
                         },
                         error -> {
-                            if (mdcContextMap != null) {
-                                MDC.setContextMap(mdcContextMap);
+                            try {
+                                if (mdcContextMap != null) {
+                                    MDC.setContextMap(mdcContextMap);
+                                }
+                                log.error("AI 응답 생성 중 오류 발생 - taskId: {}", taskId, error);
+                            } finally {
+                                MDC.clear();
                             }
-                            log.error("AI 응답 생성 중 오류 발생 - taskId: {}", taskId, error);
                         },
                         () -> {
-                            if (mdcContextMap != null) {
-                                MDC.setContextMap(mdcContextMap);
+                            try {
+                                if (mdcContextMap != null) {
+                                    MDC.setContextMap(mdcContextMap);
+                                }
+                                log.info("AI 응답 생성 완료 - taskId: {}", taskId);
+                            } finally {
+                                MDC.clear();
                             }
-                            log.info("AI 응답 생성 완료 - taskId: {}", taskId);
                         }
                 );
     }
