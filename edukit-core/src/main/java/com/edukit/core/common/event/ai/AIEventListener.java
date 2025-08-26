@@ -7,6 +7,7 @@ import com.edukit.core.common.service.SqsService;
 import com.edukit.core.common.service.response.OpenAIVersionResponse;
 import com.edukit.core.studentrecord.db.entity.StudentRecordAITask;
 import com.edukit.core.studentrecord.service.AITaskService;
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.MDC;
@@ -36,10 +37,19 @@ public class AIEventListener {
 
         log.info("AI 생기부 생성 시작 taskId: {}", taskId);
         aiTaskService.startTask(task);
+        
+        // 현재 MDC 컨텍스트 캡처 (aiTaskExecutor에서 이미 전파됨)
+        Map<String, String> mdcContextMap = MDC.getCopyOfContextMap();
+        
         Flux<OpenAIVersionResponse> response = aiService.getVersionedStreamingResponse(generateEvent.requestPrompt());
 
         response
                 .publishOn(Schedulers.boundedElastic())
+                .doOnNext(version -> {
+                    if (mdcContextMap != null) {
+                        MDC.setContextMap(mdcContextMap);
+                    }
+                })
                 .subscribe(
                         version -> {
                             String traceId = MDC.get("traceId");
@@ -59,9 +69,15 @@ public class AIEventListener {
                             }
                         },
                         error -> {
+                            if (mdcContextMap != null) {
+                                MDC.setContextMap(mdcContextMap);
+                            }
                             log.error("AI 응답 생성 중 오류 발생 - taskId: {}", taskId, error);
                         },
                         () -> {
+                            if (mdcContextMap != null) {
+                                MDC.setContextMap(mdcContextMap);
+                            }
                             log.info("AI 응답 생성 완료 - taskId: {}", taskId);
                         }
                 );

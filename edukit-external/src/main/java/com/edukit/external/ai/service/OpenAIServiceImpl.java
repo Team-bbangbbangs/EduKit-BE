@@ -4,6 +4,7 @@ import com.edukit.core.common.service.AIService;
 import com.edukit.core.common.service.response.OpenAIVersionResponse;
 import com.edukit.external.ai.exception.OpenAiErrorCode;
 import com.edukit.external.ai.exception.OpenAiException;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.MDC;
@@ -27,8 +28,8 @@ public class OpenAIServiceImpl implements AIService {
 
     public Flux<OpenAIVersionResponse> getVersionedStreamingResponse(final String prompt) {
         // 현재 스레드의 MDC 컨텍스트를 캡처
-        var mdcContextMap = MDC.getCopyOfContextMap();
-        
+        Map<String, String> mdcContextMap = MDC.getCopyOfContextMap();
+
         return Flux.<OpenAIVersionResponse>create(sink -> {
             StringBuilder buffer = new StringBuilder();
             AtomicInteger currentVersion = new AtomicInteger(0);
@@ -42,7 +43,7 @@ public class OpenAIServiceImpl implements AIService {
                             chunk -> {
                                 // Reactor 스레드에 MDC 컨텍스트 복원
                                 restoreMdcContext(mdcContextMap);
-                                
+
                                 buffer.append(chunk);
                                 String currentBuffer = buffer.toString();
 
@@ -69,7 +70,7 @@ public class OpenAIServiceImpl implements AIService {
                             () -> {
                                 // 스트림 완료 시 3번째 버전 처리
                                 restoreMdcContext(mdcContextMap);
-                                
+
                                 String finalBuffer = buffer.toString();
 
                                 // 아직 처리하지 않은 버전이 있다면 처리
@@ -91,7 +92,7 @@ public class OpenAIServiceImpl implements AIService {
         }).contextWrite(Context.of("mdc", mdcContextMap));
     }
 
-    private boolean isVersionComplete(String buffer, int currentVersion) {
+    private boolean isVersionComplete(final String buffer, final int currentVersion) {
         String currentVersionPattern = "===VERSION_" + (currentVersion + 1) + "===";
 
         if (!buffer.contains(currentVersionPattern)) {
@@ -106,7 +107,7 @@ public class OpenAIServiceImpl implements AIService {
         return false;
     }
 
-    private String extractCompleteVersion(String buffer, int versionNumber) {
+    private String extractCompleteVersion(final String buffer, final int versionNumber) {
         String versionPattern = "===VERSION_" + versionNumber + "===";
         String nextVersionPattern = "===VERSION_" + (versionNumber + 1) + "===";
 
@@ -125,8 +126,8 @@ public class OpenAIServiceImpl implements AIService {
             return buffer.substring(contentStart).trim();
         }
     }
-    
-    private void restoreMdcContext(final java.util.Map<String, String> mdcContextMap) {
+
+    private void restoreMdcContext(final Map<String, String> mdcContextMap) {
         if (mdcContextMap != null) {
             MDC.setContextMap(mdcContextMap);
         }
