@@ -52,8 +52,8 @@ public class StudentRecordController implements StudentRecordApi {
 
 
     @GetMapping("/detail/{recordId}")
-    public ResponseEntity<EdukitResponse<StudentRecordDetailResponse>> getStudentRecordDetail(@MemberId final long memberId,
-                                                                                        @PathVariable final long recordId) {
+    public ResponseEntity<EdukitResponse<StudentRecordDetailResponse>> getStudentRecordDetail(
+            @MemberId final long memberId, @PathVariable final long recordId) {
         StudentRecordDetailResponse response = studentRecordFacade.getStudentRecord(memberId, recordId);
         return ResponseEntity.ok().body(EdukitResponse.success(response));
     }
