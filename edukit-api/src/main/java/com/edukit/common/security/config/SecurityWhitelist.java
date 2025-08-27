@@ -12,7 +12,7 @@ public class SecurityWhitelist {
             "/api/v1/auth/reissue",
             "/api/v2/auth/password",
             "/api/v1/auth/verify-email",
-            "/api/v1/auth/find-password",
+            "/api/v2/auth/find-password",
             "/api/v1/auth/nickname",
             "/actuator/health",
             "/actuator/prometheus"
