@@ -18,7 +18,7 @@ scrape_configs:
           job: api_error_logs
           module: api
           level: error
-          environment: ${ENVIRONMENT}
+          environment: ${ENVIRONMENT:-$(cat /tmp/server-id.txt 2>/dev/null || echo "unknown")}
           __path__: /log/error/*.log
     pipeline_stages:
       - json:
@@ -63,7 +63,7 @@ scrape_configs:
           job: api_info_logs
           module: api
           level: info
-          environment: ${ENVIRONMENT}
+          environment: ${ENVIRONMENT:-$(cat /tmp/server-id.txt 2>/dev/null || echo "unknown")}
           __path__: /log/info/*.log
     pipeline_stages:
       - json:
@@ -108,7 +108,7 @@ scrape_configs:
           job: api_warn_logs
           module: api
           level: warn
-          environment: ${ENVIRONMENT}
+          environment: ${ENVIRONMENT:-$(cat /tmp/server-id.txt 2>/dev/null || echo "unknown")}
           __path__: /log/warn/*.log
     pipeline_stages:
       - json:

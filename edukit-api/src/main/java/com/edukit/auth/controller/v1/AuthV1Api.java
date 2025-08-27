@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 
-@Tag(name = "인증/인가", description = "회원가입, 로그인, 토큰 관리 및 이메일 인증 API")
+@Tag(name = "인증/인가 Ver1", description = "회원가입, 로그인, 토큰 관리 및 이메일 인증 API")
 public interface AuthV1Api {
 
     @Operation(
