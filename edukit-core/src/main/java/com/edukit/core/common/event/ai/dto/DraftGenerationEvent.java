@@ -5,11 +5,12 @@ public record DraftGenerationEvent(
         String requestPrompt,
         int byteCount,
         int version,
-        String draftContent
+        String draftContent,
+        String traceId
 ) {
 
     public static DraftGenerationEvent of(final long taskId, final String requestPrompt, final int byteCount,
-                                          final int version, final String draftContent) {
-        return new DraftGenerationEvent(taskId, requestPrompt, byteCount, version, draftContent);
+                                          final int version, final String draftContent, final String traceId) {
+        return new DraftGenerationEvent(taskId, requestPrompt, byteCount, version, draftContent, traceId);
     }
 }

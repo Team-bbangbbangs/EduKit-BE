@@ -9,11 +9,15 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.nio.charset.StandardCharsets;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.MDC;
 import org.springframework.stereotype.Service;
 import software.amazon.awssdk.services.sqs.SqsClient;
+import software.amazon.awssdk.services.sqs.model.MessageAttributeValue;
 import software.amazon.awssdk.services.sqs.model.SendMessageRequest;
 import software.amazon.awssdk.services.sqs.model.SendMessageResponse;
 import software.amazon.awssdk.services.sqs.model.SqsException;
+import java.util.HashMap;
+import java.util.Map;
 
 @Slf4j
 @Service
@@ -59,12 +63,33 @@ public class SqsServiceImpl implements SqsService {
     }
 
     private void sendMessageInternal(final String messageBody) {
+        Map<String, MessageAttributeValue> messageAttributes = new HashMap<>();
+        
+        // MDC에서 TraceId 가져와서 메시지 속성으로 추가
+        String traceId = MDC.get("traceId");
+        if (traceId != null) {
+            messageAttributes.put("traceId", MessageAttributeValue.builder()
+                    .dataType("String")
+                    .stringValue(traceId)
+                    .build());
+        }
+        
+        // MDC에서 UserId도 함께 전달
+        String userId = MDC.get("userId");
+        if (userId != null) {
+            messageAttributes.put("userId", MessageAttributeValue.builder()
+                    .dataType("String")
+                    .stringValue(userId)
+                    .build());
+        }
+
         final SendMessageRequest request = SendMessageRequest.builder()
                 .queueUrl(sqsProperties.queueUrl())
                 .messageBody(messageBody)
+                .messageAttributes(messageAttributes)
                 .build();
 
         final SendMessageResponse response = sqsClient.sendMessage(request);
-        log.info("SQS 메시지 전송 완료 - MessageId: {}", response.messageId());
+        log.info("SQS 메시지 전송 완료 - MessageId: {}, TraceId: {}", response.messageId(), traceId);
     }
 }

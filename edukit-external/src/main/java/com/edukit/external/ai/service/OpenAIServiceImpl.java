@@ -4,11 +4,14 @@ import com.edukit.core.common.service.AIService;
 import com.edukit.core.common.service.response.OpenAIVersionResponse;
 import com.edukit.external.ai.exception.OpenAiErrorCode;
 import com.edukit.external.ai.exception.OpenAiException;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.MDC;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
+import reactor.util.context.Context;
 
 @Service
 @RequiredArgsConstructor
@@ -24,7 +27,10 @@ public class OpenAIServiceImpl implements AIService {
 
 
     public Flux<OpenAIVersionResponse> getVersionedStreamingResponse(final String prompt) {
-        return Flux.create(sink -> {
+        // 현재 스레드의 MDC 컨텍스트를 캡처
+        Map<String, String> mdcContextMap = MDC.getCopyOfContextMap();
+
+        return Flux.<OpenAIVersionResponse>create(sink -> {
             StringBuilder buffer = new StringBuilder();
             AtomicInteger currentVersion = new AtomicInteger(0);
 
@@ -35,53 +41,68 @@ public class OpenAIServiceImpl implements AIService {
                     .content()
                     .subscribe(
                             chunk -> {
-                                buffer.append(chunk);
-                                String currentBuffer = buffer.toString();
+                                try {
+                                    // Reactor 스레드에 MDC 컨텍스트 복원
+                                    restoreMdcContext(mdcContextMap);
 
-                                // 버전 완성 감지 및 전송 로직
-                                if (isVersionComplete(currentBuffer, currentVersion.get())) {
-                                    String completeVersion = extractCompleteVersion(currentBuffer,
-                                            currentVersion.get() + 1);
+                                    buffer.append(chunk);
+                                    String currentBuffer = buffer.toString();
 
-                                    if (completeVersion.isEmpty()) {
-                                        sink.error(new OpenAiException(OpenAiErrorCode.OPEN_AI_INTERNAL_ERROR));
-                                        return;
+                                    // 버전 완성 감지 및 전송 로직
+                                    if (isVersionComplete(currentBuffer, currentVersion.get())) {
+                                        String completeVersion = extractCompleteVersion(currentBuffer,
+                                                currentVersion.get() + 1);
+
+                                        if (completeVersion.isEmpty()) {
+                                            sink.error(new OpenAiException(OpenAiErrorCode.OPEN_AI_INTERNAL_ERROR));
+                                            return;
+                                        }
+
+                                        sink.next(OpenAIVersionResponse.of(
+                                                currentVersion.get() + 1,
+                                                completeVersion,
+                                                currentVersion.get() == 2 // 3번째 버전이면 마지막
+                                        ));
+
+                                        currentVersion.incrementAndGet();
                                     }
-
-                                    sink.next(OpenAIVersionResponse.of(
-                                            currentVersion.get() + 1,
-                                            completeVersion,
-                                            currentVersion.get() == 2 // 3번째 버전이면 마지막
-                                    ));
-
-                                    currentVersion.incrementAndGet();
+                                } finally {
+                                    // 청크 처리 후 MDC 정리
+                                    MDC.clear();
                                 }
                             },
                             sink::error,
                             () -> {
-                                // 스트림 완료 시 3번째 버전 처리
-                                String finalBuffer = buffer.toString();
+                                try {
+                                    // 스트림 완료 시 3번째 버전 처리
+                                    restoreMdcContext(mdcContextMap);
 
-                                // 아직 처리하지 않은 버전이 있다면 처리
-                                if (currentVersion.get() < TOTAL_VERSION) {
-                                    String version3Content = extractCompleteVersion(finalBuffer, 3);
+                                    String finalBuffer = buffer.toString();
 
-                                    if (!version3Content.isEmpty()) {
-                                        sink.next(OpenAIVersionResponse.of(
-                                                3,
-                                                version3Content,
-                                                true // 마지막 버전
-                                        ));
+                                    // 아직 처리하지 않은 버전이 있다면 처리
+                                    if (currentVersion.get() < TOTAL_VERSION) {
+                                        String version3Content = extractCompleteVersion(finalBuffer, 3);
+
+                                        if (!version3Content.isEmpty()) {
+                                            sink.next(OpenAIVersionResponse.of(
+                                                    3,
+                                                    version3Content,
+                                                    true // 마지막 버전
+                                            ));
+                                        }
                                     }
-                                }
 
-                                sink.complete();
+                                    sink.complete();
+                                } finally {
+                                    // 스트림 완료 후 MDC 정리
+                                    MDC.clear();
+                                }
                             }
                     );
-        });
+        }).contextWrite(Context.of("mdc", mdcContextMap));
     }
 
-    private boolean isVersionComplete(String buffer, int currentVersion) {
+    private boolean isVersionComplete(final String buffer, final int currentVersion) {
         String currentVersionPattern = "===VERSION_" + (currentVersion + 1) + "===";
 
         if (!buffer.contains(currentVersionPattern)) {
@@ -96,7 +117,7 @@ public class OpenAIServiceImpl implements AIService {
         return false;
     }
 
-    private String extractCompleteVersion(String buffer, int versionNumber) {
+    private String extractCompleteVersion(final String buffer, final int versionNumber) {
         String versionPattern = "===VERSION_" + versionNumber + "===";
         String nextVersionPattern = "===VERSION_" + (versionNumber + 1) + "===";
 
@@ -113,6 +134,12 @@ public class OpenAIServiceImpl implements AIService {
         } else {
             // 다음 버전이 없으면 끝까지 (주로 3번째 버전에서 발생)
             return buffer.substring(contentStart).trim();
+        }
+    }
+
+    private void restoreMdcContext(final Map<String, String> mdcContextMap) {
+        if (mdcContextMap != null) {
+            MDC.setContextMap(mdcContextMap);
         }
     }
 }
