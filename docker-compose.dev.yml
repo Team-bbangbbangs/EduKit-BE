@@ -49,7 +49,7 @@ services:
     environment:
       TZ: Asia/Seoul
       MONITORING_INSTANCE: ${MONITORING_INSTANCE}
-      ENVIRONMENT: dev
+      ENVIRONMENT: ${SERVER_ID}
     volumes:
       - ./promtail-config.yml:/etc/promtail/config.yml
       - ./log:/log
