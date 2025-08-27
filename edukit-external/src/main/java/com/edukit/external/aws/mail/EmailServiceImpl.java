@@ -1,5 +1,6 @@
 package com.edukit.external.aws.mail;
 
+import com.edukit.core.common.event.mail.EmailTemplate;
 import com.edukit.core.common.service.EmailService;
 import com.edukit.external.aws.mail.exception.MailErrorCode;
 import com.edukit.external.aws.mail.exception.MailException;
@@ -20,10 +21,10 @@ public class EmailServiceImpl implements EmailService {
     private final AwsSesEmailMapper awsSesEmailMapper;
 
     public void sendEmail(final String emailReceiver, final String memberUuid, final String verificationCode,
-                          final String subject, final String template) {
+                          final EmailTemplate emailTemplate) {
         log.info("[SES] 이메일 발송 시작");
-        SendEmailRequest request = awsSesEmailMapper.buildEmailRequestForTeacherVerify(emailReceiver, memberUuid,
-                verificationCode, subject, template);
+        SendEmailRequest request = awsSesEmailMapper.buildEmailRequest(emailReceiver, memberUuid, verificationCode,
+                emailTemplate.getSubject(), emailTemplate.getTemplateKey());
         send(request, emailReceiver);
         log.info("[SES] 이메일 발송 성공");
     }

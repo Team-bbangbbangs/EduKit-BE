@@ -24,9 +24,9 @@ public class AwsSesEmailMapper {
 
     private static final String DEFAULT_CHARSET = StandardCharsets.UTF_8.name();
 
-    public SendEmailRequest buildEmailRequestForTeacherVerify(final String emailReceiver, final String memberUuid,
-                                                              final String verificationCode, final String subject,
-                                                              final String template) {
+    public SendEmailRequest buildEmailRequest(final String emailReceiver, final String memberUuid,
+                                              final String verificationCode, final String subject,
+                                              final String template) {
         String htmlBody = buildVerificationEmail(memberUuid, verificationCode, template);
         return buildSendEmailRequest(emailReceiver, subject, htmlBody);
     }
@@ -46,11 +46,8 @@ public class AwsSesEmailMapper {
         Body body = createBody(htmlBodyContent);
         Message message = createMessage(subjectContent, body);
 
-        return SendEmailRequest.builder()
-                .source(awsSesProperties.senderEmail())
-                .destination(destination)
-                .message(message)
-                .build();
+        return SendEmailRequest.builder().source(awsSesProperties.senderEmail()).destination(destination)
+                .message(message).build();
     }
 
     private String buildVerificationUrl(final String memberUuid, final String verificationCode) {
@@ -62,35 +59,22 @@ public class AwsSesEmailMapper {
     }
 
     private Destination createDestination(final String emailReceiver) {
-        return Destination.builder()
-                .toAddresses(emailReceiver)
-                .build();
+        return Destination.builder().toAddresses(emailReceiver).build();
     }
 
     private Content createSubjectContent(final String subject) {
-        return Content.builder()
-                .data(subject)
-                .charset(DEFAULT_CHARSET)
-                .build();
+        return Content.builder().data(subject).charset(DEFAULT_CHARSET).build();
     }
 
     private Content createHtmlBodyContent(final String htmlBody) {
-        return Content.builder()
-                .data(htmlBody)
-                .charset(DEFAULT_CHARSET)
-                .build();
+        return Content.builder().data(htmlBody).charset(DEFAULT_CHARSET).build();
     }
 
     private Body createBody(final Content htmlBodyContent) {
-        return Body.builder()
-                .html(htmlBodyContent)
-                .build();
+        return Body.builder().html(htmlBodyContent).build();
     }
 
     private Message createMessage(final Content subjectContent, final Body body) {
-        return Message.builder()
-                .subject(subjectContent)
-                .body(body)
-                .build();
+        return Message.builder().subject(subjectContent).body(body).build();
     }
 }
