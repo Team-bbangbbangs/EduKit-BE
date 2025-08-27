@@ -25,15 +25,17 @@ public class AwsSesEmailMapper {
     private static final String DEFAULT_CHARSET = StandardCharsets.UTF_8.name();
 
     public SendEmailRequest buildEmailRequestForTeacherVerify(final String emailReceiver, final String memberUuid,
-                                                              final String verificationCode, final String subject) {
-        String htmlBody = buildVerificationEmail(memberUuid, verificationCode);
+                                                              final String verificationCode, final String subject,
+                                                              final String template) {
+        String htmlBody = buildVerificationEmail(memberUuid, verificationCode, template);
         return buildSendEmailRequest(emailReceiver, subject, htmlBody);
     }
 
-    private String buildVerificationEmail(final String memberUuid, final String verificationCode) {
+    private String buildVerificationEmail(final String memberUuid, final String verificationCode,
+                                          final String template) {
         Context context = new Context();
         context.setVariable("verificationLink", buildVerificationUrl(memberUuid, verificationCode));
-        return templateEngine.process("email-verification", context);
+        return templateEngine.process(template, context);
     }
 
     public SendEmailRequest buildSendEmailRequest(final String emailReceiver, final String subject,

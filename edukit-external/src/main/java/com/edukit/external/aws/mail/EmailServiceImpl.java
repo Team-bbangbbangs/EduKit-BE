@@ -20,10 +20,10 @@ public class EmailServiceImpl implements EmailService {
     private final AwsSesEmailMapper awsSesEmailMapper;
 
     public void sendEmail(final String emailReceiver, final String memberUuid, final String verificationCode,
-                          final String subject) {
+                          final String subject, final String template) {
         log.info("[SES] 이메일 발송 시작");
         SendEmailRequest request = awsSesEmailMapper.buildEmailRequestForTeacherVerify(emailReceiver, memberUuid,
-                verificationCode, subject);
+                verificationCode, subject, template);
         send(request, emailReceiver);
         log.info("[SES] 이메일 발송 성공");
     }
