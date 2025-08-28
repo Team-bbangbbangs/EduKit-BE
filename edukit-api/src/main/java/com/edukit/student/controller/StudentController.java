@@ -8,12 +8,17 @@ import com.edukit.student.controller.request.StudentDeleteRequest;
 import com.edukit.student.controller.request.StudentUpdateRequest;
 import com.edukit.student.facade.StudentFacade;
 import com.edukit.student.facade.response.StudentUploadResponse;
+import com.edukit.student.facade.response.StudentsGetResponse;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import java.util.List;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -29,6 +34,10 @@ import org.springframework.web.multipart.MultipartFile;
 public class StudentController implements StudentApi {
 
     private final StudentFacade studentFacade;
+
+    private static final String DEFAULT_PAGE_SIZE = "20";
+    private static final int MIN_PAGE_SIZE = 1;
+    private static final int MAX_PAGE_SIZE = 100;
 
     @PostMapping(value = "/excel", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<EdukitResponse<StudentUploadResponse>> uploadStudentExcel(@MemberId final long memberId,
@@ -61,5 +70,20 @@ public class StudentController implements StudentApi {
                                                                @RequestBody @Valid final StudentDeleteRequest request) {
         studentFacade.deleteStudents(memberId, request.studentIds());
         return ResponseEntity.ok().body(EdukitResponse.success());
+    }
+
+    @GetMapping
+    public ResponseEntity<EdukitResponse<StudentsGetResponse>> getStudents(@MemberId final long memberId,
+                                                                           @RequestParam(required = false) final List<Integer> grades,
+                                                                           @RequestParam(required = false) final List<Integer> classNumbers,
+                                                                           @RequestParam(required = false) final List<String> recordTypes,
+                                                                           @RequestParam(required = false) final Long lastStudentId,
+                                                                           @RequestParam(required = false, defaultValue = DEFAULT_PAGE_SIZE)
+                                                                               @Min(MIN_PAGE_SIZE) @Max(MAX_PAGE_SIZE) final int pageSize) {
+        List<StudentRecordType> studentRecordTypes = Optional.ofNullable(recordTypes).orElseGet(List::of).stream()
+                .map(StudentRecordType::from).toList();
+        StudentsGetResponse response = studentFacade.getStudents(memberId, grades, classNumbers, studentRecordTypes,
+                lastStudentId, pageSize);
+        return ResponseEntity.ok().body(EdukitResponse.success(response));
     }
 }

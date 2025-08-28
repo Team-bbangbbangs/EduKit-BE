@@ -6,13 +6,18 @@ import com.edukit.student.controller.request.StudentCreateRequest;
 import com.edukit.student.controller.request.StudentDeleteRequest;
 import com.edukit.student.controller.request.StudentUpdateRequest;
 import com.edukit.student.facade.response.StudentUploadResponse;
+import com.edukit.student.facade.response.StudentsGetResponse;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
+import java.util.List;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -264,5 +269,92 @@ public interface StudentApi {
     ResponseEntity<EdukitResponse<Void>> deleteStudents(
             @MemberId final long memberId,
             @RequestBody @Valid final StudentDeleteRequest request
+    );
+
+    @Operation(summary = "학생 목록 조회")
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "학생 목록 조회 성공",
+                    content = @Content(
+                            examples = @ExampleObject(
+                                    name = "성공 응답",
+                                    value = """
+                                            {
+                                              "code": "SUCCESS",
+                                              "message": "요청이 성공했습니다.",
+                                              "data": {
+                                                "students": [
+                                                  {
+                                                    "studentId": 1,
+                                                    "grade": 1,
+                                                    "classNumber": 1,
+                                                    "studentNumber": 1,
+                                                    "studentName": "홍길동",
+                                                    "recordTypes": ["세부능력 및 특기사항", "행동특성 및 종합의견"]
+                                                  }
+                                                ]
+                                              }
+                                            }
+                                            """
+                            )
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "ERROR",
+                    content = @Content(
+                            examples = {
+                                    @ExampleObject(
+                                            name = "유효하지 않은 생활기록부 항목",
+                                            description = "존재하지 않는 생활기록부 항목을 요청한 경우",
+                                            value = """
+                                                      {
+                                                        "code": "SR-40403",
+                                                        "message": "유효하지 않은 생활기록부 항목입니다."
+                                                      }
+                                                    """
+                                    ),
+                                    @ExampleObject(
+                                            name = "페이지 크기 최솟값 위반",
+                                            description = "페이지 크기가 1보다 작은 경우",
+                                            value = """
+                                                      {
+                                                        "code": "FAIL-400",
+                                                        "message": "validation 오류",
+                                                        "data": {
+                                                          "pageSize": "1 이상이어야 합니다"
+                                                        }
+                                                      }
+                                                    """
+                                    ),
+                                    @ExampleObject(
+                                            name = "페이지 크기 최댓값 위반",
+                                            description = "페이지 크기가 100보다 큰 경우",
+                                            value = """
+                                                      {
+                                                        "code": "FAIL-400",
+                                                        "message": "validation 오류",
+                                                        "data": {
+                                                          "pageSize": "100 이하여야 합니다"
+                                                        }
+                                                      }
+                                                    """
+                                    )
+                            }
+                    )
+            )
+    })
+    ResponseEntity<EdukitResponse<StudentsGetResponse>> getStudents(
+            @MemberId final long memberId,
+            @Parameter(description = "조회할 학년 목록")
+            @RequestParam(required = false) final List<Integer> grades,
+            @Parameter(description = "조회할 반 목록")
+            @RequestParam(required = false) final List<Integer> classNumbers,
+            @Parameter(description = "조회할 생활기록부 항목")
+            @RequestParam(required = false) final List<String> recordTypes,
+            @Parameter(description = "마지막 조회된 학생 ID (페이징)")
+            @RequestParam(required = false) final Long lastStudentId,
+            @Parameter(description = "페이지 크기")
+            @RequestParam(required = false, defaultValue = "20") @Min(1) @Max(100) final int pageSize
     );
 }

@@ -6,10 +6,12 @@ import com.edukit.core.student.db.entity.Student;
 import com.edukit.core.student.service.ExcelService;
 import com.edukit.core.student.service.StudentService;
 import com.edukit.core.student.service.dto.ExcelParseResult;
+import com.edukit.core.student.service.dto.StudentItem;
 import com.edukit.core.studentrecord.db.entity.StudentRecord;
 import com.edukit.core.studentrecord.db.enums.StudentRecordType;
 import com.edukit.core.studentrecord.service.StudentRecordService;
 import com.edukit.student.facade.response.StudentUploadResponse;
+import com.edukit.student.facade.response.StudentsGetResponse;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -68,5 +70,13 @@ public class StudentFacade {
     public void deleteStudents(final long memberId, final List<Long> studentsIds) {
         List<Student> students = studentService.getStudents(studentsIds, memberId);
         studentService.deleteStudents(students.stream().map(Student::getId).toList());
+    }
+
+    public StudentsGetResponse getStudents(final long memberId, final List<Integer> grades,
+                                           final List<Integer> classNumbers, final List<StudentRecordType> recordTypes,
+                                           final Long lastStudentId, final int pageSize) {
+        List<StudentItem> studentItems = studentService.getStudentsByFilters(memberId, grades, classNumbers,
+                recordTypes, lastStudentId, pageSize);
+        return StudentsGetResponse.of(studentItems);
     }
 }
