@@ -284,6 +284,7 @@ public interface StudentApi {
                                               "code": "SUCCESS",
                                               "message": "요청이 성공했습니다.",
                                               "data": {
+                                                "studentCount": 10,
                                                 "students": [
                                                   {
                                                     "studentId": 1,
