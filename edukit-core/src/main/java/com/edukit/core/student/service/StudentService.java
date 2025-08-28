@@ -136,13 +136,4 @@ public class StudentService {
             throw new StudentException(StudentErrorCode.STUDENT_ALREADY_EXIST_ERROR);
         }
     }
-
-    @Transactional(readOnly = true)
-    public List<StudentItem> getStudentsByFilters(final long memberId, final List<Integer> grades,
-                                                  final List<Integer> classNumbers,
-                                                  final List<StudentRecordType> recordTypes, final Long lastStudentId,
-                                                  final int pageSize) {
-        Optional<Student> lastStudent = studentRepository.findByIdAndMemberId(lastStudentId, memberId);
-        return studentQueryRepository.findStudents(memberId, grades, classNumbers, recordTypes, lastStudent, pageSize);
-    }
 }
