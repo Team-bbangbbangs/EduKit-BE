@@ -77,6 +77,7 @@ public class StudentFacade {
                                            final Long lastStudentId, final int pageSize) {
         List<StudentItem> studentItems = studentService.getStudentsByFilters(memberId, grades, classNumbers,
                 recordTypes, lastStudentId, pageSize);
-        return StudentsGetResponse.of(studentItems);
+        int studentCount = studentService.getStudentCount(memberId);
+        return StudentsGetResponse.of(studentCount, studentItems);
     }
 }

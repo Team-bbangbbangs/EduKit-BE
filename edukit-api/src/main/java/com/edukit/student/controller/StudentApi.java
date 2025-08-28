@@ -284,6 +284,7 @@ public interface StudentApi {
                                               "code": "SUCCESS",
                                               "message": "요청이 성공했습니다.",
                                               "data": {
+                                                "studentCount": 10,
                                                 "students": [
                                                   {
                                                     "studentId": 1,
@@ -346,11 +347,11 @@ public interface StudentApi {
     })
     ResponseEntity<EdukitResponse<StudentsGetResponse>> getStudents(
             @MemberId final long memberId,
-            @Parameter(description = "조회할 학년 목록")
+            @Parameter(description = "학년 목록")
             @RequestParam(required = false) final List<Integer> grades,
-            @Parameter(description = "조회할 반 목록")
+            @Parameter(description = "반 목록")
             @RequestParam(required = false) final List<Integer> classNumbers,
-            @Parameter(description = "조회할 생활기록부 항목")
+            @Parameter(description = "생활기록부 항목")
             @RequestParam(required = false) final List<String> recordTypes,
             @Parameter(description = "마지막 조회된 학생 ID (페이징)")
             @RequestParam(required = false) final Long lastStudentId,

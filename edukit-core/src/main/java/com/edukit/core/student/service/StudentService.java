@@ -83,6 +83,19 @@ public class StudentService {
         studentRepository.deleteAllByIdInBatch(studentIds);
     }
 
+    @Transactional(readOnly = true)
+    public List<StudentItem> getStudentsByFilters(final long memberId, final List<Integer> grades,
+                                                  final List<Integer> classNumbers,
+                                                  final List<StudentRecordType> recordTypes, final Long lastStudentId,
+                                                  final int pageSize) {
+        Optional<Student> lastStudent = studentRepository.findByIdAndMemberId(lastStudentId, memberId);
+        return studentQueryRepository.findStudents(memberId, grades, classNumbers, recordTypes, lastStudent, pageSize);
+    }
+
+    public int getStudentCount(final long memberId) {
+        return studentRepository.countByMemberId(memberId);
+    }
+
     private void bulkInsertStudents(final List<ValidStudentRow> studentRows, final Member member) {
         String sql = """
                 INSERT INTO student (member_id, grade, class_number, student_number, student_name, student_name_normalized, created_at, modified_at)
@@ -122,14 +135,5 @@ public class StudentService {
                 StudentKey.from(student.getGrade(), student.getClassNumber(), student.getStudentNumber()))) {
             throw new StudentException(StudentErrorCode.STUDENT_ALREADY_EXIST_ERROR);
         }
-    }
-
-    @Transactional(readOnly = true)
-    public List<StudentItem> getStudentsByFilters(final long memberId, final List<Integer> grades,
-                                                  final List<Integer> classNumbers,
-                                                  final List<StudentRecordType> recordTypes, final Long lastStudentId,
-                                                  final int pageSize) {
-        Optional<Student> lastStudent = studentRepository.findByIdAndMemberId(lastStudentId, memberId);
-        return studentQueryRepository.findStudents(memberId, grades, classNumbers, recordTypes, lastStudent, pageSize);
     }
 }
