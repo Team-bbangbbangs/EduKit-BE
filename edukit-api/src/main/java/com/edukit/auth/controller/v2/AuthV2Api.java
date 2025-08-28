@@ -106,7 +106,7 @@ public interface AuthV2Api {
                             examples = {
                                     @ExampleObject(
                                             name = "필수 값 누락",
-                                            description = "memberUuid, verificationCode, password, confirmPassword 중 하나라도 null인 경우",
+                                            description = "memberUuid, verificationCode, password 중 하나라도 null인 경우",
                                             value = """
                                                       {
                                                         "code": "FAIL-400",
@@ -114,8 +114,7 @@ public interface AuthV2Api {
                                                         "data": {
                                                           "memberUuid": "유저 uuid를 입력해주세요.",
                                                           "verificationCode": "인증 코드는 필수입니다.",
-                                                          "password": "새 비밀번호를 입력해주세요.",
-                                                          "confirmPassword": "비밀번호 확인을 입력해주세요."
+                                                          "password": "새 비밀번호를 입력해주세요."
                                                         }
                                                       }
                                                     """
