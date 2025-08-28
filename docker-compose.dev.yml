@@ -5,7 +5,7 @@ services:
     environment:
       PROFILE: dev
       TZ: Asia/Seoul
-      HOSTNAME: ${SERVER_ID:-app-blue}
+      HOSTNAME: ${SERVER_ID:-dev-1}-blue
     ports:
       - "8080:8080"
     env_file:
@@ -22,7 +22,7 @@ services:
     environment:
       PROFILE: dev
       TZ: Asia/Seoul
-      HOSTNAME: ${SERVER_ID:-app-green}
+      HOSTNAME: ${SERVER_ID:-dev-1}-green
     ports:
       - "8081:8080"
     env_file:
