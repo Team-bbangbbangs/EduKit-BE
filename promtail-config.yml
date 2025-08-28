@@ -34,15 +34,10 @@ scrape_configs:
             requestUrl: requestUrl
             method: method
 
-      # 헬스체크 및 메트릭 엔드포인트 필터링
+      # 헬스체크 및 메트릭 엔드포인트 필터링 (구조화된 필드 기반)
       - drop:
-          expression: '.*(/health|/actuator|/metrics|/prometheus|favicon\.ico).*'
-          source: message
-
-      # HTTP 메서드 기반 헬스체크 필터링
-      - drop:
-          expression: '.*(GET|POST|PUT|DELETE).*(actuator|health|metrics|prometheus).*'
-          source: message
+          expression: '.*(health|actuator|metrics|prometheus|favicon\.ico).*'
+          source: requestUrl
 
       # 동적 라벨 설정 (고카디널리티 라벨 최소화)
       - labels:
