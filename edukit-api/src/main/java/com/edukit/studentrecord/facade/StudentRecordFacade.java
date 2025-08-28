@@ -7,6 +7,7 @@ import com.edukit.core.student.service.ExcelService;
 import com.edukit.core.studentrecord.db.entity.StudentRecord;
 import com.edukit.core.studentrecord.db.enums.StudentRecordType;
 import com.edukit.core.studentrecord.service.StudentRecordService;
+import com.edukit.studentrecord.facade.response.StudentRecordDetailResponse;
 import com.edukit.studentrecord.facade.response.StudentRecordsGetResponse;
 import com.edukit.studentrecord.facade.response.StudentRecordsGetResponse.StudentRecordItems;
 import java.util.List;
@@ -44,6 +45,12 @@ public class StudentRecordFacade {
     public void updateStudentRecord(final long memberId, final long recordId, final String description) {
         StudentRecord studentRecord = studentRecordService.getRecordDetail(memberId, recordId);
         studentRecordService.updateStudentRecord(studentRecord, description);
+    }
+
+    @Transactional(readOnly = true)
+    public StudentRecordDetailResponse getStudentRecord(final long memberId, final long recordId) {
+        StudentRecord recordDetail = studentRecordService.getRecordDetail(memberId, recordId);
+        return StudentRecordDetailResponse.of(recordDetail.getDescription());
     }
 
     public byte[] downloadStudentRecordExcel(final long memberId, final StudentRecordType recordType) {

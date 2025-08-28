@@ -4,6 +4,7 @@ import com.edukit.common.EdukitResponse;
 import com.edukit.common.annotation.MemberId;
 import com.edukit.core.studentrecord.db.enums.StudentRecordType;
 import com.edukit.studentrecord.controller.request.StudentRecordUpdateRequest;
+import com.edukit.studentrecord.facade.response.StudentRecordDetailResponse;
 import com.edukit.studentrecord.facade.response.StudentRecordsGetResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -148,6 +149,63 @@ public interface StudentRecordApi {
             @MemberId final long memberId,
             @PathVariable final long recordId,
             @RequestBody @Valid final StudentRecordUpdateRequest request
+    );
+
+    @Operation(
+            summary = "생활기록부 상세 조회"
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "생활기록부 상세 조회 성공",
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            examples = @ExampleObject(
+                                    name = "성공 응답",
+                                    value = """
+                                            {
+                                              "code": "SUCCESS",
+                                              "message": "요청이 성공했습니다.",
+                                              "data": {
+                                                "description": "수학 수업에 적극적으로 참여하는 모습을 보인다."
+                                              }
+                                            }
+                                            """
+                            )
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "ERROR",
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            examples = {
+                                    @ExampleObject(
+                                            name = "학생 기록 미존재",
+                                            description = "조회하려는 학생 기록이 존재하지 않는 경우",
+                                            value = """
+                                                      {
+                                                        "code": "SR-40401",
+                                                        "message": "해당 학생 기록이 존재하지 않습니다."
+                                                      }
+                                                    """
+                                    ),
+                                    @ExampleObject(
+                                            name = "권한 없음",
+                                            description = "해당 학생 기록에 대한 권한이 없는 경우",
+                                            value = """
+                                                      {
+                                                        "code": "SR-40302",
+                                                        "message": "해당 학생 기록에 대한 권한이 없습니다."
+                                                      }
+                                                    """
+                                    )
+                            }
+                    )
+            )
+    })
+    ResponseEntity<EdukitResponse<StudentRecordDetailResponse>> getStudentRecordDetail(
+            @MemberId final long memberId,
+            @PathVariable final long recordId
     );
 
     @Operation(

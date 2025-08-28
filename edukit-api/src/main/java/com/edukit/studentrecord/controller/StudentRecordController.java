@@ -5,14 +5,15 @@ import com.edukit.common.annotation.MemberId;
 import com.edukit.core.studentrecord.db.enums.StudentRecordType;
 import com.edukit.studentrecord.controller.request.StudentRecordUpdateRequest;
 import com.edukit.studentrecord.facade.StudentRecordFacade;
+import com.edukit.studentrecord.facade.response.StudentRecordDetailResponse;
 import com.edukit.studentrecord.facade.response.StudentRecordsGetResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ContentDisposition;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -41,7 +42,7 @@ public class StudentRecordController implements StudentRecordApi {
         return ResponseEntity.ok().body(EdukitResponse.success(response));
     }
 
-    @PatchMapping("/{recordId}")
+    @PostMapping("/detail/{recordId}")
     public ResponseEntity<EdukitResponse<Void>> updateStudentRecord(@MemberId final long memberId,
                                                                     @PathVariable final long recordId,
                                                                     @RequestBody @Valid final StudentRecordUpdateRequest request) {
@@ -49,6 +50,12 @@ public class StudentRecordController implements StudentRecordApi {
         return ResponseEntity.ok().body(EdukitResponse.success());
     }
 
+    @GetMapping("/detail/{recordId}")
+    public ResponseEntity<EdukitResponse<StudentRecordDetailResponse>> getStudentRecordDetail(
+            @MemberId final long memberId, @PathVariable final long recordId) {
+        StudentRecordDetailResponse response = studentRecordFacade.getStudentRecord(memberId, recordId);
+        return ResponseEntity.ok().body(EdukitResponse.success(response));
+    }
 
     @GetMapping("/{recordType}/excel")
     public ResponseEntity<byte[]> downloadStudentRecordExcel(@MemberId final long memberId,
