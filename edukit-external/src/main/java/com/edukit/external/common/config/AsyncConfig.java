@@ -1,6 +1,7 @@
 package com.edukit.external.common.config;
 
 import com.edukit.external.common.handler.CustomAsyncExceptionHandler;
+import java.util.Map;
 import java.util.concurrent.Executor;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.MDC;
@@ -59,7 +60,7 @@ public class AsyncConfig implements AsyncConfigurer {
     private static class MdcTaskDecorator implements TaskDecorator {
         @Override
         public Runnable decorate(final Runnable runnable) {
-            var contextMap = MDC.getCopyOfContextMap();
+            Map<String, String> contextMap = MDC.getCopyOfContextMap();
             return () -> {
                 if (contextMap != null) {
                     MDC.setContextMap(contextMap);
