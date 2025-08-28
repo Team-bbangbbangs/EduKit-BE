@@ -38,9 +38,7 @@ public class AIEventListener {
         log.info("AI 생기부 생성 시작 taskId: {}", taskId);
         aiTaskService.startTask(task);
 
-        // 현재 MDC 컨텍스트 캡처 (aiTaskExecutor에서 이미 전파됨)
         Map<String, String> mdcContextMap = MDC.getCopyOfContextMap();
-
         Flux<OpenAIVersionResponse> response = aiService.getVersionedStreamingResponse(generateEvent.requestPrompt());
 
         response
@@ -51,7 +49,6 @@ public class AIEventListener {
                     }
                 })
                 .doFinally(signalType -> {
-                    // 스트림 종료 시 MDC 정리 (메모리 누수 방지)
                     MDC.clear();
                 })
                 .subscribe(
@@ -71,7 +68,6 @@ public class AIEventListener {
                             } catch (ExternalException e) {
                                 log.error("SQS 메시지 전송 실패 - taskId: {}, error: {}", taskId, e.getMessage());
                             } finally {
-                                // 각 처리 후 MDC 정리
                                 MDC.clear();
                             }
                         },
