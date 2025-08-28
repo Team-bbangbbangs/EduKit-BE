@@ -7,6 +7,8 @@ import com.edukit.external.aws.sqs.exception.SQSException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.MDC;
@@ -16,8 +18,6 @@ import software.amazon.awssdk.services.sqs.model.MessageAttributeValue;
 import software.amazon.awssdk.services.sqs.model.SendMessageRequest;
 import software.amazon.awssdk.services.sqs.model.SendMessageResponse;
 import software.amazon.awssdk.services.sqs.model.SqsException;
-import java.util.HashMap;
-import java.util.Map;
 
 @Slf4j
 @Service
@@ -64,8 +64,7 @@ public class SqsServiceImpl implements SqsService {
 
     private void sendMessageInternal(final String messageBody) {
         Map<String, MessageAttributeValue> messageAttributes = new HashMap<>();
-        
-        // MDC에서 TraceId 가져와서 메시지 속성으로 추가
+
         String traceId = MDC.get("traceId");
         if (traceId != null) {
             messageAttributes.put("traceId", MessageAttributeValue.builder()
@@ -73,8 +72,7 @@ public class SqsServiceImpl implements SqsService {
                     .stringValue(traceId)
                     .build());
         }
-        
-        // MDC에서 UserId도 함께 전달
+
         String userId = MDC.get("userId");
         if (userId != null) {
             messageAttributes.put("userId", MessageAttributeValue.builder()
