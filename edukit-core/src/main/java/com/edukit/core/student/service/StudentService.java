@@ -124,6 +124,7 @@ public class StudentService {
         }
     }
 
+    @Transactional(readOnly = true)
     public List<StudentItem> getStudentsByFilters(final long memberId, final List<Integer> grades,
                                                   final List<Integer> classNumbers,
                                                   final List<StudentRecordType> recordTypes, final Long lastStudentId,

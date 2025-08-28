@@ -15,6 +15,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import java.util.List;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -288,7 +290,8 @@ public interface StudentApi {
                                                     "grade": 1,
                                                     "classNumber": 1,
                                                     "studentNumber": 1,
-                                                    "studentName": "홍길동"
+                                                    "studentName": "홍길동",
+                                                    "recordTypes": ["세부능력 및 특기사항", "행동특성 및 종합의견"]
                                                   }
                                                 ]
                                               }
@@ -310,6 +313,32 @@ public interface StudentApi {
                                                         "message": "유효하지 않은 생활기록부 항목입니다."
                                                       }
                                                     """
+                                    ),
+                                    @ExampleObject(
+                                            name = "페이지 크기 최솟값 위반",
+                                            description = "페이지 크기가 1보다 작은 경우",
+                                            value = """
+                                                      {
+                                                        "code": "FAIL-400",
+                                                        "message": "validation 오류",
+                                                        "data": {
+                                                          "pageSize": "1 이상이어야 합니다"
+                                                        }
+                                                      }
+                                                    """
+                                    ),
+                                    @ExampleObject(
+                                            name = "페이지 크기 최댓값 위반",
+                                            description = "페이지 크기가 100보다 큰 경우",
+                                            value = """
+                                                      {
+                                                        "code": "FAIL-400",
+                                                        "message": "validation 오류",
+                                                        "data": {
+                                                          "pageSize": "100 이하여야 합니다"
+                                                        }
+                                                      }
+                                                    """
                                     )
                             }
                     )
@@ -326,6 +355,6 @@ public interface StudentApi {
             @Parameter(description = "마지막 조회된 학생 ID (페이징)")
             @RequestParam(required = false) final Long lastStudentId,
             @Parameter(description = "페이지 크기")
-            @RequestParam(required = false, defaultValue = "20") final int pageSize
+            @RequestParam(required = false, defaultValue = "20") @Min(1) @Max(100) final int pageSize
     );
 }
