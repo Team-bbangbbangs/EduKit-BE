@@ -1,5 +1,6 @@
 package com.edukit.external.aws.mail;
 
+import com.edukit.core.common.event.mail.EmailTemplate;
 import com.edukit.external.aws.mail.config.AwsSesProperties;
 import com.edukit.external.aws.mail.exception.MailErrorCode;
 import com.edukit.external.aws.mail.exception.MailException;
@@ -25,17 +26,16 @@ public class AwsSesEmailMapper {
     private static final String DEFAULT_CHARSET = StandardCharsets.UTF_8.name();
 
     public SendEmailRequest buildEmailRequest(final String emailReceiver, final String memberUuid,
-                                              final String verificationCode, final String subject,
-                                              final String template) {
+                                              final String verificationCode, final EmailTemplate template) {
         String htmlBody = buildVerificationEmail(memberUuid, verificationCode, template);
-        return buildSendEmailRequest(emailReceiver, subject, htmlBody);
+        return buildSendEmailRequest(emailReceiver, template.getSubject(), htmlBody);
     }
 
     private String buildVerificationEmail(final String memberUuid, final String verificationCode,
-                                          final String template) {
+                                          final EmailTemplate template) {
         Context context = new Context();
-        context.setVariable("verificationLink", buildVerificationUrl(memberUuid, verificationCode));
-        return templateEngine.process(template, context);
+        context.setVariable("verificationLink", buildVerificationUrl(memberUuid, verificationCode, template));
+        return templateEngine.process(template.getTemplateKey(), context);
     }
 
     public SendEmailRequest buildSendEmailRequest(final String emailReceiver, final String subject,
@@ -50,9 +50,13 @@ public class AwsSesEmailMapper {
                 .message(message).build();
     }
 
-    private String buildVerificationUrl(final String memberUuid, final String verificationCode) {
+    private String buildVerificationUrl(final String memberUuid, final String verificationCode,
+                                        final EmailTemplate template) {
         try {
-            return String.format(awsSesProperties.emailVerifyUrl(), memberUuid, verificationCode);
+            if (template == EmailTemplate.PASSWORD_CHANGE) {
+                return String.format(awsSesProperties.passwordResetUrl(), memberUuid, verificationCode);
+            }
+            return String.format(awsSesProperties.teacherVerifyUrl(), memberUuid, verificationCode);
         } catch (IllegalFormatException e) {
             throw new MailException(MailErrorCode.ILLEGAL_URL_ARGUMENT);
         }
