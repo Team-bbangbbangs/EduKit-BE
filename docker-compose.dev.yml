@@ -5,13 +5,14 @@ services:
     environment:
       PROFILE: dev
       TZ: Asia/Seoul
+      HOSTNAME: ${HOSTNAME_BLUE:-dev-1-blue}
     ports:
       - "8080:8080"
     env_file:
       - .env
     restart: always
     volumes:
-      - ./log:/log
+      - ./log/blue:/log
     networks:
       - app-network
 
@@ -21,13 +22,14 @@ services:
     environment:
       PROFILE: dev
       TZ: Asia/Seoul
+      HOSTNAME: ${HOSTNAME_GREEN:-dev-1-green}
     ports:
       - "8081:8080"
     env_file:
       - .env
     restart: always
     volumes:
-      - ./log:/log
+      - ./log/green:/log
     networks:
       - app-network
 
@@ -49,9 +51,14 @@ services:
     environment:
       TZ: Asia/Seoul
       MONITORING_INSTANCE: ${MONITORING_INSTANCE}
+      ENVIRONMENT: ${ENVIRONMENT:-dev}
+      SERVER_ID: ${SERVER_ID:-dev-1}
+    env_file:
+      - .env
     volumes:
       - ./promtail-config.yml:/etc/promtail/config.yml
       - ./log:/log
+      - ./promtail-positions:/tmp/positions
     command: -config.expand-env=true -config.file=/etc/promtail/config.yml
     restart: always
     networks:

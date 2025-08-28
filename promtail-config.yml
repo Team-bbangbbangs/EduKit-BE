@@ -9,18 +9,19 @@ clients:
   - url: "http://${MONITORING_INSTANCE}/loki/api/v1/push"
 
 scrape_configs:
-  # API 모듈 - ERROR 로그
-  - job_name: api_error_logs
+  # EduKit API 모듈 - Blue 슬롯
+  - job_name: edukit-api-blue
     static_configs:
       - targets:
           - localhost
         labels:
-          job: api_error_logs
+          job: edukit-api
           module: api
-          level: error
           environment: ${ENVIRONMENT}
-          __path__: /log/error/*.log
+          host: ${HOSTNAME_BLUE:-dev-1-blue}
+          __path__: /log/blue/**/*.log
     pipeline_stages:
+      # JSON 로그 파싱
       - json:
           expressions:
             timestamp: timestamp
@@ -33,39 +34,36 @@ scrape_configs:
             requestUrl: requestUrl
             method: method
 
+      # 헬스체크 및 메트릭 엔드포인트 필터링 (구조화된 필드 기반)
       - drop:
-          expression: '.*(/health|/actuator|/metrics|/prometheus|favicon\.ico|GET.*200.*(/health|/actuator|/metrics)).*'
-          source: message
+          expression: '.*(health|actuator|metrics|prometheus|favicon\.ico).*'
+          source: requestUrl
 
-      - drop:
-          expression: '.*(GET|POST|PUT|DELETE).*(actuator|health|metrics|prometheus).*'
-          source: message
-
+      # 동적 라벨 설정 (고카디널리티 라벨 최소화)
       - labels:
-          thread:
+          level:
           logger:
           traceId:
-          userId:
-          requestUrl:
-          method:
 
+      # 타임스탬프 파싱
       - timestamp:
           source: timestamp
           format: "2006-01-02 15:04:05.000"
           location: "Asia/Seoul"
 
-  # API 모듈 - INFO 로그
-  - job_name: api_info_logs
+  # EduKit API 모듈 - Green 슬롯
+  - job_name: edukit-api-green
     static_configs:
       - targets:
           - localhost
         labels:
-          job: api_info_logs
+          job: edukit-api
           module: api
-          level: info
           environment: ${ENVIRONMENT}
-          __path__: /log/info/*.log
+          host: ${HOSTNAME_GREEN:-dev-1-green}
+          __path__: /log/green/**/*.log
     pipeline_stages:
+      # JSON 로그 파싱
       - json:
           expressions:
             timestamp: timestamp
@@ -78,67 +76,18 @@ scrape_configs:
             requestUrl: requestUrl
             method: method
 
+      # 헬스체크 및 메트릭 엔드포인트 필터링 (구조화된 필드 기반)
       - drop:
-          expression: '.*(/health|/actuator|/metrics|/prometheus|favicon\.ico|GET.*200.*(/health|/actuator|/metrics)).*'
-          source: message
+          expression: '.*(health|actuator|metrics|prometheus|favicon\.ico).*'
+          source: requestUrl
 
-      - drop:
-          expression: '.*(GET|POST|PUT|DELETE).*(actuator|health|metrics|prometheus).*'
-          source: message
-
+      # 동적 라벨 설정 (고카디널리티 라벨 최소화)
       - labels:
-          thread:
+          level:
           logger:
           traceId:
-          userId:
-          requestUrl:
-          method:
 
-      - timestamp:
-          source: timestamp
-          format: "2006-01-02 15:04:05.000"
-          location: "Asia/Seoul"
-
-  # API 모듈 - WARN 로그
-  - job_name: api_warn_logs
-    static_configs:
-      - targets:
-          - localhost
-        labels:
-          job: api_warn_logs
-          module: api
-          level: warn
-          environment: ${ENVIRONMENT}
-          __path__: /log/warn/*.log
-    pipeline_stages:
-      - json:
-          expressions:
-            timestamp: timestamp
-            level: level
-            thread: thread
-            logger: logger
-            message: message
-            traceId: traceId
-            userId: userId
-            requestUrl: requestUrl
-            method: method
-
-      - drop:
-          expression: '.*(/health|/actuator|/metrics|/prometheus|favicon\.ico|GET.*200.*(/health|/actuator|/metrics)).*'
-          source: message
-
-      - drop:
-          expression: '.*(GET|POST|PUT|DELETE).*(actuator|health|metrics|prometheus).*'
-          source: message
-
-      - labels:
-          thread:
-          logger:
-          traceId:
-          userId:
-          requestUrl:
-          method:
-
+      # 타임스탬프 파싱
       - timestamp:
           source: timestamp
           format: "2006-01-02 15:04:05.000"
