@@ -3,15 +3,19 @@ package com.edukit.core.student.service;
 import com.edukit.core.member.db.entity.Member;
 import com.edukit.core.member.exception.MemberException;
 import com.edukit.core.student.db.entity.Student;
+import com.edukit.core.student.db.repository.StudentQueryRepository;
 import com.edukit.core.student.db.repository.StudentRepository;
 import com.edukit.core.student.exception.StudentErrorCode;
 import com.edukit.core.student.exception.StudentException;
+import com.edukit.core.student.service.dto.StudentItem;
 import com.edukit.core.student.service.dto.StudentKey;
 import com.edukit.core.student.service.dto.ValidStudentRow;
 import com.edukit.core.student.utils.KoreanNormalizer;
+import com.edukit.core.studentrecord.db.enums.StudentRecordType;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
@@ -25,6 +29,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class StudentService {
 
     private final StudentRepository studentRepository;
+    private final StudentQueryRepository studentQueryRepository;
     private final JdbcTemplate jdbcTemplate;
 
     @Transactional
@@ -117,5 +122,13 @@ public class StudentService {
                 StudentKey.from(student.getGrade(), student.getClassNumber(), student.getStudentNumber()))) {
             throw new StudentException(StudentErrorCode.STUDENT_ALREADY_EXIST_ERROR);
         }
+    }
+
+    public List<StudentItem> getStudentsByFilters(final long memberId, final List<Integer> grades,
+                                                  final List<Integer> classNumbers,
+                                                  final List<StudentRecordType> recordTypes, final Long lastStudentId,
+                                                  final int pageSize) {
+        Optional<Student> lastStudent = studentRepository.findByIdAndMemberId(lastStudentId, memberId);
+        return studentQueryRepository.findStudents(memberId, grades, classNumbers, recordTypes, lastStudent, pageSize);
     }
 }
