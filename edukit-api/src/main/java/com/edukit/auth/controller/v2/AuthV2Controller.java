@@ -29,8 +29,7 @@ public class AuthV2Controller implements AuthV2Api {
     @PatchMapping("/password")
     public ResponseEntity<EdukitResponse<Void>> updatePassword(
             @RequestBody @Valid final UpdatePasswordRequest request) {
-        authFacade.updatePassword(request.memberUuid(), request.verificationCode(), request.password(),
-                request.confirmPassword());
+        authFacade.updatePassword(request.memberUuid(), request.verificationCode(), request.password());
         return ResponseEntity.ok(EdukitResponse.success());
     }
 }

@@ -96,10 +96,8 @@ public class AuthFacade {
     }
 
     @Transactional
-    public void updatePassword(final String memberUuid, final String verificationCode, final String newPassword,
-                               final String confirmPassword) {
+    public void updatePassword(final String memberUuid, final String verificationCode, final String newPassword) {
         PasswordValidator.validatePasswordFormat(newPassword);
-        PasswordValidator.validatePasswordEquality(newPassword, confirmPassword);
 
         Member member = memberService.getMemberByUuid(memberUuid);
         verificationCodeService.checkVerificationCode(member, verificationCode, VerificationCodeType.PASSWORD_RESET);

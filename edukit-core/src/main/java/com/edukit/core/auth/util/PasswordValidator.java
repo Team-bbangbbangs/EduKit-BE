@@ -37,11 +37,5 @@ public class PasswordValidator {
             throw new AuthException(AuthErrorCode.INVALID_PASSWORD_FORMAT);
         }
     }
-
-    public static void validatePasswordEquality(final String newPassword, final String confirmedNewPassword) {
-        if (!newPassword.equals(confirmedNewPassword)) {
-            throw new AuthException(AuthErrorCode.PASSWORD_CONFIRM_MISMATCH);
-        }
-    }
 }
 
