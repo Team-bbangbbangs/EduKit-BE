@@ -102,6 +102,9 @@ jobs:
           IMAGE_TAG=${{ needs.build.outputs.IMAGE_TAG }}
           MONITORING_INSTANCE=${{ secrets.MONITORING_INSTANCE }}
           SERVER_ID=${{ matrix.runner }}
+          ENVIRONMENT=dev
+          HOSTNAME_BLUE=${{ matrix.runner }}-blue
+          HOSTNAME_GREEN=${{ matrix.runner }}-green
           EOF
 
       - name: Login to AWS ECR

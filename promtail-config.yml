@@ -9,8 +9,8 @@ clients:
   - url: "http://${MONITORING_INSTANCE}/loki/api/v1/push"
 
 scrape_configs:
-  # EduKit API 모듈 - 모든 로그 레벨
-  - job_name: edukit-api
+  # EduKit API 모듈 - Blue 슬롯
+  - job_name: edukit-api-blue
     static_configs:
       - targets:
           - localhost
@@ -18,8 +18,50 @@ scrape_configs:
           job: edukit-api
           module: api
           environment: ${ENVIRONMENT}
-          host: ${HOSTNAME:-localhost}
-          __path__: /log/**/*.log
+          host: ${HOSTNAME_BLUE:-dev-1-blue}
+          __path__: /log/blue/**/*.log
+    pipeline_stages:
+      # JSON 로그 파싱
+      - json:
+          expressions:
+            timestamp: timestamp
+            level: level
+            thread: thread
+            logger: logger
+            message: message
+            traceId: traceId
+            userId: userId
+            requestUrl: requestUrl
+            method: method
+
+      # 헬스체크 및 메트릭 엔드포인트 필터링 (구조화된 필드 기반)
+      - drop:
+          expression: '.*(health|actuator|metrics|prometheus|favicon\.ico).*'
+          source: requestUrl
+
+      # 동적 라벨 설정 (고카디널리티 라벨 최소화)
+      - labels:
+          level:
+          logger:
+          traceId:
+
+      # 타임스탬프 파싱
+      - timestamp:
+          source: timestamp
+          format: "2006-01-02 15:04:05.000"
+          location: "Asia/Seoul"
+
+  # EduKit API 모듈 - Green 슬롯
+  - job_name: edukit-api-green
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: edukit-api
+          module: api
+          environment: ${ENVIRONMENT}
+          host: ${HOSTNAME_GREEN:-dev-1-green}
+          __path__: /log/green/**/*.log
     pipeline_stages:
       # JSON 로그 파싱
       - json:
