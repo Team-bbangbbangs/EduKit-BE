@@ -50,7 +50,6 @@ public class StudentRecordController implements StudentRecordApi {
         return ResponseEntity.ok().body(EdukitResponse.success());
     }
 
-
     @GetMapping("/detail/{recordId}")
     public ResponseEntity<EdukitResponse<StudentRecordDetailResponse>> getStudentRecordDetail(
             @MemberId final long memberId, @PathVariable final long recordId) {
