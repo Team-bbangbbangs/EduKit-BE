@@ -26,16 +26,10 @@ public class AuthV2Controller implements AuthV2Api {
         return ResponseEntity.ok(EdukitResponse.success());
     }
 
-
-    /**
-     이거 없앨 지 말지 회의 -> 메일로 임시 비밀번호 제공해주는 쪽으로 변경할 지 의논해야함
-     지금은 비밀번호를 변경할 수 있는 링크를 제공하고 있음
-     */
     @PatchMapping("/password")
     public ResponseEntity<EdukitResponse<Void>> updatePassword(
             @RequestBody @Valid final UpdatePasswordRequest request) {
-        authFacade.updatePassword(request.memberUuid(), request.verificationCode(), request.password(),
-                request.confirmPassword());
+        authFacade.updatePassword(request.memberUuid(), request.verificationCode(), request.password());
         return ResponseEntity.ok(EdukitResponse.success());
     }
 }

@@ -6,7 +6,8 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 public record AwsSesProperties(
         String senderEmail,
         String region,
-        String emailVerifyUrl,
+        String teacherVerifyUrl,
+        String passwordResetUrl,
         int singleRequestTimeout,
         int totalCallTimeout
 ) {

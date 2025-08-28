@@ -1,5 +1,6 @@
 package com.edukit.external.aws.mail;
 
+import com.edukit.core.common.event.mail.EmailTemplate;
 import com.edukit.external.aws.mail.config.AwsSesProperties;
 import com.edukit.external.aws.mail.exception.MailErrorCode;
 import com.edukit.external.aws.mail.exception.MailException;
@@ -24,16 +25,17 @@ public class AwsSesEmailMapper {
 
     private static final String DEFAULT_CHARSET = StandardCharsets.UTF_8.name();
 
-    public SendEmailRequest buildEmailRequestForTeacherVerify(final String emailReceiver, final String memberUuid,
-                                                              final String verificationCode) {
-        String htmlBody = buildVerificationEmail(memberUuid, verificationCode);
-        return buildSendEmailRequest(emailReceiver, "[Edukit] 교사 인증 링크", htmlBody);
+    public SendEmailRequest buildEmailRequest(final String emailReceiver, final String memberUuid,
+                                              final String verificationCode, final EmailTemplate template) {
+        String htmlBody = buildVerificationEmail(memberUuid, verificationCode, template);
+        return buildSendEmailRequest(emailReceiver, template.getSubject(), htmlBody);
     }
 
-    private String buildVerificationEmail(final String memberUuid, final String verificationCode) {
+    private String buildVerificationEmail(final String memberUuid, final String verificationCode,
+                                          final EmailTemplate template) {
         Context context = new Context();
-        context.setVariable("verificationLink", buildVerificationUrl(memberUuid, verificationCode));
-        return templateEngine.process("email-verification", context);
+        context.setVariable("verificationLink", buildVerificationUrl(memberUuid, verificationCode, template));
+        return templateEngine.process(template.getTemplateKey(), context);
     }
 
     public SendEmailRequest buildSendEmailRequest(final String emailReceiver, final String subject,
@@ -44,51 +46,39 @@ public class AwsSesEmailMapper {
         Body body = createBody(htmlBodyContent);
         Message message = createMessage(subjectContent, body);
 
-        return SendEmailRequest.builder()
-                .source(awsSesProperties.senderEmail())
-                .destination(destination)
-                .message(message)
-                .build();
+        return SendEmailRequest.builder().source(awsSesProperties.senderEmail()).destination(destination)
+                .message(message).build();
     }
 
-    private String buildVerificationUrl(final String memberUuid, final String verificationCode) {
+    private String buildVerificationUrl(final String memberUuid, final String verificationCode,
+                                        final EmailTemplate template) {
         try {
-            return String.format(awsSesProperties.emailVerifyUrl(), memberUuid, verificationCode);
+            if (template == EmailTemplate.PASSWORD_CHANGE) {
+                return String.format(awsSesProperties.passwordResetUrl(), memberUuid, verificationCode);
+            }
+            return String.format(awsSesProperties.teacherVerifyUrl(), memberUuid, verificationCode);
         } catch (IllegalFormatException e) {
             throw new MailException(MailErrorCode.ILLEGAL_URL_ARGUMENT);
         }
     }
 
     private Destination createDestination(final String emailReceiver) {
-        return Destination.builder()
-                .toAddresses(emailReceiver)
-                .build();
+        return Destination.builder().toAddresses(emailReceiver).build();
     }
 
     private Content createSubjectContent(final String subject) {
-        return Content.builder()
-                .data(subject)
-                .charset(DEFAULT_CHARSET)
-                .build();
+        return Content.builder().data(subject).charset(DEFAULT_CHARSET).build();
     }
 
     private Content createHtmlBodyContent(final String htmlBody) {
-        return Content.builder()
-                .data(htmlBody)
-                .charset(DEFAULT_CHARSET)
-                .build();
+        return Content.builder().data(htmlBody).charset(DEFAULT_CHARSET).build();
     }
 
     private Body createBody(final Content htmlBodyContent) {
-        return Body.builder()
-                .html(htmlBodyContent)
-                .build();
+        return Body.builder().html(htmlBodyContent).build();
     }
 
     private Message createMessage(final Content subjectContent, final Body body) {
-        return Message.builder()
-                .subject(subjectContent)
-                .body(body)
-                .build();
+        return Message.builder().subject(subjectContent).body(body).build();
     }
 }

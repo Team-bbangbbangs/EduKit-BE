@@ -18,12 +18,12 @@ public class EmailEventListener {
     @Async("emailTaskExecutor")
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void handleTeacherVerifyEmailEvent(final TeacherVerificationEmailEvent event) {
-        emailService.sendEmail(event.email(), event.memberUuid(), event.verificationCode());
+        emailService.sendEmail(event.email(), event.memberUuid(), event.verificationCode(), EmailTemplate.TEACHER_VERIFY);
     }
 
     @Async("emailTaskExecutor")
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void handlePasswordFindEvent(final PasswordChangeEmailEvent event) {
-        emailService.sendEmail(event.email(), event.memberUuid(), event.verificationCode());
+        emailService.sendEmail(event.email(), event.memberUuid(), event.verificationCode(), EmailTemplate.PASSWORD_CHANGE);
     }
 }

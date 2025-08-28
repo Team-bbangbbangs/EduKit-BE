@@ -16,7 +16,6 @@ import com.edukit.core.auth.service.VerificationCodeService;
 import com.edukit.core.auth.service.jwt.dto.AuthToken;
 import com.edukit.core.auth.util.PasswordValidator;
 import com.edukit.core.member.db.entity.Member;
-import com.edukit.core.member.db.enums.MemberRole;
 import com.edukit.core.member.db.enums.School;
 import com.edukit.core.member.service.MemberService;
 import com.edukit.core.subject.db.entity.Subject;
@@ -97,10 +96,8 @@ public class AuthFacade {
     }
 
     @Transactional
-    public void updatePassword(final String memberUuid, final String verificationCode, final String newPassword,
-                               final String confirmPassword) {
+    public void updatePassword(final String memberUuid, final String verificationCode, final String newPassword) {
         PasswordValidator.validatePasswordFormat(newPassword);
-        PasswordValidator.validatePasswordEquality(newPassword, confirmPassword);
 
         Member member = memberService.getMemberByUuid(memberUuid);
         verificationCodeService.checkVerificationCode(member, verificationCode, VerificationCodeType.PASSWORD_RESET);
@@ -111,14 +108,6 @@ public class AuthFacade {
 
         String encodedPassword = passwordEncoder.encode(newPassword);
         memberService.updatePassword(member, encodedPassword);
-    }
-
-    @Transactional(readOnly = true)
-    public void checkHasPermission(final long memberId) {
-        Member member = memberService.getMemberById(memberId);
-        if (member.getRole() == MemberRole.PENDING_TEACHER) {
-            throw new AuthException(AuthErrorCode.FORBIDDEN_MEMBER);
-        }
     }
 
     @Transactional
