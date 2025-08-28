@@ -17,7 +17,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 public interface AuthV2Api {
 
     @Operation(
-            summary = "비밀번호 찾기"
+            summary = "비밀번호 찾기",
+            description = "이메일로 비밀번호 재설정 페이지 링크를 발송합니다."
     )
     @ApiResponses({
             @ApiResponse(
@@ -82,7 +83,11 @@ public interface AuthV2Api {
     ResponseEntity<EdukitResponse<Void>> findPassword(@RequestBody @Valid final PasswordFindRequest request);
 
     @Operation(
-            summary = "비밀번호 변경"
+            summary = "비밀번호 변경",
+            description = """
+                    비밀번호 재설정 페이지에서 비밀번호를 변경합니다.
+                    재설정 페이지 링크: https://{도메인 주소}/reset-password?id=%s&code=%s
+                    """
     )
     @ApiResponses({
             @ApiResponse(
