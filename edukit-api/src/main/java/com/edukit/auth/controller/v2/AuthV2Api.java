@@ -130,16 +130,6 @@ public interface AuthV2Api {
                                                     """
                                     ),
                                     @ExampleObject(
-                                            name = "비밀번호 확인 불일치",
-                                            description = "새 비밀번호와 비밀번호 확인이 일치하지 않는 경우",
-                                            value = """
-                                                      {
-                                                        "code": "A-40010",
-                                                        "message": "새 비밀번호와 비밀번호 확인이 일치하지 않습니다."
-                                                      }
-                                                    """
-                                    ),
-                                    @ExampleObject(
                                             name = "기존과 동일한 비밀번호",
                                             description = "새로운 비밀번호가 기존 비밀번호와 같은 경우",
                                             value = """
