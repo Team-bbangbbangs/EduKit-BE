@@ -5,11 +5,13 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.List;
 
 public record StudentsGetResponse(
+        @Schema(description = "총 등록된 학생 수")
+        int studentCount,
         @Schema(description = "학생 목록")
         List<StudentsGetResponseItem> students
 ) {
-    public static StudentsGetResponse of(List<StudentItem> studentItems) {
-        return new StudentsGetResponse(studentItems.stream().map(StudentsGetResponseItem::of).toList());
+    public static StudentsGetResponse of(final int studentCount, final List<StudentItem> studentItems) {
+        return new StudentsGetResponse(studentCount, studentItems.stream().map(StudentsGetResponseItem::of).toList());
     }
 
     public record StudentsGetResponseItem(
