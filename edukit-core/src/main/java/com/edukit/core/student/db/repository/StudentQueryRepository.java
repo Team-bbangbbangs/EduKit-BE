@@ -34,7 +34,6 @@ public class StudentQueryRepository {
     ) {
         QStudent qStudent = QStudent.student;
 
-        // 기본 쿼리 구성
         JPAQuery<Student> query = qf.selectFrom(qStudent);
 
         applyWhereConditions(query, qStudent, memberId, grades, classNumbers, lastStudent);
