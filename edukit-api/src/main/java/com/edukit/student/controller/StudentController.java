@@ -79,7 +79,7 @@ public class StudentController implements StudentApi {
                                                                            @RequestParam(required = false) final List<String> recordTypes,
                                                                            @RequestParam(required = false) final Long lastStudentId,
                                                                            @RequestParam(required = false, defaultValue = DEFAULT_PAGE_SIZE)
-                                                                               @Min(MIN_PAGE_SIZE) @Max(MAX_PAGE_SIZE) final int pageSize) {
+                                                                           @Min(MIN_PAGE_SIZE) @Max(MAX_PAGE_SIZE) final int pageSize) {
         List<StudentRecordType> studentRecordTypes = Optional.ofNullable(recordTypes).orElseGet(List::of).stream()
                 .map(StudentRecordType::from).toList();
         StudentsGetResponse response = studentFacade.getStudents(memberId, grades, classNumbers, studentRecordTypes,
