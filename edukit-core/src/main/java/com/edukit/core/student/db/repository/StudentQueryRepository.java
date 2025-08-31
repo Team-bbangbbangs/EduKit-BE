@@ -11,6 +11,7 @@ import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -120,6 +121,9 @@ public class StudentQueryRepository {
                 .from(qStudentRecord)
                 .where(qStudentRecord.student.id.in(studentIds))
                 .fetch();
+        studentRecords.sort(Comparator.comparing(
+                (Tuple t) -> Objects.requireNonNull(t.get(qStudentRecord.studentRecordType)).ordinal()
+        ));
 
         Map<Long, List<String>> recordMap = new HashMap<>();
         for (Tuple studentRecordTuple : studentRecords) {
