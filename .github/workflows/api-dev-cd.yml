@@ -146,6 +146,9 @@ jobs:
             fi
             sleep 5
           done
+          
+          docker-compose -f docker-compose.dev.yml stop app-${{ steps.deploy.outputs.TARGET }}
+          docker-compose -f docker-compose.dev.yml rm -f app-${{ steps.deploy.outputs.TARGET }}
           exit 1
 
       - name: Switch nginx upstream and reload
