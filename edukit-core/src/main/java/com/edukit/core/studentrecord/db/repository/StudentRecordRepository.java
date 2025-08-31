@@ -1,6 +1,5 @@
 package com.edukit.core.studentrecord.db.repository;
 
-import com.edukit.core.member.db.entity.Member;
 import com.edukit.core.student.db.entity.Student;
 import com.edukit.core.studentrecord.db.entity.StudentRecord;
 import com.edukit.core.studentrecord.db.enums.StudentRecordType;
@@ -15,7 +14,7 @@ public interface StudentRecordRepository extends JpaRepository<StudentRecord, Lo
     @Query("""
                 SELECT sr FROM StudentRecord sr
                 JOIN FETCH sr.student s
-                WHERE s.member = :member
+                WHERE s.member.id = :memberId
                   AND sr.studentRecordType = :studentRecordType
                   AND (:grade IS NULL OR s.grade = :grade)
                   AND (:classNumber IS NULL OR s.classNumber = :classNumber)
@@ -25,7 +24,7 @@ public interface StudentRecordRepository extends JpaRepository<StudentRecord, Lo
                   )
                   ORDER BY s.grade ASC, s.classNumber ASC, s.studentNumber ASC, s.studentName ASC, s.id ASC
             """)
-    List<StudentRecord> findStudentRecordsByFilters(@Param("member") Member member,
+    List<StudentRecord> findStudentRecordsByFilters(@Param("memberId") long memberId,
                                                     @Param("studentRecordType") StudentRecordType studentRecordType,
                                                     @Param("grade") Integer grade,
                                                     @Param("classNumber") Integer classNumber,
@@ -36,7 +35,7 @@ public interface StudentRecordRepository extends JpaRepository<StudentRecord, Lo
     @Query("""
                 SELECT sr FROM StudentRecord sr
                 JOIN FETCH sr.student s
-                WHERE s.member = :member
+                WHERE s.member.id = :memberId
                   AND sr.studentRecordType = :studentRecordType
                   AND (:grade IS NULL OR s.grade = :grade)
                   AND (:classNumber IS NULL OR s.classNumber = :classNumber)
@@ -52,7 +51,7 @@ public interface StudentRecordRepository extends JpaRepository<StudentRecord, Lo
                   )
                   ORDER BY s.grade ASC, s.classNumber ASC, s.studentNumber ASC, s.studentName ASC, s.id ASC
             """)
-    List<StudentRecord> findStudentRecordsByFilters(@Param("member") Member member,
+    List<StudentRecord> findStudentRecordsByFilters(@Param("memberId") long memberId,
                                                     @Param("studentRecordType") StudentRecordType studentRecordType,
                                                     @Param("grade") Integer grade,
                                                     @Param("classNumber") Integer classNumber,
@@ -76,4 +75,30 @@ public interface StudentRecordRepository extends JpaRepository<StudentRecord, Lo
                                                            @Param("studentRecordType") StudentRecordType type);
 
     List<StudentRecord> findAllByStudent(Student student);
+
+    int countByStudentMemberIdAndStudentRecordType(long memberId, StudentRecordType recordType);
+
+    @Query("""
+                select distinct s.grade
+                from StudentRecord sr
+                join sr.student s
+                where s.member.id = :memberId
+                  and sr.studentRecordType = :recordType
+                order by s.grade
+            """)
+    List<Integer> findDistinctGradesByRecordType(@Param("memberId") long memberId,
+                                                 @Param("recordType") StudentRecordType recordType
+    );
+
+    @Query("""
+                select distinct s.classNumber
+                from StudentRecord sr
+                join sr.student s
+                where s.member.id = :memberId
+                  and sr.studentRecordType = :recordType
+                order by s.classNumber
+            """)
+    List<Integer> findDistinctClassNumbersByRecordType(@Param("memberId") long memberId,
+                                                       @Param("recordType") StudentRecordType recordType
+    );
 }

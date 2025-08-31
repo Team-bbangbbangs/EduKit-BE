@@ -1,7 +1,5 @@
 package com.edukit.studentrecord.facade;
 
-import com.edukit.core.member.db.entity.Member;
-import com.edukit.core.member.service.MemberService;
 import com.edukit.core.student.db.entity.Student;
 import com.edukit.core.student.service.ExcelService;
 import com.edukit.core.studentrecord.db.entity.StudentRecord;
@@ -9,7 +7,7 @@ import com.edukit.core.studentrecord.db.enums.StudentRecordType;
 import com.edukit.core.studentrecord.service.StudentRecordService;
 import com.edukit.studentrecord.facade.response.StudentRecordDetailResponse;
 import com.edukit.studentrecord.facade.response.StudentRecordsGetResponse;
-import com.edukit.studentrecord.facade.response.StudentRecordsGetResponse.StudentRecordItems;
+import com.edukit.studentrecord.facade.response.StudentRecordsGetResponse.StudentRecordItem;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -20,24 +18,26 @@ import org.springframework.transaction.annotation.Transactional;
 public class StudentRecordFacade {
 
     private final StudentRecordService studentRecordService;
-    private final MemberService memberService;
     private final ExcelService excelService;
 
     @Transactional(readOnly = true)
     public StudentRecordsGetResponse getStudentRecords(final long memberId, final StudentRecordType recordType,
                                                        final Integer grade, final Integer classNumber,
                                                        final String search, final Long lastRecordId) {
-        Member member = memberService.getMemberById(memberId);
-        List<StudentRecord> studentRecords = studentRecordService.getStudentRecordsByFilters(member, recordType, grade,
-                classNumber, search, lastRecordId);
-
-        return StudentRecordsGetResponse.of(studentRecords.stream()
+        List<StudentRecord> studentRecords = studentRecordService.getStudentRecordsByFilters(memberId, recordType,
+                grade, classNumber, search, lastRecordId);
+        List<StudentRecordItem> studentRecordItems = studentRecords.stream()
                 .map(record -> {
                     Student student = record.getStudent();
-                    return StudentRecordItems.of(record.getId(), student.getGrade(), student.getClassNumber(),
+                    return StudentRecordItem.of(record.getId(), student.getGrade(), student.getClassNumber(),
                             student.getStudentNumber(), student.getStudentName(), record.getDescription());
-                })
-                .toList());
+                }).toList();
+
+        int studentCount = studentRecordService.getStudentCountByRecordType(memberId, recordType);
+        List<Integer> studentGrades = studentRecordService.getStudentGrades(memberId, recordType);
+        List<Integer> studentClassNumbers = studentRecordService.getStudentClassNumbers(memberId, recordType);
+
+        return StudentRecordsGetResponse.of(studentCount, studentGrades, studentClassNumbers, studentRecordItems);
     }
 
     @Transactional

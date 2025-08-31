@@ -1,6 +1,5 @@
 package com.edukit.core.studentrecord.service;
 
-import com.edukit.core.member.db.entity.Member;
 import com.edukit.core.student.db.entity.Student;
 import com.edukit.core.student.utils.KoreanNormalizer;
 import com.edukit.core.studentrecord.db.entity.StudentRecord;
@@ -42,7 +41,7 @@ public class StudentRecordService {
     }
 
     @Transactional(readOnly = true)
-    public List<StudentRecord> getStudentRecordsByFilters(final Member member,
+    public List<StudentRecord> getStudentRecordsByFilters(final long memberId,
                                                           final StudentRecordType studentRecordType,
                                                           final Integer grade, final Integer classNumber,
                                                           final String search, final Long lastRecordId) {
@@ -50,13 +49,13 @@ public class StudentRecordService {
         Pageable pageable = PageRequest.of(0, STUDENT_RECORD_PAGE_SIZE, Sort.unsorted());   //페이지 사이즈 용도
 
         if (lastRecordId == null) {
-            return studentRecordRepository.findStudentRecordsByFilters(member, studentRecordType, grade, classNumber,
+            return studentRecordRepository.findStudentRecordsByFilters(memberId, studentRecordType, grade, classNumber,
                     searchNormalized, search, pageable);
         }
 
-        StudentRecord lastRecord = getRecordDetail(member.getId(), lastRecordId);
+        StudentRecord lastRecord = getRecordDetail(memberId, lastRecordId);
         Student lastStudent = lastRecord.getStudent();
-        return studentRecordRepository.findStudentRecordsByFilters(member, studentRecordType, grade, classNumber,
+        return studentRecordRepository.findStudentRecordsByFilters(memberId, studentRecordType, grade, classNumber,
                 searchNormalized, search, lastRecord.getId(), lastStudent.getGrade(),
                 lastStudent.getClassNumber(), lastStudent.getStudentNumber(), lastStudent.getStudentName(), pageable);
     }
@@ -82,6 +81,21 @@ public class StudentRecordService {
         validateRecordTypes(newTypes);
         createRecordsForNewTypes(newTypes, existingRecords, student);
         deleteRecordsForRemovedTypes(newTypes, existingRecords);
+    }
+
+    @Transactional(readOnly = true)
+    public int getStudentCountByRecordType(final long memberId, final StudentRecordType recordType) {
+        return studentRecordRepository.countByStudentMemberIdAndStudentRecordType(memberId, recordType);
+    }
+
+    @Transactional(readOnly = true)
+    public List<Integer> getStudentGrades(final long memberId, final StudentRecordType recordType) {
+        return studentRecordRepository.findDistinctGradesByRecordType(memberId, recordType);
+    }
+
+    @Transactional(readOnly = true)
+    public List<Integer> getStudentClassNumbers(final long memberId, final StudentRecordType recordType) {
+        return studentRecordRepository.findDistinctClassNumbersByRecordType(memberId, recordType);
     }
 
     private StudentRecord getRecordDetailById(final long recordId) {
