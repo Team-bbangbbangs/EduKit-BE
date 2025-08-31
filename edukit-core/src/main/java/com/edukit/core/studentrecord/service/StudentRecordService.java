@@ -24,6 +24,8 @@ public class StudentRecordService {
 
     private final StudentRecordRepository studentRecordRepository;
 
+    private static final int STUDENT_RECORD_PAGE_SIZE = 10;
+
     @Transactional(readOnly = true)
     public StudentRecord getRecordDetail(final long memberId, final long recordId) {
         StudentRecord existingDetail = getRecordDetailById(recordId);
@@ -43,10 +45,9 @@ public class StudentRecordService {
     public List<StudentRecord> getStudentRecordsByFilters(final Member member,
                                                           final StudentRecordType studentRecordType,
                                                           final Integer grade, final Integer classNumber,
-                                                          final String search, final Long lastRecordId,
-                                                          final int pageSize) {
+                                                          final String search, final Long lastRecordId) {
         String searchNormalized = KoreanNormalizer.toNormalized(search);
-        Pageable pageable = PageRequest.of(0, pageSize, Sort.unsorted());   //페이지 사이즈 용도
+        Pageable pageable = PageRequest.of(0, STUDENT_RECORD_PAGE_SIZE, Sort.unsorted());   //페이지 사이즈 용도
 
         if (lastRecordId == null) {
             return studentRecordRepository.findStudentRecordsByFilters(member, studentRecordType, grade, classNumber,

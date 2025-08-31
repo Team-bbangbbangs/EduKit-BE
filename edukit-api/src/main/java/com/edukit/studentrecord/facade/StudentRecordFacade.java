@@ -26,11 +26,10 @@ public class StudentRecordFacade {
     @Transactional(readOnly = true)
     public StudentRecordsGetResponse getStudentRecords(final long memberId, final StudentRecordType recordType,
                                                        final Integer grade, final Integer classNumber,
-                                                       final String search, final Long lastRecordId,
-                                                       final int pageSize) {
+                                                       final String search, final Long lastRecordId) {
         Member member = memberService.getMemberById(memberId);
         List<StudentRecord> studentRecords = studentRecordService.getStudentRecordsByFilters(member, recordType, grade,
-                classNumber, search, lastRecordId, pageSize);
+                classNumber, search, lastRecordId);
 
         return StudentRecordsGetResponse.of(studentRecords.stream()
                 .map(record -> {

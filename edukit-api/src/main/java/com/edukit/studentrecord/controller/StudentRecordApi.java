@@ -79,8 +79,7 @@ public interface StudentRecordApi {
             @RequestParam(required = false) final Integer grade,
             @RequestParam(required = false) final Integer classNumber,
             @RequestParam(required = false) final String search,
-            @RequestParam(required = false) final Long lastRecordId,
-            @RequestParam(required = false, defaultValue = "10") final int pageSize
+            @RequestParam(required = false) final Long lastRecordId
     );
 
     @Operation(

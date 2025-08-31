@@ -26,7 +26,6 @@ public class StudentRecordController implements StudentRecordApi {
 
     private final StudentRecordFacade studentRecordFacade;
 
-    private static final String DEFAULT_PAGE_SIZE = "10";
     private static final String XLSX_CONTENT_TYPE = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
 
     @GetMapping("/{recordType}")
@@ -35,10 +34,9 @@ public class StudentRecordController implements StudentRecordApi {
                                                                                        @RequestParam(required = false) final Integer grade,
                                                                                        @RequestParam(required = false) final Integer classNumber,
                                                                                        @RequestParam(required = false) final String search,
-                                                                                       @RequestParam(required = false) final Long lastRecordId,
-                                                                                       @RequestParam(required = false, defaultValue = DEFAULT_PAGE_SIZE) final int pageSize) {
+                                                                                       @RequestParam(required = false) final Long lastRecordId) {
         StudentRecordsGetResponse response = studentRecordFacade.getStudentRecords(memberId, recordType, grade,
-                classNumber, search, lastRecordId, pageSize);
+                classNumber, search, lastRecordId);
         return ResponseEntity.ok().body(EdukitResponse.success(response));
     }
 
