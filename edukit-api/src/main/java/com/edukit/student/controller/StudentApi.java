@@ -15,8 +15,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.Max;
-import jakarta.validation.constraints.Min;
 import java.util.List;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -285,6 +283,8 @@ public interface StudentApi {
                                               "message": "요청이 성공했습니다.",
                                               "data": {
                                                 "studentCount": 10,
+                                                "grades": [1, 2, 3],
+                                                "classNumbers": [1, 2, 3],
                                                 "students": [
                                                   {
                                                     "studentId": 1,
@@ -354,8 +354,6 @@ public interface StudentApi {
             @Parameter(description = "생활기록부 항목")
             @RequestParam(required = false) final List<String> recordTypes,
             @Parameter(description = "마지막 조회된 학생 ID (페이징)")
-            @RequestParam(required = false) final Long lastStudentId,
-            @Parameter(description = "페이지 크기")
-            @RequestParam(required = false, defaultValue = "20") @Min(1) @Max(100) final int pageSize
+            @RequestParam(required = false) final Long lastStudentId
     );
 }

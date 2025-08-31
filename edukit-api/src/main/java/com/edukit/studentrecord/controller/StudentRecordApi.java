@@ -38,6 +38,9 @@ public interface StudentRecordApi {
                                               "code": "SUCCESS",
                                               "message": "요청이 성공했습니다.",
                                               "data": {
+                                                "studentCount": 10,
+                                                "grades": [1, 2, 3],
+                                                "classNumbers": [1, 2, 3],
                                                 "studentRecords": [
                                                   {
                                                     "recordId": 1,
@@ -79,8 +82,7 @@ public interface StudentRecordApi {
             @RequestParam(required = false) final Integer grade,
             @RequestParam(required = false) final Integer classNumber,
             @RequestParam(required = false) final String search,
-            @RequestParam(required = false) final Long lastRecordId,
-            @RequestParam(required = false, defaultValue = "10") final int pageSize
+            @RequestParam(required = false) final Long lastRecordId
     );
 
     @Operation(
