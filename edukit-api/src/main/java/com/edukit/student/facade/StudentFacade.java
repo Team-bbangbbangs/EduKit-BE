@@ -78,6 +78,8 @@ public class StudentFacade {
         List<StudentItem> studentItems = studentService.getStudentsByFilters(memberId, grades, classNumbers,
                 recordTypes, lastStudentId);
         int studentCount = studentService.getStudentCount(memberId);
-        return StudentsGetResponse.of(studentCount, studentItems);
+        List<Integer> studentGrades = studentService.getStudentGrades(memberId);
+        List<Integer> studentClassNumbers = studentService.getStudentClassNumbers(memberId);
+        return StudentsGetResponse.of(studentCount, studentGrades, studentClassNumbers, studentItems);
     }
 }

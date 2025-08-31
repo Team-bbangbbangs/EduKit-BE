@@ -283,6 +283,8 @@ public interface StudentApi {
                                               "message": "요청이 성공했습니다.",
                                               "data": {
                                                 "studentCount": 10,
+                                                "grades": [1, 2, 3],
+                                                "classNumbers": [1, 2, 3],
                                                 "students": [
                                                   {
                                                     "studentId": 1,

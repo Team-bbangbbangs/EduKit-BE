@@ -94,8 +94,19 @@ public class StudentService {
                 STUDENT_PAGE_SIZE);
     }
 
+    @Transactional(readOnly = true)
     public int getStudentCount(final long memberId) {
         return studentRepository.countByMemberId(memberId);
+    }
+
+    @Transactional(readOnly = true)
+    public List<Integer> getStudentGrades(final long memberId) {
+        return studentRepository.findAllGrades(memberId);
+    }
+
+    @Transactional(readOnly = true)
+    public List<Integer> getStudentClassNumbers(final long memberId) {
+        return studentRepository.findAllClasses(memberId);
     }
 
     private void bulkInsertStudents(final List<ValidStudentRow> studentRows, final Member member) {
