@@ -32,6 +32,8 @@ public class StudentService {
     private final StudentQueryRepository studentQueryRepository;
     private final JdbcTemplate jdbcTemplate;
 
+    private static final int STUDENT_PAGE_SIZE = 20;
+
     @Transactional
     public void createStudent(final Set<ValidStudentRow> studentRows, final Member member) {
         Set<StudentKey> existingKeys = getExistingStudents(member);
@@ -86,10 +88,10 @@ public class StudentService {
     @Transactional(readOnly = true)
     public List<StudentItem> getStudentsByFilters(final long memberId, final List<Integer> grades,
                                                   final List<Integer> classNumbers,
-                                                  final List<StudentRecordType> recordTypes, final Long lastStudentId,
-                                                  final int pageSize) {
+                                                  final List<StudentRecordType> recordTypes, final Long lastStudentId) {
         Optional<Student> lastStudent = studentRepository.findByIdAndMemberId(lastStudentId, memberId);
-        return studentQueryRepository.findStudents(memberId, grades, classNumbers, recordTypes, lastStudent, pageSize);
+        return studentQueryRepository.findStudents(memberId, grades, classNumbers, recordTypes, lastStudent,
+                STUDENT_PAGE_SIZE);
     }
 
     public int getStudentCount(final long memberId) {
