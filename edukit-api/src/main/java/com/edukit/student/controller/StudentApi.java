@@ -82,6 +82,16 @@ public interface StudentApi {
                                                         "message": "엑셀 레코드 형식이 올바르지 않습니다."
                                                       }
                                                     """
+                                    ),
+                                    @ExampleObject(
+                                            name = "파일 크기 초과",
+                                            description = "업로드한 파일 크기가 10MB를 초과하는 경우",
+                                            value = """
+                                                      {
+                                                        "code": "ST-40007",
+                                                        "message": "파일 크기가 10MB를 초과합니다."
+                                                      }
+                                                    """
                                     )
                             }
                     )
