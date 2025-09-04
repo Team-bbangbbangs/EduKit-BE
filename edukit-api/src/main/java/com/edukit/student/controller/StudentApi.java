@@ -72,6 +72,16 @@ public interface StudentApi {
                                                         "message": "Excel 파일을 읽을 수 없습니다."
                                                       }
                                                     """
+                                    ),
+                                    @ExampleObject(
+                                            name = "엑셀 레코드 형식 오류",
+                                            description = "엑셀 파일 내 데이터 형식이 올바르지 않은 경우",
+                                            value = """
+                                                      {
+                                                        "code": "ST-40006",
+                                                        "message": "엑셀 레코드 형식이 올바르지 않습니다."
+                                                      }
+                                                    """
                                     )
                             }
                     )
