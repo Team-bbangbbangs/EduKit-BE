@@ -2,11 +2,13 @@ package com.edukit.student.controller;
 
 import com.edukit.common.EdukitResponse;
 import com.edukit.common.annotation.MemberId;
+import com.edukit.core.studentrecord.db.enums.StudentRecordType;
 import com.edukit.student.controller.request.StudentCreateRequest;
 import com.edukit.student.controller.request.StudentDeleteRequest;
 import com.edukit.student.controller.request.StudentUpdateRequest;
 import com.edukit.student.facade.response.StudentUploadResponse;
 import com.edukit.student.facade.response.StudentsGetResponse;
+import com.edukit.student.facade.response.StudentNamesGetResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -375,5 +377,60 @@ public interface StudentApi {
             @RequestParam(required = false) final List<String> recordTypes,
             @Parameter(description = "마지막 조회된 학생 ID (페이징)")
             @RequestParam(required = false) final Long lastStudentId
+    );
+
+    @Operation(summary = "생활기록부 항목별 학생 이름 조회")
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "학생 이름 조회 성공",
+                    content = @Content(
+                            examples = @ExampleObject(
+                                    name = "성공 응답",
+                                    value = """
+                                            {
+                                              "code": "SUCCESS",
+                                              "message": "요청이 성공했습니다.",
+                                              "data": {
+                                                "studentNames": [
+                                                  {
+                                                    "recordId": 1,
+                                                    "studentName": "홍길동"
+                                                  },
+                                                  {
+                                                    "recordId": 2,
+                                                    "studentName": "김철수"
+                                                  }
+                                                ]
+                                              }
+                                            }
+                                            """
+                            )
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "ERROR",
+                    content = @Content(
+                            examples = {
+                                    @ExampleObject(
+                                            name = "유효하지 않은 생활기록부 항목",
+                                            description = "존재하지 않는 생활기록부 항목을 요청한 경우",
+                                            value = """
+                                                      {
+                                                        "code": "SR-40403",
+                                                        "message": "유효하지 않은 생활기록부 항목입니다."
+                                                      }
+                                                    """
+                                    )
+                            }
+                    )
+            )
+    })
+    ResponseEntity<EdukitResponse<StudentNamesGetResponse>> getStudentNames(
+            @MemberId final long memberId,
+            @PathVariable final StudentRecordType recordType,
+            @RequestParam(required = false) final Integer grade,
+            @RequestParam(required = false) final Integer classNumber,
+            @RequestParam(required = false) final String studentName
     );
 }
