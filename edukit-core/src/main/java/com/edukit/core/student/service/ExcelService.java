@@ -106,12 +106,12 @@ public class ExcelService {
         String studentNumberStr = ExcelUtils.getCellValueAsStringOrDefault(row.getCell(STUDENT_NUMBER_INDEX));
         String studentName = ExcelUtils.getCellValueAsStringOrDefault(row.getCell(STUDENT_NAME_INDEX));
 
-        Integer grade = validateAndParseInt(gradeStr);
-        Integer classNumber = validateAndParseInt(classNumberStr);
-        Integer studentNumber = validateAndParseInt(studentNumberStr);
+        int grade = validateAndParseInt(gradeStr);
+        int classNumber = validateAndParseInt(classNumberStr);
+        int studentNumber = validateAndParseInt(studentNumberStr);
 
         if (isInvalidRow(grade, classNumber, studentNumber, studentName)) {
-            invalidRows.add(InvalidStudentRow.of(rowNumber, gradeStr, classNumberStr, studentNumberStr, studentName));
+            invalidRows.add(InvalidStudentRow.of(rowNumber, grade, classNumber, studentNumber, studentName));
         } else {
             validStudents.add(ValidStudentRow.of(grade, classNumber, studentNumber, studentName.trim()));
         }
@@ -121,7 +121,7 @@ public class ExcelService {
         try {
             return Integer.parseInt(value.trim());
         } catch (NumberFormatException e) {
-            return null;
+            throw new StudentException(StudentErrorCode.EXCEL_RECORD_FORMAT_ERROR);
         }
     }
 
