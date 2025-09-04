@@ -53,8 +53,7 @@ public class StudentService {
     public Student createStudent(final int grade, final int classNumber, final int studentNumber,
                                  final String studentName, final Member member) {
         Student student = Student.create(member, grade, classNumber, studentNumber, studentName);
-        validateStudentDuplicate(member.getId(), student.getGrade(), student.getClassNumber(),
-                student.getStudentNumber());
+        validateStudentCreate(member.getId(), student);
         try {
             return studentRepository.save(student);
         } catch (DataIntegrityViolationException e) {
@@ -153,22 +152,20 @@ public class StudentService {
                 .collect(Collectors.toSet());
     }
 
-    private void validateStudentDuplicate(final long memberId, final int grade, final int classNumber,
-                                          final int studentNumber) {
-        Optional<Student> existingStudent = studentRepository.findByMemberIdAndGradeAndClassNumberAndStudentNumber(
-                memberId, grade, classNumber, studentNumber);
-        if (existingStudent.isPresent()) {
+    private void validateStudentCreate(final long memberId, final Student student) {
+        boolean exists = studentRepository.existsByMemberIdAndGradeAndClassNumberAndStudentNumber(
+                memberId, student.getGrade(), student.getClassNumber(), student.getStudentNumber());
+        if (exists) {
             throw new StudentException(StudentErrorCode.STUDENT_ALREADY_EXIST_ERROR);
         }
     }
 
     private void validateStudentUpdate(final Student student, final long memberId, final int newGrade,
                                        final int newClassNumber, final int newStudentNumber) {
-        if (student.getGrade() == newGrade && student.getClassNumber() == newClassNumber
-                && student.getStudentNumber() == newStudentNumber) {
-            return;
+        boolean exists = studentRepository.existsByMemberIdAndGradeAndClassNumberAndStudentNumberAndIdNot(
+                memberId, newGrade, newClassNumber, newStudentNumber, student.getId());
+        if (exists) {
+            throw new StudentException(StudentErrorCode.STUDENT_ALREADY_EXIST_ERROR);
         }
-
-        validateStudentDuplicate(memberId, newGrade, newClassNumber, newStudentNumber);
     }
 }

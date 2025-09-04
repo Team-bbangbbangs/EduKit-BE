@@ -28,6 +28,9 @@ public interface StudentRepository extends JpaRepository<Student, Long> {
             "order by s.classNumber")
     List<Integer> findAllClasses(@Param("memberId") long memberId);
 
-    Optional<Student> findByMemberIdAndGradeAndClassNumberAndStudentNumber(long memberId, int grade, int classNumber,
-                                                                           int studentNumber);
+    boolean existsByMemberIdAndGradeAndClassNumberAndStudentNumber(long memberId, int grade, int classNumber,
+                                                                   int studentNumber);
+
+    boolean existsByMemberIdAndGradeAndClassNumberAndStudentNumberAndIdNot(long memberId, int grade, int classNumber,
+                                                                           int studentNumber, long studentId);
 }
