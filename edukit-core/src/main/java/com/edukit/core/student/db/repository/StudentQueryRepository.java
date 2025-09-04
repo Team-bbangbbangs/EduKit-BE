@@ -78,7 +78,7 @@ public class StudentQueryRepository {
                 .orderBy(qStudent.grade.asc(), qStudent.classNumber.asc(), qStudent.studentNumber.asc())
                 .fetch()
                 .stream()
-                .map(t -> new StudentNameItem(
+                .map(t -> StudentNameItem.of(
                         Objects.requireNonNull(t.get(qStudentRecord.id)),
                         Objects.requireNonNull(t.get(qStudent.studentName))
                 ))
