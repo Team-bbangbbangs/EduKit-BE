@@ -13,7 +13,8 @@ public enum StudentErrorCode implements ErrorCode {
     EXCEL_FILE_FORMAT_ERROR("ST-40003", "엑셀 파일 형식이 올바르지 않습니다."),
     EXCEL_FILE_CREATE_FAIL("ST-50004", "엑셀 파일 생성 중 오류가 발생했습니다."),
     STUDENT_ALREADY_EXIST_ERROR("ST-40905", "이미 등록된 학생입니다."),
-    EXCEL_RECORD_FORMAT_ERROR("ST-40006", "엑셀 레코드 형식이 올바르지 않습니다.")
+    EXCEL_RECORD_FORMAT_ERROR("ST-40006", "엑셀 레코드 형식이 올바르지 않습니다."),
+    EXCEL_FILE_SIZE_EXCEED("ST-40007", "파일 크기가 10MB를 초과합니다.")
     ;
 
     private final String code;

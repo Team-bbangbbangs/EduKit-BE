@@ -3,6 +3,8 @@ package com.edukit.student.facade;
 import com.edukit.core.member.db.entity.Member;
 import com.edukit.core.member.service.MemberService;
 import com.edukit.core.student.db.entity.Student;
+import com.edukit.core.student.exception.StudentErrorCode;
+import com.edukit.core.student.exception.StudentException;
 import com.edukit.core.student.service.ExcelService;
 import com.edukit.core.student.service.StudentService;
 import com.edukit.core.student.service.dto.ExcelParseResult;
@@ -22,6 +24,8 @@ import org.springframework.web.multipart.MultipartFile;
 @RequiredArgsConstructor
 public class StudentFacade {
 
+    private static final long MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
+
     private final StudentService studentService;
     private final ExcelService excelService;
     private final MemberService memberService;
@@ -29,6 +33,7 @@ public class StudentFacade {
 
     @Transactional
     public StudentUploadResponse createStudentsFromExcel(final long memberId, final MultipartFile excelFile) {
+        validateFileSize(excelFile);
         excelService.validateExcelFormat(excelFile);
         ExcelParseResult parseResult = excelService.parseStudentExcel(excelFile);
 
@@ -81,5 +86,11 @@ public class StudentFacade {
         List<Integer> studentGrades = studentService.getStudentGrades(memberId);
         List<Integer> studentClassNumbers = studentService.getStudentClassNumbers(memberId);
         return StudentsGetResponse.of(studentCount, studentGrades, studentClassNumbers, studentItems);
+    }
+
+    private void validateFileSize(final MultipartFile file) {
+        if (file.getSize() > MAX_FILE_SIZE) {
+            throw new StudentException(StudentErrorCode.EXCEL_FILE_SIZE_EXCEED);
+        }
     }
 }
