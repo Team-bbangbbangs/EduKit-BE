@@ -9,6 +9,7 @@ import com.edukit.core.student.exception.StudentErrorCode;
 import com.edukit.core.student.exception.StudentException;
 import com.edukit.core.student.service.dto.StudentItem;
 import com.edukit.core.student.service.dto.StudentKey;
+import com.edukit.core.student.service.dto.StudentNameItem;
 import com.edukit.core.student.service.dto.ValidStudentRow;
 import com.edukit.core.student.utils.KoreanNormalizer;
 import com.edukit.core.studentrecord.db.enums.StudentRecordType;
@@ -90,7 +91,7 @@ public class StudentService {
                                                   final List<Integer> classNumbers,
                                                   final List<StudentRecordType> recordTypes, final Long lastStudentId) {
         Optional<Student> lastStudent = studentRepository.findByIdAndMemberId(lastStudentId, memberId);
-        return studentQueryRepository.findStudents(memberId, grades, classNumbers, recordTypes, lastStudent,
+        return studentQueryRepository.getStudents(memberId, grades, classNumbers, recordTypes, lastStudent,
                 STUDENT_PAGE_SIZE);
     }
 
@@ -107,6 +108,13 @@ public class StudentService {
     @Transactional(readOnly = true)
     public List<Integer> getStudentClassNumbers(final long memberId) {
         return studentRepository.findAllClasses(memberId);
+    }
+
+    @Transactional(readOnly = true)
+    public List<StudentNameItem> getStudentNamesByFilters(final long memberId, final StudentRecordType recordType,
+                                                          final Integer grade, final Integer classNumber,
+                                                          final String studentName) {
+        return studentQueryRepository.getStudentNames(memberId, recordType, grade, classNumber, studentName);
     }
 
     private void bulkInsertStudents(final List<ValidStudentRow> studentRows, final Member member) {

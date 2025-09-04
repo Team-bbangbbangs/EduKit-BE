@@ -9,10 +9,12 @@ import com.edukit.core.student.service.ExcelService;
 import com.edukit.core.student.service.StudentService;
 import com.edukit.core.student.service.dto.ExcelParseResult;
 import com.edukit.core.student.service.dto.StudentItem;
+import com.edukit.core.student.service.dto.StudentNameItem;
 import com.edukit.core.studentrecord.db.entity.StudentRecord;
 import com.edukit.core.studentrecord.db.enums.StudentRecordType;
 import com.edukit.core.studentrecord.service.StudentRecordService;
 import com.edukit.student.facade.response.StudentUploadResponse;
+import com.edukit.student.facade.response.StudentNamesGetResponse;
 import com.edukit.student.facade.response.StudentsGetResponse;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -86,6 +88,15 @@ public class StudentFacade {
         List<Integer> studentGrades = studentService.getStudentGrades(memberId);
         List<Integer> studentClassNumbers = studentService.getStudentClassNumbers(memberId);
         return StudentsGetResponse.of(studentCount, studentGrades, studentClassNumbers, studentItems);
+    }
+
+    public StudentNamesGetResponse getStudentNames(final long memberId,
+                                                   final StudentRecordType recordType,
+                                                   final Integer grade, final Integer classNumber,
+                                                   final String studentName) {
+        List<StudentNameItem> studentNameItems = studentService.getStudentNamesByFilters(memberId, recordType,
+                grade, classNumber, studentName);
+        return StudentNamesGetResponse.of(studentNameItems);
     }
 
     private void validateFileSize(final MultipartFile file) {

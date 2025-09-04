@@ -3,6 +3,8 @@ package com.edukit.core.student.db.repository;
 import com.edukit.core.student.db.entity.QStudent;
 import com.edukit.core.student.db.entity.Student;
 import com.edukit.core.student.service.dto.StudentItem;
+import com.edukit.core.student.service.dto.StudentNameItem;
+import com.edukit.core.student.utils.KoreanNormalizer;
 import com.edukit.core.studentrecord.db.entity.QStudentRecord;
 import com.edukit.core.studentrecord.db.enums.StudentRecordType;
 import com.querydsl.core.BooleanBuilder;
@@ -26,19 +28,19 @@ public class StudentQueryRepository {
 
     private final JPAQueryFactory qf;
 
-    public List<StudentItem> findStudents(final Long memberId,
-                                          final List<Integer> grades,
-                                          final List<Integer> classNumbers,
-                                          final List<StudentRecordType> recordTypes,
-                                          final Optional<Student> lastStudent,
-                                          final int pageSize
+    public List<StudentItem> getStudents(final long memberId,
+                                         final List<Integer> grades,
+                                         final List<Integer> classNumbers,
+                                         final List<StudentRecordType> recordTypes,
+                                         final Optional<Student> lastStudent,
+                                         final int pageSize
     ) {
         QStudent qStudent = QStudent.student;
 
         JPAQuery<Student> query = qf.selectFrom(qStudent);
 
         applyWhereConditions(query, qStudent, memberId, grades, classNumbers, lastStudent);
-        applyRecordTypesFilter(query, qStudent, memberId, recordTypes);
+        applyRecordTypesFilter(query, qStudent, recordTypes);
 
         // 학생 목록 조회
         List<Student> students = fetchStudents(query, qStudent, pageSize);
@@ -49,6 +51,38 @@ public class StudentQueryRepository {
         // 조회한 학생들의 recordTypes 일괄 조회
         Map<Long, List<String>> typeMap = fetchRecordTypes(students);
         return generateStudentItems(students, typeMap);
+    }
+
+    public List<StudentNameItem> getStudentNames(final long memberId, final StudentRecordType recordType,
+                                                 final Integer grade, final Integer classNumber,
+                                                 final String studentName) {
+        QStudent qStudent = QStudent.student;
+        QStudentRecord qStudentRecord = QStudentRecord.studentRecord;
+
+        BooleanBuilder whereBuilder = new BooleanBuilder().and(qStudent.member.id.eq(memberId));
+        if (grade != null) {
+            whereBuilder.and(qStudent.grade.eq(grade));
+        }
+        if (classNumber != null) {
+            whereBuilder.and(qStudent.classNumber.eq(classNumber));
+        }
+        if (studentName != null) {
+            whereBuilder.and(qStudent.studentNameNormalized.contains(KoreanNormalizer.toNormalized(studentName)));
+        }
+
+        return qf.select(qStudentRecord.id, qStudent.studentName)
+                .from(qStudent)
+                .join(qStudentRecord)
+                .on(qStudentRecord.student.id.eq(qStudent.id).and(qStudentRecord.studentRecordType.eq(recordType)))
+                .where(whereBuilder)
+                .orderBy(qStudent.grade.asc(), qStudent.classNumber.asc(), qStudent.studentNumber.asc())
+                .fetch()
+                .stream()
+                .map(t -> new StudentNameItem(
+                        Objects.requireNonNull(t.get(qStudentRecord.id)),
+                        Objects.requireNonNull(t.get(qStudent.studentName))
+                ))
+                .toList();
     }
 
     private void applyWhereConditions(
@@ -83,7 +117,6 @@ public class StudentQueryRepository {
     private void applyRecordTypesFilter(
             final JPAQuery<Student> query,
             final QStudent qStudent,
-            final Long memberId,
             final List<StudentRecordType> recordTypes
     ) {
         if (recordTypes == null || recordTypes.isEmpty()) {
@@ -92,7 +125,6 @@ public class StudentQueryRepository {
 
         QStudentRecord qStudentRecord = QStudentRecord.studentRecord;
         query.leftJoin(qStudentRecord).on(qStudentRecord.student.id.eq(qStudent.id)
-                        .and(qStudentRecord.student.member.id.eq(memberId))
                         .and(qStudentRecord.studentRecordType.in(recordTypes))
                 )
                 .groupBy(qStudent.id, qStudent.grade, qStudent.classNumber, qStudent.studentNumber)
