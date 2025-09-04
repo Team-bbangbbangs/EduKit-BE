@@ -53,7 +53,8 @@ public class StudentService {
     public Student createStudent(final int grade, final int classNumber, final int studentNumber,
                                  final String studentName, final Member member) {
         Student student = Student.create(member, grade, classNumber, studentNumber, studentName);
-        validateStudent(student, member);
+        validateStudentDuplicate(member.getId(), student.getGrade(), student.getClassNumber(),
+                student.getStudentNumber());
         try {
             return studentRepository.save(student);
         } catch (DataIntegrityViolationException e) {
@@ -76,8 +77,10 @@ public class StudentService {
     }
 
     @Transactional
-    public void updateStudent(final Student student, final int grade, final int classNumber, final int studentNumber,
+    public void updateStudent(final Student student, final long memberId, final int grade, final int classNumber,
+                              final int studentNumber,
                               final String studentName) {
+        validateStudentUpdate(student, memberId, grade, classNumber, studentNumber);
         student.update(grade, classNumber, studentNumber, studentName);
     }
 
@@ -150,11 +153,22 @@ public class StudentService {
                 .collect(Collectors.toSet());
     }
 
-    private void validateStudent(final Student student, final Member member) {
-        Set<StudentKey> existingKeys = getExistingStudents(member);
-        if (existingKeys.contains(
-                StudentKey.from(student.getGrade(), student.getClassNumber(), student.getStudentNumber()))) {
+    private void validateStudentDuplicate(final long memberId, final int grade, final int classNumber,
+                                          final int studentNumber) {
+        Optional<Student> existingStudent = studentRepository.findByMemberIdAndGradeAndClassNumberAndStudentNumber(
+                memberId, grade, classNumber, studentNumber);
+        if (existingStudent.isPresent()) {
             throw new StudentException(StudentErrorCode.STUDENT_ALREADY_EXIST_ERROR);
         }
+    }
+
+    private void validateStudentUpdate(final Student student, final long memberId, final int newGrade,
+                                       final int newClassNumber, final int newStudentNumber) {
+        if (student.getGrade() == newGrade && student.getClassNumber() == newClassNumber
+                && student.getStudentNumber() == newStudentNumber) {
+            return;
+        }
+
+        validateStudentDuplicate(memberId, newGrade, newClassNumber, newStudentNumber);
     }
 }

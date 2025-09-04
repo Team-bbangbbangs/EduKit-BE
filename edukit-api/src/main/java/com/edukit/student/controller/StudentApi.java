@@ -219,6 +219,16 @@ public interface StudentApi {
                                                     """
                                     ),
                                     @ExampleObject(
+                                            name = "이미 등록된 학생",
+                                            description = "동일한 학년, 반, 번호의 학생이 이미 존재하는 경우",
+                                            value = """
+                                                      {
+                                                        "code": "ST-40905",
+                                                        "message": "이미 등록된 학생입니다."
+                                                      }
+                                                    """
+                                    ),
+                                    @ExampleObject(
                                             name = "유효하지 않은 생활기록부 항목",
                                             description = "존재하지 않는 생활기록부 항목을 요청한 경우",
                                             value = """

@@ -67,7 +67,8 @@ public class StudentFacade {
                               final int studentNumber, final String studentName,
                               final List<StudentRecordType> recordTypes) {
         Student student = studentService.getStudent(studentId, memberId);
-        studentService.updateStudent(student, grade, classNumber, studentNumber, studentName);
+
+        studentService.updateStudent(student, memberId, grade, classNumber, studentNumber, studentName);
 
         List<StudentRecord> studentRecords = studentRecordService.getStudentRecordsByStudent(student);
         studentRecordService.updateStudentRecord(recordTypes, studentRecords, student);
