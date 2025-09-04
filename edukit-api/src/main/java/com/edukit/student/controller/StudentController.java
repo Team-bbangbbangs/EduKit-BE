@@ -8,6 +8,7 @@ import com.edukit.student.controller.request.StudentDeleteRequest;
 import com.edukit.student.controller.request.StudentUpdateRequest;
 import com.edukit.student.facade.StudentFacade;
 import com.edukit.student.facade.response.StudentUploadResponse;
+import com.edukit.student.facade.response.StudentNamesGetResponse;
 import com.edukit.student.facade.response.StudentsGetResponse;
 import jakarta.validation.Valid;
 import java.util.List;
@@ -76,6 +77,18 @@ public class StudentController implements StudentApi {
                 .map(StudentRecordType::from).toList();
         StudentsGetResponse response = studentFacade.getStudents(memberId, grades, classNumbers, studentRecordTypes,
                 lastStudentId);
+        return ResponseEntity.ok().body(EdukitResponse.success(response));
+    }
+
+    @GetMapping("/{recordType}")
+    public ResponseEntity<EdukitResponse<StudentNamesGetResponse>> getStudentNames(
+            @MemberId final long memberId,
+            @PathVariable final StudentRecordType recordType,
+            @RequestParam(required = false) final Integer grade,
+            @RequestParam(required = false) final Integer classNumber,
+            @RequestParam(required = false) final String studentName) {
+        StudentNamesGetResponse response = studentFacade.getStudentNames(memberId, recordType, grade, classNumber,
+                studentName);
         return ResponseEntity.ok().body(EdukitResponse.success(response));
     }
 }

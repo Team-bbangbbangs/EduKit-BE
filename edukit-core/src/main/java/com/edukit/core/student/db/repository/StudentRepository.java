@@ -9,7 +9,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 public interface StudentRepository extends JpaRepository<Student, Long> {
-    
+
     List<Student> findByMember(Member member);
 
     Optional<Student> findByIdAndMemberId(Long studentId, long memberId);
@@ -27,4 +27,10 @@ public interface StudentRepository extends JpaRepository<Student, Long> {
             "where s.member.id = :memberId " +
             "order by s.classNumber")
     List<Integer> findAllClasses(@Param("memberId") long memberId);
+
+    boolean existsByMemberIdAndGradeAndClassNumberAndStudentNumber(long memberId, int grade, int classNumber,
+                                                                   int studentNumber);
+
+    boolean existsByMemberIdAndGradeAndClassNumberAndStudentNumberAndIdNot(long memberId, int grade, int classNumber,
+                                                                           int studentNumber, long studentId);
 }

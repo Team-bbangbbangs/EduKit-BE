@@ -9,6 +9,7 @@ import com.edukit.core.student.exception.StudentErrorCode;
 import com.edukit.core.student.exception.StudentException;
 import com.edukit.core.student.service.dto.StudentItem;
 import com.edukit.core.student.service.dto.StudentKey;
+import com.edukit.core.student.service.dto.StudentNameItem;
 import com.edukit.core.student.service.dto.ValidStudentRow;
 import com.edukit.core.student.utils.KoreanNormalizer;
 import com.edukit.core.studentrecord.db.enums.StudentRecordType;
@@ -52,7 +53,7 @@ public class StudentService {
     public Student createStudent(final int grade, final int classNumber, final int studentNumber,
                                  final String studentName, final Member member) {
         Student student = Student.create(member, grade, classNumber, studentNumber, studentName);
-        validateStudent(student, member);
+        validateStudentCreate(member.getId(), student);
         try {
             return studentRepository.save(student);
         } catch (DataIntegrityViolationException e) {
@@ -75,8 +76,10 @@ public class StudentService {
     }
 
     @Transactional
-    public void updateStudent(final Student student, final int grade, final int classNumber, final int studentNumber,
+    public void updateStudent(final Student student, final long memberId, final int grade, final int classNumber,
+                              final int studentNumber,
                               final String studentName) {
+        validateStudentUpdate(student, memberId, grade, classNumber, studentNumber);
         student.update(grade, classNumber, studentNumber, studentName);
     }
 
@@ -90,7 +93,7 @@ public class StudentService {
                                                   final List<Integer> classNumbers,
                                                   final List<StudentRecordType> recordTypes, final Long lastStudentId) {
         Optional<Student> lastStudent = studentRepository.findByIdAndMemberId(lastStudentId, memberId);
-        return studentQueryRepository.findStudents(memberId, grades, classNumbers, recordTypes, lastStudent,
+        return studentQueryRepository.getStudents(memberId, grades, classNumbers, recordTypes, lastStudent,
                 STUDENT_PAGE_SIZE);
     }
 
@@ -107,6 +110,13 @@ public class StudentService {
     @Transactional(readOnly = true)
     public List<Integer> getStudentClassNumbers(final long memberId) {
         return studentRepository.findAllClasses(memberId);
+    }
+
+    @Transactional(readOnly = true)
+    public List<StudentNameItem> getStudentNamesByFilters(final long memberId, final StudentRecordType recordType,
+                                                          final Integer grade, final Integer classNumber,
+                                                          final String studentName) {
+        return studentQueryRepository.getStudentNames(memberId, recordType, grade, classNumber, studentName);
     }
 
     private void bulkInsertStudents(final List<ValidStudentRow> studentRows, final Member member) {
@@ -142,10 +152,19 @@ public class StudentService {
                 .collect(Collectors.toSet());
     }
 
-    private void validateStudent(final Student student, final Member member) {
-        Set<StudentKey> existingKeys = getExistingStudents(member);
-        if (existingKeys.contains(
-                StudentKey.from(student.getGrade(), student.getClassNumber(), student.getStudentNumber()))) {
+    private void validateStudentCreate(final long memberId, final Student student) {
+        boolean exists = studentRepository.existsByMemberIdAndGradeAndClassNumberAndStudentNumber(
+                memberId, student.getGrade(), student.getClassNumber(), student.getStudentNumber());
+        if (exists) {
+            throw new StudentException(StudentErrorCode.STUDENT_ALREADY_EXIST_ERROR);
+        }
+    }
+
+    private void validateStudentUpdate(final Student student, final long memberId, final int newGrade,
+                                       final int newClassNumber, final int newStudentNumber) {
+        boolean exists = studentRepository.existsByMemberIdAndGradeAndClassNumberAndStudentNumberAndIdNot(
+                memberId, newGrade, newClassNumber, newStudentNumber, student.getId());
+        if (exists) {
             throw new StudentException(StudentErrorCode.STUDENT_ALREADY_EXIST_ERROR);
         }
     }
