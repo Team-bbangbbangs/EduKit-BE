@@ -40,7 +40,8 @@ public class SqsServiceImpl implements SqsService {
 
             validateMessageSize(messageSizeBytes);
 
-            sendMessageInternal(messageBody);
+            String idempotencyKey = extractIdempotencyKey(message);
+            sendMessageInternal(messageBody, idempotencyKey);
 
         } catch (JsonProcessingException e) {
             log.error("SQS 메시지 직렬화 실패", e);
@@ -62,7 +63,7 @@ public class SqsServiceImpl implements SqsService {
         }
     }
 
-    private void sendMessageInternal(final String messageBody) {
+    private void sendMessageInternal(final String messageBody, final String idempotencyKey) {
         Map<String, MessageAttributeValue> messageAttributes = new HashMap<>();
 
         String traceId = MDC.get("traceId");
@@ -81,6 +82,13 @@ public class SqsServiceImpl implements SqsService {
                     .build());
         }
 
+        if (idempotencyKey != null) {
+            messageAttributes.put("idempotencyKey", MessageAttributeValue.builder()
+                    .dataType("String")
+                    .stringValue(idempotencyKey)
+                    .build());
+        }
+
         final SendMessageRequest request = SendMessageRequest.builder()
                 .queueUrl(sqsProperties.queueUrl())
                 .messageBody(messageBody)
@@ -88,6 +96,24 @@ public class SqsServiceImpl implements SqsService {
                 .build();
 
         final SendMessageResponse response = sqsClient.sendMessage(request);
-        log.info("SQS 메시지 전송 완료 - MessageId: {}, TraceId: {}", response.messageId(), traceId);
+        log.info("SQS 메시지 전송 완료 - MessageId: {}, TraceId: {}, IdempotencyKey: {}", 
+                response.messageId(), traceId, idempotencyKey);
+    }
+
+    private String extractIdempotencyKey(final Object message) {
+        try {
+            if (message.getClass().getSimpleName().equals("DraftGenerationEvent")) {
+                java.lang.reflect.Method getTaskId = message.getClass().getMethod("taskId");
+                java.lang.reflect.Method getVersion = message.getClass().getMethod("version");
+                long taskId = (Long) getTaskId.invoke(message);
+                int version = (Integer) getVersion.invoke(message);
+                String idempotencyKey = taskId + "-" + version;
+                log.debug("멱등성 키 생성: {}", idempotencyKey);
+                return idempotencyKey;
+            }
+        } catch (Exception e) {
+            log.debug("멱등성 키 추출 실패, 기본 처리: {}", e.getMessage());
+        }
+        return null;
     }
 }
