@@ -113,7 +113,7 @@ public class SqsServiceImpl implements SqsService {
             }
         } catch (Exception e) {
             log.debug("멱등성 키 추출 실패, 기본 처리: {}", e.getMessage());
+            throw new SQSException(SQSErrorCode.MESSAGE_SERIALIZATION_FAILED, e);
         }
-        return null;
     }
 }
