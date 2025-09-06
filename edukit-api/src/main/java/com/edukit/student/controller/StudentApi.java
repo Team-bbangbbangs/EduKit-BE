@@ -402,6 +402,8 @@ public interface StudentApi {
                                               "code": "SUCCESS",
                                               "message": "요청이 성공했습니다.",
                                               "data": {
+                                                "grades": [1, 2, 3],
+                                                "classNumbers": [1, 2, 3],
                                                 "studentNames": [
                                                   {
                                                     "recordId": 1,
