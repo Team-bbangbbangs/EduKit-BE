@@ -5,11 +5,17 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.List;
 
 public record StudentNamesGetResponse(
+        @Schema(description = "학년 목록")
+        List<Integer> grades,
+        @Schema(description = "반 목록")
+        List<Integer> classNumbers,
         @Schema(description = "학생 목록")
         List<StudentNamesGetResponseItem> studentNames
 ) {
-    public static StudentNamesGetResponse of(final List<StudentNameItem> studentNameItems) {
-        return new StudentNamesGetResponse(studentNameItems.stream().map(StudentNamesGetResponseItem::of).toList());
+    public static StudentNamesGetResponse of(final List<Integer> grades, final List<Integer> classNumbers,
+                                             final List<StudentNameItem> studentNameItems) {
+        return new StudentNamesGetResponse(grades, classNumbers,
+                studentNameItems.stream().map(StudentNamesGetResponseItem::of).toList());
     }
 
     public record StudentNamesGetResponseItem(
