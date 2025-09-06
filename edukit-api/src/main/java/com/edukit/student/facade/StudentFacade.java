@@ -97,7 +97,9 @@ public class StudentFacade {
                                                    final String studentName) {
         List<StudentNameItem> studentNameItems = studentService.getStudentNamesByFilters(memberId, recordType,
                 grade, classNumber, studentName);
-        return StudentNamesGetResponse.of(studentNameItems);
+        List<Integer> studentGrades = studentRecordService.getStudentGrades(memberId, recordType);
+        List<Integer> studentClassNumbers = studentRecordService.getStudentClassNumbers(memberId, recordType);
+        return StudentNamesGetResponse.of(studentGrades, studentClassNumbers, studentNameItems);
     }
 
     private void validateFileSize(final MultipartFile file) {
