@@ -2,6 +2,8 @@ package com.edukit.studentrecord.controller;
 
 import com.edukit.common.EdukitResponse;
 import com.edukit.common.annotation.MemberId;
+import com.edukit.core.studentrecord.exception.StudentRecordErrorCode;
+import com.edukit.core.studentrecord.exception.StudentRecordException;
 import com.edukit.studentrecord.controller.request.StudentRecordPromptRequest;
 import com.edukit.studentrecord.facade.StudentRecordAIFacade;
 import com.edukit.studentrecord.facade.response.StudentRecordTaskResponse;
@@ -43,7 +45,7 @@ public class StudentRecordAIController implements StudentRecordAIApi {
             studentRecordAIFacade.closeChannel(taskId);
         });
         emitter.onTimeout(() -> {
-            emitter.completeWithError(new RuntimeException("SSE Timeout"));
+            emitter.completeWithError(new StudentRecordException(StudentRecordErrorCode.AI_GENERATE_TIMEOUT));
             studentRecordAIFacade.closeChannel(taskId);
         });
         emitter.onError((throwable) -> {
