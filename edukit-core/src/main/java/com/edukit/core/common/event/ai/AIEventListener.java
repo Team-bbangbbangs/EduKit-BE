@@ -70,7 +70,9 @@ public class AIEventListener {
                                         traceId
                                 );
                                 log.info("Task ID: {} VERSION {} 생성 완료! SQS 전송 시작", taskId, version.versionNumber());
-                                messageQueueService.sendMessage(event);
+
+                                String idempotencyKey = taskId + "-" + version.versionNumber();
+                                messageQueueService.sendMessage(event, idempotencyKey);
                             } catch (ExternalException e) {
                                 log.error("SQS 메시지 전송 실패 - taskId: {}, error: {}", taskId, e.getMessage());
                             } finally {

@@ -6,7 +6,6 @@ import com.edukit.external.aws.sqs.exception.SQSErrorCode;
 import com.edukit.external.aws.sqs.exception.SQSException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.lang.reflect.Method;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
@@ -32,7 +31,7 @@ public class SqsServiceImpl implements SqsService {
     private static final int SQS_MAX_MESSAGE_SIZE = 256 * 1024;
 
     @Override
-    public void sendMessage(final Object message) {
+    public void sendMessage(final Object message, final String idempotencyKey) {
         try {
             final String messageBody = objectMapper.writeValueAsString(message);
             final int messageSizeBytes = messageBody.getBytes(StandardCharsets.UTF_8).length;
@@ -41,9 +40,7 @@ public class SqsServiceImpl implements SqsService {
 
             validateMessageSize(messageSizeBytes);
 
-            String idempotencyKey = extractIdempotencyKey(message);
             sendMessageInternal(messageBody, idempotencyKey);
-
         } catch (JsonProcessingException e) {
             log.error("SQS 메시지 직렬화 실패", e);
             throw new SQSException(SQSErrorCode.MESSAGE_SERIALIZATION_FAILED, e);
@@ -97,24 +94,7 @@ public class SqsServiceImpl implements SqsService {
                 .build();
 
         final SendMessageResponse response = sqsClient.sendMessage(request);
-        log.info("SQS 메시지 전송 완료 - MessageId: {}, TraceId: {}, IdempotencyKey: {}", 
+        log.info("SQS 메시지 전송 완료 - MessageId: {}, TraceId: {}, IdempotencyKey: {}",
                 response.messageId(), traceId, idempotencyKey);
-    }
-
-    private String extractIdempotencyKey(final Object message) {
-        try {
-            if (message.getClass().getSimpleName().equals("DraftGenerationEvent")) {
-                Method getTaskId = message.getClass().getMethod("taskId");
-                Method getVersion = message.getClass().getMethod("version");
-                String taskId = (String) getTaskId.invoke(message);
-                int version = (Integer) getVersion.invoke(message);
-                String idempotencyKey = taskId + "-" + version;
-                log.debug("멱등성 키 생성: {}", idempotencyKey);
-                return idempotencyKey;
-            }
-        } catch (Exception e) {
-            log.debug("멱등성 키 추출 실패, 기본 처리: {}", e.getMessage());
-        }
-        return null;
     }
 }

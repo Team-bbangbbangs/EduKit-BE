@@ -2,5 +2,5 @@ package com.edukit.core.common.service;
 
 public interface SqsService {
     
-    void sendMessage(Object message);
+    void sendMessage(Object message, String idempotencyKey);
 }
