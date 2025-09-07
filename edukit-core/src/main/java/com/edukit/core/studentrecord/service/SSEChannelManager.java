@@ -76,7 +76,7 @@ public class SSEChannelManager {
                 emitter.send(SseEmitter.event()
                         .name("ai-progress")
                         .data(message));
-                log.info("Sent progress message to SSE channel for taskId: {}, status: {}", taskId, message.status());
+                log.info("Sent progress message to SSE channel for taskId: {}, status: {}", taskId, message.message());
             } catch (IOException e) {
                 log.error("Failed to send progress message to SSE channel for taskId: {}", taskId, e);
                 removeChannel(taskId);
