@@ -6,6 +6,7 @@ import com.edukit.external.aws.sqs.exception.SQSErrorCode;
 import com.edukit.external.aws.sqs.exception.SQSException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.lang.reflect.Method;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
@@ -103,9 +104,9 @@ public class SqsServiceImpl implements SqsService {
     private String extractIdempotencyKey(final Object message) {
         try {
             if (message.getClass().getSimpleName().equals("DraftGenerationEvent")) {
-                java.lang.reflect.Method getTaskId = message.getClass().getMethod("taskId");
-                java.lang.reflect.Method getVersion = message.getClass().getMethod("version");
-                long taskId = (Long) getTaskId.invoke(message);
+                Method getTaskId = message.getClass().getMethod("taskId");
+                Method getVersion = message.getClass().getMethod("version");
+                String taskId = (String) getTaskId.invoke(message);
                 int version = (Integer) getVersion.invoke(message);
                 String idempotencyKey = taskId + "-" + version;
                 log.debug("멱등성 키 생성: {}", idempotencyKey);
