@@ -139,7 +139,7 @@ public interface StudentRecordAIApi {
     @Operation(
             summary = "AI 생활기록부 생성 결과 스트리밍",
             description = "AI 생활기록부 생성 작업의 결과를 실시간으로 스트리밍합니다. " +
-                         "응답이 3번 전송되면 자동으로 작업이 완료되고 연결이 종료됩니다."
+                         "진행 상태 메시지와 생성된 결과를 포함하며, 응답이 3번 전송되면 자동으로 작업이 완료되고 연결이 종료됩니다."
     )
     @ApiResponses({
             @ApiResponse(
@@ -151,14 +151,20 @@ public interface StudentRecordAIApi {
                                     type = "string",
                                     description = "Server-Sent Events 스트림",
                                     example = """
-                                            event: ai-response
-                                            data: {"taskId":123,"content":"생성된 생활기록부 내용 1","isComplete":false}
+                                            event: ai-message
+                                            data: {"taskId":"123","type":"PROGRESS","data":{"message":"3가지 버전 생성 중"}}
                                             
-                                            event: ai-response
-                                            data: {"taskId":123,"content":"생성된 생활기록부 내용 2","isComplete":false}
+                                            event: ai-message
+                                            data: {"taskId":"123","type":"RESPONSE","data":{"finalContent":"생성된 생활기록부 내용 1","version":1}}
                                             
-                                            event: ai-response
-                                            data: {"taskId":123,"content":"생성된 생활기록부 내용 3","isComplete":true}
+                                            event: ai-message
+                                            data: {"taskId":"123","type":"RESPONSE","data":{"finalContent":"생성된 생활기록부 내용 2","version":2}}
+                                            
+                                            event: ai-message
+                                            data: {"taskId":"123","type":"RESPONSE","data":{"finalContent":"생성된 생활기록부 내용 3","version":3}}
+                                            
+                                            event: ai-message
+                                            data: {"taskId":"123","type":"PROGRESS","data":{"message":"3가지 버전 생성 완료"}}
                                             """
                             )
                     )
