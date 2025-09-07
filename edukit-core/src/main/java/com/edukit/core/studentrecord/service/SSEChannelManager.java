@@ -1,12 +1,13 @@
 package com.edukit.core.studentrecord.service;
 
 import com.edukit.common.infra.ServerInstanceManager;
-import com.edukit.core.common.event.ai.dto.AIResponseMessage;
 import com.edukit.core.common.event.ai.dto.AIProgressMessage;
+import com.edukit.core.common.event.ai.dto.AIResponseMessage;
 import com.edukit.core.common.event.ai.dto.SSEMessage;
 import com.edukit.core.common.service.RedisStoreService;
 import com.edukit.core.studentrecord.exception.StudentRecordErrorCode;
 import com.edukit.core.studentrecord.exception.StudentRecordException;
+import com.edukit.core.studentrecord.service.enums.AITaskStatus;
 import java.io.IOException;
 import java.time.Duration;
 import java.util.concurrent.ConcurrentHashMap;
@@ -40,16 +41,18 @@ public class SSEChannelManager {
         redisStoreService.store(sseChannelKey(taskId), serverId, Duration.ofHours(1));
         activeChannels.put(taskId, emitter);
         log.info("Registered SSE channel for taskId: {} on server: {}", taskId, serverId);
-        
+
         // SSE 채널 등록 시 현재 진행 상태가 있다면 전송
         String currentStatus = redisStoreService.get(taskStatusKey(taskId));
         if (currentStatus != null) {
             try {
-                SSEMessage sseMessage = SSEMessage.progress(taskId, currentStatus);
+                String message = AITaskStatus.getMessageByStatus(currentStatus);
+                SSEMessage sseMessage = SSEMessage.progress(taskId, message);
                 emitter.send(SseEmitter.event()
                         .name(SSE_EVENT_NAME)
                         .data(sseMessage));
-                log.info("Sent stored progress message to SSE channel for taskId: {}, message: {}", taskId, currentStatus);
+                log.info("Sent stored progress message to SSE channel for taskId: {}, message: {}", taskId,
+                        currentStatus);
             } catch (IOException e) {
                 log.error("Failed to send stored progress message to SSE channel for taskId: {}", taskId, e);
                 removeChannel(taskId);
@@ -69,7 +72,8 @@ public class SSEChannelManager {
         SseEmitter emitter = activeChannels.get(taskId);
         if (emitter != null) {
             try {
-                SSEMessage sseMessage = SSEMessage.response(message.taskId(), message.reviewedContent(), message.version());
+                SSEMessage sseMessage = SSEMessage.response(message.taskId(), message.reviewedContent(),
+                        message.version());
                 emitter.send(SseEmitter.event()
                         .name(SSE_EVENT_NAME)
                         .data(sseMessage));
@@ -88,19 +92,22 @@ public class SSEChannelManager {
         }
     }
 
-    public void sendProgressMessage(final String taskId, final AIProgressMessage message) {
+    public void sendProgressMessage(final String taskId, final AIProgressMessage aiProgressMessage) {
+        String message = aiProgressMessage.status().getMessage();
+        String status = aiProgressMessage.status().getStatus();
+
         // Redis에 진행 상태 저장 (SSE 채널이 없어도 저장)
-        redisStoreService.store(taskStatusKey(taskId), message.message(), TASK_STATUS_TTL);
-        log.info("Stored progress message in Redis for taskId: {}, message: {}", taskId, message.message());
-        
+        redisStoreService.store(taskStatusKey(taskId), status, TASK_STATUS_TTL);
+        log.info("Stored progress message in Redis for taskId: {}, message: {}", taskId, message);
+
         SseEmitter emitter = activeChannels.get(taskId);
         if (emitter != null) {
             try {
-                SSEMessage sseMessage = SSEMessage.progress(message.taskId(), message.message());
+                SSEMessage sseMessage = SSEMessage.progress(aiProgressMessage.taskId(), message);
                 emitter.send(SseEmitter.event()
                         .name(SSE_EVENT_NAME)
                         .data(sseMessage));
-                log.info("Sent progress message to SSE channel for taskId: {}, message: {}", taskId, message.message());
+                log.info("Sent progress message to SSE channel for taskId: {}, message: {}", taskId, message);
             } catch (IOException e) {
                 log.error("Failed to send progress message to SSE channel for taskId: {}", taskId, e);
                 removeChannel(taskId);

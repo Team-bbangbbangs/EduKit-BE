@@ -1,22 +1,20 @@
 package com.edukit.core.common.event.ai.dto;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.edukit.core.studentrecord.service.enums.AITaskStatus;
 
 public record AIProgressMessage(
-        @JsonProperty("task_id")
         String taskId,
-        @JsonProperty("message")
-        String message
+        AITaskStatus status
 ) {
-    public static AIProgressMessage of(final String taskId, final String message) {
-        return new AIProgressMessage(taskId, message);
+    public static AIProgressMessage of(final String taskId, final AITaskStatus status) {
+        return new AIProgressMessage(taskId, status);
     }
 
     public static AIProgressMessage generationStarted(final String taskId) {
-        return new AIProgressMessage(taskId, "3가지 버전 생성 중");
+        return new AIProgressMessage(taskId, AITaskStatus.PHASE1_STARTED);
     }
 
     public static AIProgressMessage generationCompleted(final String taskId) {
-        return new AIProgressMessage(taskId, "3가지 버전 생성 완료");
+        return new AIProgressMessage(taskId, AITaskStatus.PHASE1_COMPLETED);
     }
 }
