@@ -3,11 +3,8 @@ package com.edukit.core.studentrecord.db.entity;
 import static jakarta.persistence.FetchType.LAZY;
 
 import com.edukit.core.member.db.entity.Member;
-import com.edukit.core.studentrecord.db.enums.AITaskStatus;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -38,20 +35,14 @@ public class StudentRecordAITask {
     @Column(nullable = false)
     private String prompt;
 
-    @Column(nullable = false)
-    @Enumerated(EnumType.STRING)
-    private AITaskStatus status;
-
     private LocalDateTime startedAt;
 
     private LocalDateTime completedAt;
 
     @Builder(access = AccessLevel.PRIVATE)
-    private StudentRecordAITask(final Member member, final String prompt, final AITaskStatus status,
-                                final LocalDateTime startedAt) {
+    private StudentRecordAITask(final Member member, final String prompt, final LocalDateTime startedAt) {
         this.member = member;
         this.prompt = prompt;
-        this.status = status;
         this.startedAt = startedAt;
     }
 
@@ -59,17 +50,14 @@ public class StudentRecordAITask {
         return StudentRecordAITask.builder()
                 .member(member)
                 .prompt(prompt)
-                .status(AITaskStatus.PENDING)
                 .build();
     }
 
     public void start() {
-        this.status = AITaskStatus.IN_PROGRESS;
         this.startedAt = LocalDateTime.now();
     }
 
     public void complete() {
-        this.status = AITaskStatus.COMPLETED;
         this.completedAt = LocalDateTime.now();
     }
 }
