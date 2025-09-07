@@ -3,6 +3,7 @@ package com.edukit.core.studentrecord.service;
 import com.edukit.common.infra.ServerInstanceManager;
 import com.edukit.core.common.event.ai.dto.AIResponseMessage;
 import com.edukit.core.common.event.ai.dto.AIProgressMessage;
+import com.edukit.core.common.event.ai.dto.SSEMessage;
 import com.edukit.core.common.service.RedisStoreService;
 import com.edukit.core.studentrecord.exception.StudentRecordErrorCode;
 import com.edukit.core.studentrecord.exception.StudentRecordException;
@@ -28,7 +29,7 @@ public class SSEChannelManager {
 
     private static final String SSE_CHANNEL_PREFIX = "sse-channel:";
     private static final String RESPONSE_COUNT_PREFIX = "response-count:";
-    private static final String REDIS_CHANNEL = "ai-response";
+    private static final String SSE_EVENT_NAME = "ai-message";
     private static final int MAX_RESPONSE_COUNT = 3;
     private static final Duration RESPONSE_COUNT_TTL = Duration.ofMinutes(5);
 
@@ -51,10 +52,11 @@ public class SSEChannelManager {
         SseEmitter emitter = activeChannels.get(taskId);
         if (emitter != null) {
             try {
+                SSEMessage sseMessage = SSEMessage.response(message.taskId(), message.reviewedContent(), message.version());
                 emitter.send(SseEmitter.event()
-                        .name(REDIS_CHANNEL)
-                        .data(message));
-                log.info("Sent message to SSE channel for taskId: {}", taskId);
+                        .name(SSE_EVENT_NAME)
+                        .data(sseMessage));
+                log.info("Sent response message to SSE channel for taskId: {}", taskId);
 
                 Long responseCount = redisStoreService.increment(responseCountKey(taskId), RESPONSE_COUNT_TTL);
                 log.info("Response count for taskId {}: {}", taskId, responseCount);
@@ -73,10 +75,11 @@ public class SSEChannelManager {
         SseEmitter emitter = activeChannels.get(taskId);
         if (emitter != null) {
             try {
+                SSEMessage sseMessage = SSEMessage.progress(message.taskId(), message.message());
                 emitter.send(SseEmitter.event()
-                        .name("ai-progress")
-                        .data(message));
-                log.info("Sent progress message to SSE channel for taskId: {}, status: {}", taskId, message.message());
+                        .name(SSE_EVENT_NAME)
+                        .data(sseMessage));
+                log.info("Sent progress message to SSE channel for taskId: {}, message: {}", taskId, message.message());
             } catch (IOException e) {
                 log.error("Failed to send progress message to SSE channel for taskId: {}", taskId, e);
                 removeChannel(taskId);
