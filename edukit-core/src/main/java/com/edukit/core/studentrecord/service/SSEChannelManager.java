@@ -2,6 +2,7 @@ package com.edukit.core.studentrecord.service;
 
 import com.edukit.common.infra.ServerInstanceManager;
 import com.edukit.core.common.event.ai.dto.AIResponseMessage;
+import com.edukit.core.common.event.ai.dto.AIProgressMessage;
 import com.edukit.core.common.service.RedisStoreService;
 import com.edukit.core.studentrecord.exception.StudentRecordErrorCode;
 import com.edukit.core.studentrecord.exception.StudentRecordException;
@@ -63,6 +64,21 @@ public class SSEChannelManager {
                 }
             } catch (IOException e) {
                 log.error("Failed to send message to SSE channel for taskId: {}", taskId, e);
+                removeChannel(taskId);
+            }
+        }
+    }
+
+    public void sendProgressMessage(final String taskId, final AIProgressMessage message) {
+        SseEmitter emitter = activeChannels.get(taskId);
+        if (emitter != null) {
+            try {
+                emitter.send(SseEmitter.event()
+                        .name("ai-progress")
+                        .data(message));
+                log.info("Sent progress message to SSE channel for taskId: {}, status: {}", taskId, message.status());
+            } catch (IOException e) {
+                log.error("Failed to send progress message to SSE channel for taskId: {}", taskId, e);
                 removeChannel(taskId);
             }
         }

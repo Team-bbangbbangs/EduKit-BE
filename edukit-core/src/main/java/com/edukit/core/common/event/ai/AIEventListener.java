@@ -7,6 +7,8 @@ import com.edukit.core.common.service.SqsService;
 import com.edukit.core.common.service.response.OpenAIVersionResponse;
 import com.edukit.core.studentrecord.db.entity.StudentRecordAITask;
 import com.edukit.core.studentrecord.service.AITaskService;
+import com.edukit.core.studentrecord.service.SSEChannelManager;
+import com.edukit.core.common.event.ai.dto.AIProgressMessage;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -28,6 +30,7 @@ public class AIEventListener {
     private final AIService aiService;
     private final AITaskService aiTaskService;
     private final SqsService messageQueueService;
+    private final SSEChannelManager sseChannelManager;
 
     @Async("aiTaskExecutor")
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
@@ -37,6 +40,9 @@ public class AIEventListener {
 
         log.info("AI 생기부 생성 시작 taskId: {}", taskId);
         aiTaskService.startTask(task);
+
+        // SSE로 3가지 버전 생성 시작 알림
+        sseChannelManager.sendProgressMessage(String.valueOf(taskId), AIProgressMessage.generationStarted(taskId));
 
         Map<String, String> mdcContextMap = MDC.getCopyOfContextMap();
         Flux<OpenAIVersionResponse> response = aiService.getVersionedStreamingResponse(generateEvent.requestPrompt());
@@ -87,6 +93,9 @@ public class AIEventListener {
                                     MDC.setContextMap(mdcContextMap);
                                 }
                                 log.info("AI 응답 생성 완료 - taskId: {}", taskId);
+                                
+                                // SSE로 3가지 버전 생성 완료 알림
+                                sseChannelManager.sendProgressMessage(String.valueOf(taskId), AIProgressMessage.generationCompleted(taskId));
                             } finally {
                                 MDC.clear();
                             }
