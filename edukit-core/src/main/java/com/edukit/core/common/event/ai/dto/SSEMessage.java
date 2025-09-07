@@ -1,15 +1,15 @@
 package com.edukit.core.common.event.ai.dto;
 
 public record SSEMessage(
-        Long taskId,
+        String taskId,
         String type,
         Object data
 ) {
-    public static SSEMessage progress(final Long taskId, final String message) {
+    public static SSEMessage progress(final String taskId, final String message) {
         return new SSEMessage(taskId, "PROGRESS", new ProgressData(message));
     }
 
-    public static SSEMessage response(final Long taskId, final String finalContent, final Integer version) {
+    public static SSEMessage response(final String taskId, final String finalContent, final Integer version) {
         return new SSEMessage(taskId, "RESPONSE", new ResponseData(finalContent, version));
     }
 

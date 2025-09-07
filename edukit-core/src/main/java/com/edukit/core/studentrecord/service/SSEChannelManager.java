@@ -29,15 +29,32 @@ public class SSEChannelManager {
 
     private static final String SSE_CHANNEL_PREFIX = "sse-channel:";
     private static final String RESPONSE_COUNT_PREFIX = "response-count:";
+    private static final String TASK_STATUS_PREFIX = "task-status:";
     private static final String SSE_EVENT_NAME = "ai-message";
     private static final int MAX_RESPONSE_COUNT = 3;
     private static final Duration RESPONSE_COUNT_TTL = Duration.ofMinutes(5);
+    private static final Duration TASK_STATUS_TTL = Duration.ofHours(1);
 
     public void registerTaskChannel(final String taskId, final SseEmitter emitter) {
         String serverId = serverInstanceManager.getServerId();
         redisStoreService.store(sseChannelKey(taskId), serverId, Duration.ofHours(1));
         activeChannels.put(taskId, emitter);
         log.info("Registered SSE channel for taskId: {} on server: {}", taskId, serverId);
+        
+        // SSE 채널 등록 시 현재 진행 상태가 있다면 전송
+        String currentStatus = redisStoreService.get(taskStatusKey(taskId));
+        if (currentStatus != null) {
+            try {
+                SSEMessage sseMessage = SSEMessage.progress(taskId, currentStatus);
+                emitter.send(SseEmitter.event()
+                        .name(SSE_EVENT_NAME)
+                        .data(sseMessage));
+                log.info("Sent stored progress message to SSE channel for taskId: {}, message: {}", taskId, currentStatus);
+            } catch (IOException e) {
+                log.error("Failed to send stored progress message to SSE channel for taskId: {}", taskId, e);
+                removeChannel(taskId);
+            }
+        }
     }
 
     public String get(final String taskId) {
@@ -72,6 +89,10 @@ public class SSEChannelManager {
     }
 
     public void sendProgressMessage(final String taskId, final AIProgressMessage message) {
+        // Redis에 진행 상태 저장 (SSE 채널이 없어도 저장)
+        redisStoreService.store(taskStatusKey(taskId), message.message(), TASK_STATUS_TTL);
+        log.info("Stored progress message in Redis for taskId: {}, message: {}", taskId, message.message());
+        
         SseEmitter emitter = activeChannels.get(taskId);
         if (emitter != null) {
             try {
@@ -84,6 +105,8 @@ public class SSEChannelManager {
                 log.error("Failed to send progress message to SSE channel for taskId: {}", taskId, e);
                 removeChannel(taskId);
             }
+        } else {
+            log.info("No active SSE channel for taskId: {}, message stored in Redis", taskId);
         }
     }
 
@@ -96,6 +119,7 @@ public class SSEChannelManager {
                 log.warn("SSE complete failed for taskId: {}", taskId, e);
             } finally {
                 redisStoreService.delete(sseChannelKey(taskId));
+                redisStoreService.delete(taskStatusKey(taskId));
                 log.info("Removed SSE channel for taskId: {}", taskId);
             }
         }
@@ -120,5 +144,9 @@ public class SSEChannelManager {
 
     private String responseCountKey(final String taskId) {
         return RESPONSE_COUNT_PREFIX + taskId;
+    }
+
+    private String taskStatusKey(final String taskId) {
+        return TASK_STATUS_PREFIX + taskId;
     }
 }

@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 public record AIResponseMessage(
         @JsonProperty("task_id")
-        Long taskId,
+        String taskId,
         @JsonProperty("final_content")
         String reviewedContent,
         @JsonProperty("version")

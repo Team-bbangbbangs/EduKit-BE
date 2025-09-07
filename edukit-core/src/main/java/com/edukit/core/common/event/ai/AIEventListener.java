@@ -36,13 +36,13 @@ public class AIEventListener {
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void handleAIResponseGenerateEvent(final AIResponseGenerateEvent generateEvent) {
         StudentRecordAITask task = generateEvent.task();
-        long taskId = task.getId();
+        String taskId = String.valueOf(task.getId());
 
         log.info("AI 생기부 생성 시작 taskId: {}", taskId);
         aiTaskService.startTask(task);
 
         // SSE로 3가지 버전 생성 시작 알림
-        sseChannelManager.sendProgressMessage(String.valueOf(taskId), AIProgressMessage.generationStarted(taskId));
+        sseChannelManager.sendProgressMessage(taskId, AIProgressMessage.generationStarted(taskId));
 
         Map<String, String> mdcContextMap = MDC.getCopyOfContextMap();
         Flux<OpenAIVersionResponse> response = aiService.getVersionedStreamingResponse(generateEvent.requestPrompt());
@@ -93,9 +93,9 @@ public class AIEventListener {
                                     MDC.setContextMap(mdcContextMap);
                                 }
                                 log.info("AI 응답 생성 완료 - taskId: {}", taskId);
-                                
+
                                 // SSE로 3가지 버전 생성 완료 알림
-                                sseChannelManager.sendProgressMessage(String.valueOf(taskId), AIProgressMessage.generationCompleted(taskId));
+                                sseChannelManager.sendProgressMessage(taskId, AIProgressMessage.generationCompleted(taskId));
                             } finally {
                                 MDC.clear();
                             }

@@ -1,7 +1,7 @@
 package com.edukit.core.common.event.ai.dto;
 
 public record DraftGenerationEvent(
-        long taskId,
+        String taskId,
         String requestPrompt,
         int byteCount,
         int version,
@@ -9,7 +9,7 @@ public record DraftGenerationEvent(
         String traceId
 ) {
 
-    public static DraftGenerationEvent of(final long taskId, final String requestPrompt, final int byteCount,
+    public static DraftGenerationEvent of(final String taskId, final String requestPrompt, final int byteCount,
                                           final int version, final String draftContent, final String traceId) {
         return new DraftGenerationEvent(taskId, requestPrompt, byteCount, version, draftContent, traceId);
     }
