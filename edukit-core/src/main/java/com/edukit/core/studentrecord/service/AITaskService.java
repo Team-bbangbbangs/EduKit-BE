@@ -23,11 +23,6 @@ public class AITaskService {
     }
 
     @Transactional
-    public void startTask(final StudentRecordAITask task) {
-        task.start();
-    }
-
-    @Transactional
     public void completeAITask(final Long taskId) {
         StudentRecordAITask aiTask = aiTaskRepository.findById(taskId)
                 .orElseThrow(() -> new StudentRecordException(StudentRecordErrorCode.AI_TASK_NOT_FOUND));

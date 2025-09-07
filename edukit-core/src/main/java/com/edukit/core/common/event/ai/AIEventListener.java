@@ -36,7 +36,6 @@ public class AIEventListener {
         long taskId = task.getId();
 
         log.info("AI 생기부 생성 시작 taskId: {}", taskId);
-        aiTaskService.startTask(task);
 
         Map<String, String> mdcContextMap = MDC.getCopyOfContextMap();
         Flux<OpenAIVersionResponse> response = aiService.getVersionedStreamingResponse(generateEvent.requestPrompt());
