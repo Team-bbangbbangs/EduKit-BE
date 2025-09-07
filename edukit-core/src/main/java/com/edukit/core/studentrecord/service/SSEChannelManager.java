@@ -51,8 +51,7 @@ public class SSEChannelManager {
                 emitter.send(SseEmitter.event()
                         .name(SSE_EVENT_NAME)
                         .data(sseMessage));
-                log.info("Sent stored progress message to SSE channel for taskId: {}, message: {}", taskId,
-                        currentStatus);
+                log.info("Sent stored progress message to SSE channel for taskId: {}, message: {}", taskId, message);
             } catch (IOException e) {
                 log.error("Failed to send stored progress message to SSE channel for taskId: {}", taskId, e);
                 removeChannel(taskId);

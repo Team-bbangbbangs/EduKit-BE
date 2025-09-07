@@ -1,5 +1,7 @@
 package com.edukit.core.studentrecord.service.enums;
 
+import com.edukit.core.studentrecord.exception.StudentRecordErrorCode;
+import com.edukit.core.studentrecord.exception.StudentRecordException;
 import java.util.Arrays;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -7,7 +9,6 @@ import lombok.RequiredArgsConstructor;
 @Getter
 @RequiredArgsConstructor
 public enum AITaskStatus {
-
     PHASE1_STARTED("PHASE1_STARTED", "3가지 버전 생성 중"),
     PHASE1_COMPLETED("PHASE1_COMPLETED", "3가지 버전 생성 완료");
 
@@ -19,6 +20,6 @@ public enum AITaskStatus {
                 .filter(aiTaskStatus -> aiTaskStatus.getStatus().equals(status))
                 .map(AITaskStatus::getMessage)
                 .findFirst()
-                .orElse(null);
+                .orElseThrow(() -> new StudentRecordException(StudentRecordErrorCode.INVALID_AI_TASK_STATUS));
     }
 }
