@@ -40,7 +40,7 @@ public interface StudentRecordAIApi {
                                               "code": "SUCCESS",
                                               "message": "요청이 성공했습니다.",
                                               "data": {
-                                                "taskId": 123
+                                                "taskId": "123"
                                               }
                                             }
                                             """
@@ -219,6 +219,6 @@ public interface StudentRecordAIApi {
                     description = "AI 생성 작업 ID",
                     required = true,
                     example = "123"
-            ) @PathVariable final long taskId
+            ) @PathVariable final String taskId
     );
 }
