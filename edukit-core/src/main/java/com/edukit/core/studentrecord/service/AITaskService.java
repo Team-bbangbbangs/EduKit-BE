@@ -34,10 +34,18 @@ public class AITaskService {
         aiTask.complete();
     }
 
-    public void validateUserTask(final long memberId, final long taskId) {
-        boolean exists = aiTaskRepository.existsByIdAndMemberId(taskId, memberId);
+    public void validateUserTask(final long memberId, final String taskId) {
+        boolean exists = aiTaskRepository.existsByIdAndMemberId(parseTaskId(taskId), memberId);
         if (!exists) {
             throw new StudentRecordException(StudentRecordErrorCode.AI_TASK_NOT_FOUND);
+        }
+    }
+
+    private long parseTaskId(final String taskId) {
+        try {
+            return Long.parseLong(taskId);
+        } catch (NumberFormatException e) {
+            throw new StudentRecordException(StudentRecordErrorCode.NUMBER_FORMAT_EXCEPTION);
         }
     }
 }

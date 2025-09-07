@@ -15,7 +15,9 @@ public enum StudentRecordErrorCode implements ErrorCode {
     MESSAGE_PROCESSING_FAILED("SR-50005", "Redis 메시지 처리 중 오류가 발생했습니다."),
     AI_TASK_NOT_FOUND("SR-40406", "AI 작업을 찾을 수 없습니다."),
     AI_TASK_COMPLETION_FAILED("SR-50007", "AI 작업 완료에 실패했습니다."),
-    AI_GENERATE_TIMEOUT("SR-50008", "AI 생성 요청이 시간 초과되었습니다.");
+    AI_GENERATE_TIMEOUT("SR-50008", "AI 생성 요청이 시간 초과되었습니다."),
+    INVALID_AI_TASK_STATUS("SR-40009", "유효하지 않은 AI 작업 상태입니다."),
+    NUMBER_FORMAT_EXCEPTION("SR-40010", "숫자 형식이 올바르지 않습니다."),;
 
     private final String code;
     private final String message;

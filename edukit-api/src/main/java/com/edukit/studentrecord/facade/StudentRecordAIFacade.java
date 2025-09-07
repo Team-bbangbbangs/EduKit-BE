@@ -37,18 +37,18 @@ public class StudentRecordAIFacade {
         StudentRecordAITask task = aiTaskService.createAITask(member, userPrompt);
 
         eventPublisher.publishEvent(AITaskCreateEvent.of(task, userPrompt, requestPrompt, byteCount));
-        return StudentRecordTaskResponse.of(task.getId());
+        return StudentRecordTaskResponse.of(String.valueOf(task.getId()));
     }
 
-    public SseEmitter createChannel(final long memberId, final long taskId) {
+    public SseEmitter createChannel(final long memberId, final String taskId) {
         aiTaskService.validateUserTask(memberId, taskId);
 
         SseEmitter emitter = new SseEmitter(10 * 60 * 1000L);
-        sseChannelManager.registerTaskChannel(String.valueOf(taskId), emitter);
+        sseChannelManager.registerTaskChannel(taskId, emitter);
         return emitter;
     }
 
-    public void closeChannel(final long taskId) {
-        sseChannelManager.removeChannel(String.valueOf(taskId));
+    public void closeChannel(final String taskId) {
+        sseChannelManager.removeChannel(taskId);
     }
 }
