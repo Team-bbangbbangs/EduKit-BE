@@ -10,7 +10,9 @@ import com.edukit.core.studentrecord.exception.StudentRecordException;
 import com.edukit.core.studentrecord.service.enums.AITaskStatus;
 import java.io.IOException;
 import java.time.Duration;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
@@ -71,8 +73,8 @@ public class SSEChannelManager {
         SseEmitter emitter = activeChannels.get(taskId);
         if (emitter != null) {
             try {
-                SSEMessage sseMessage = SSEMessage.response(message.taskId(), message.reviewedContent(),
-                        message.version());
+                SSEMessage sseMessage = SSEMessage.response(message.taskId(), message.reviewedContent(), message.version());
+
                 emitter.send(SseEmitter.event()
                         .name(SSE_EVENT_NAME)
                         .data(sseMessage));
@@ -82,7 +84,11 @@ public class SSEChannelManager {
                 log.info("Response count for taskId {}: {}", taskId, responseCount);
 
                 if (responseCount >= MAX_RESPONSE_COUNT) {
-                    completeTask(taskId);
+                    CompletableFuture.delayedExecutor(200, TimeUnit.MILLISECONDS)
+                            .execute(() -> {
+                                completeTask(taskId);
+                                removeChannel(taskId);
+                            });
                 }
             } catch (IOException e) {
                 log.error("Failed to send message to SSE channel for taskId: {}", taskId, e);
