@@ -9,8 +9,7 @@ import lombok.RequiredArgsConstructor;
 @Getter
 @RequiredArgsConstructor
 public enum AITaskStatus {
-    PHASE1_STARTED("PHASE1_STARTED", "3가지 버전 생성 중"),
-    PHASE1_COMPLETED("PHASE1_COMPLETED", "3가지 버전 생성 완료");
+    PHASE1_STARTED("PHASE1_STARTED", "3가지 버전 생성 중");
 
     private final String status;
     private final String message;

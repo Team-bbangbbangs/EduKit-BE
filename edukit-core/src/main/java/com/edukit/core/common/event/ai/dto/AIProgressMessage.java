@@ -13,8 +13,4 @@ public record AIProgressMessage(
     public static AIProgressMessage generationStarted(final String taskId) {
         return new AIProgressMessage(taskId, AITaskStatus.PHASE1_STARTED);
     }
-
-    public static AIProgressMessage generationCompleted(final String taskId) {
-        return new AIProgressMessage(taskId, AITaskStatus.PHASE1_COMPLETED);
-    }
 }
