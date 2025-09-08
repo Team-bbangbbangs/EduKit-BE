@@ -82,8 +82,7 @@ public class RedisStreamConsumer {
         try {
             Consumer consumer = Consumer.from(consumerGroupName, CONSUMER_NAME);
             List<MapRecord<String, Object, Object>> messages = redisStreamServiceImpl.readFromStream(consumer,
-                    STREAM_KEY,
-                    ReadOffset.lastConsumed());
+                    STREAM_KEY, ReadOffset.lastConsumed());
 
             for (MapRecord<String, Object, Object> message : messages) {
                 processMessage(message);
