@@ -95,10 +95,6 @@ public class AIEventListener {
                                     MDC.setContextMap(mdcContextMap);
                                 }
                                 log.info("AI 응답 생성 완료 - taskId: {}", taskId);
-
-                                // SSE로 3가지 버전 생성 완료 알림
-                                sseChannelManager.sendProgressMessage(taskId,
-                                        AIProgressMessage.generationCompleted(taskId));
                             } finally {
                                 MDC.clear();
                             }
