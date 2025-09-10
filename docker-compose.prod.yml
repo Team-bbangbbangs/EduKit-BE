@@ -1,0 +1,69 @@
+services:
+  app-blue:
+    container_name: app-blue
+    image: ${ECR_IMAGE_URI}:${IMAGE_TAG}
+    environment:
+      PROFILE: prod
+      TZ: Asia/Seoul
+      HOSTNAME: ${HOSTNAME_BLUE:-prod-1-blue}
+    ports:
+      - "8080:8080"
+    env_file:
+      - .env
+    restart: always
+    volumes:
+      - ./log/blue:/log
+    networks:
+      - app-network
+
+  app-green:
+    container_name: app-green
+    image: ${ECR_IMAGE_URI}:${IMAGE_TAG}
+    environment:
+      PROFILE: prod
+      TZ: Asia/Seoul
+      HOSTNAME: ${HOSTNAME_GREEN:-prod-1-green}
+    ports:
+      - "8081:8080"
+    env_file:
+      - .env
+    restart: always
+    volumes:
+      - ./log/green:/log
+    networks:
+      - app-network
+
+  nginx:
+    container_name: nginx
+    image: nginx:latest
+    ports:
+      - "80:80"
+    volumes:
+      - ~/nginx-conf/app.conf:/etc/nginx/conf.d/app.conf:ro
+      - ~/nginx-conf/service-url.inc:/etc/nginx/conf.d/service-url.inc
+    restart: always
+    networks:
+      - app-network
+
+  promtail:
+    container_name: promtail
+    image: grafana/promtail:latest
+    environment:
+      TZ: Asia/Seoul
+      MONITORING_INSTANCE: ${MONITORING_INSTANCE}
+      ENVIRONMENT: ${ENVIRONMENT:-prod}
+      SERVER_ID: ${SERVER_ID:-prod-1}
+    env_file:
+      - .env
+    volumes:
+      - ./promtail-config.yml:/etc/promtail/config.yml
+      - ./log:/log
+      - ./promtail-positions:/tmp/positions
+    command: -config.expand-env=true -config.file=/etc/promtail/config.yml
+    restart: always
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
