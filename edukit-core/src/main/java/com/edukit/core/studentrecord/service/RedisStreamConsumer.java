@@ -1,12 +1,14 @@
 package com.edukit.core.studentrecord.service;
 
 import com.edukit.common.infra.ServerInstanceManager;
-import com.edukit.core.common.event.ai.dto.AIResponse;
+import com.edukit.core.common.event.ai.dto.AIProgressMessage;
 import com.edukit.core.common.event.ai.dto.AIResponseMessage;
 import com.edukit.core.common.service.RedisStreamService;
 import com.edukit.core.studentrecord.exception.StudentRecordErrorCode;
 import com.edukit.core.studentrecord.exception.StudentRecordException;
 import com.edukit.core.studentrecord.service.enums.AITaskStatus;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
@@ -99,17 +101,17 @@ public class RedisStreamConsumer {
         try {
             Map<Object, Object> messageBody = message.getValue();
             String messageJson = (String) messageBody.get("data");
-
             log.info("Received message from Redis Stream: {}", messageJson);
 
-            AIResponse responseMessage = objectMapper.readValue(messageJson, AIResponseMessage.class);
-            String taskId = String.valueOf(responseMessage.taskId());
-            String status = responseMessage.status();
+            String taskId = parseDate("task_id");
+            String status = parseDate("status");
 
             if (sseChannelManager.hasActivateChannel(taskId)) { // 상태에 따라
                 if (AITaskStatus.isInProgress(status)) {
+                    AIProgressMessage responseMessage = objectMapper.readValue(messageJson, AIProgressMessage.class);
                     sseChannelManager.sendProgressMessage(taskId, responseMessage);
                 } else {
+                    AIResponseMessage responseMessage = objectMapper.readValue(messageJson, AIResponseMessage.class);
                     sseChannelManager.sendCompleteMessage(taskId, responseMessage);
                 }
             } else {
@@ -122,6 +124,16 @@ public class RedisStreamConsumer {
         } catch (Exception e) {
             log.error("Error processing Redis Stream message: {}", e.getMessage(), e);
             throw new StudentRecordException(StudentRecordErrorCode.MESSAGE_PROCESSING_FAILED);
+        }
+    }
+
+    private String parseDate(final String target) {
+        try {
+            JsonNode node = objectMapper.readTree(target);
+            return node.get(target).asText();
+        } catch (JsonProcessingException e) {
+            log.error("JSON 파싱 오류: {}", e.getMessage(), e);
+            throw new StudentRecordException(StudentRecordErrorCode.MESSAGE_PROCESSING_FAILED, e);
         }
     }
 

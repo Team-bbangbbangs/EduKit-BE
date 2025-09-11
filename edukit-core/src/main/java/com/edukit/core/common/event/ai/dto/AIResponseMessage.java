@@ -11,5 +11,5 @@ public record AIResponseMessage(
         Integer version,
         @JsonProperty("status")
         String status
-) implements AIResponse {
+) {
 }

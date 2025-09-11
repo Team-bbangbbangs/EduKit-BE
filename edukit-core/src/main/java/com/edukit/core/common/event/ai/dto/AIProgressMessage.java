@@ -1,11 +1,14 @@
 package com.edukit.core.common.event.ai.dto;
 
 import com.edukit.core.studentrecord.service.enums.AITaskStatus;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 public record AIProgressMessage(
+        @JsonProperty("task_id")
         String taskId,
+        @JsonProperty("status")
         String status
-) implements AIResponse {
+) {
     public static AIProgressMessage of(final String taskId, final String status) {
         return new AIProgressMessage(taskId, status);
     }
