@@ -1,6 +1,6 @@
 package com.edukit.auth.event;
 
-import com.edukit.core.common.event.mail.PasswordChangeEmailEvent;
+import com.edukit.core.event.mail.PasswordChangeEmailEvent;
 
 public record PasswordFindEvent(
         String email,

@@ -1,6 +1,6 @@
 package com.edukit.studentrecord.event;
 
-import com.edukit.core.common.event.ai.AIResponseGenerateEvent;
+import com.edukit.core.event.ai.AIResponseGenerateEvent;
 import com.edukit.core.studentrecord.db.entity.StudentRecordAITask;
 
 public record AITaskCreateEvent(

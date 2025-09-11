@@ -1,6 +1,6 @@
 package com.edukit.external.aws.mail;
 
-import com.edukit.core.common.event.mail.EmailTemplate;
+import com.edukit.core.event.mail.EmailTemplate;
 import com.edukit.core.common.service.EmailService;
 import com.edukit.external.aws.mail.exception.MailErrorCode;
 import com.edukit.external.aws.mail.exception.MailException;

@@ -1,4 +1,4 @@
-package com.edukit.core.common.event.mail;
+package com.edukit.core.event.mail;
 
 import com.edukit.core.common.service.EmailService;
 import lombok.RequiredArgsConstructor;

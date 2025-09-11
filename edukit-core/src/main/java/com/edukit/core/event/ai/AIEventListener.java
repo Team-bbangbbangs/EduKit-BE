@@ -1,8 +1,8 @@
-package com.edukit.core.common.event.ai;
+package com.edukit.core.event.ai;
 
 import com.edukit.common.exception.ExternalException;
-import com.edukit.core.common.event.ai.dto.AIProgressMessage;
-import com.edukit.core.common.event.ai.dto.DraftGenerationEvent;
+import com.edukit.core.event.ai.dto.AIProgressMessage;
+import com.edukit.core.event.ai.dto.DraftGenerationEvent;
 import com.edukit.core.common.service.AIService;
 import com.edukit.core.common.service.SqsService;
 import com.edukit.core.common.service.response.OpenAIVersionResponse;
