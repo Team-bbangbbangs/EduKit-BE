@@ -69,7 +69,7 @@ public class SSEChannelManager {
         return activeChannels.containsKey(taskId);
     }
 
-    public void sendMessage(final String taskId, final AIResponseMessage message) {
+    public void sendCompleteMessage(final String taskId, final AIResponseMessage message) {
         SseEmitter emitter = activeChannels.get(taskId);
         if (emitter != null) {
             try {
