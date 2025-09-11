@@ -3,6 +3,7 @@ package com.edukit.external.redis;
 import com.edukit.core.common.service.RedisStreamService;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.connection.stream.Consumer;
 import org.springframework.data.redis.connection.stream.MapRecord;
@@ -32,5 +33,9 @@ public class RedisStreamServiceImpl implements RedisStreamService {
 
     public void acknowledgeStreamMessage(final String groupName, final String streamKey, final RecordId messageId) {
         redisTemplate.opsForStream().acknowledge(groupName, streamKey, messageId);
+    }
+
+    public void sendMessage(final String streamKey, final Map<String, Object> messageData) {
+        redisTemplate.opsForStream().add(streamKey, messageData);
     }
 }
