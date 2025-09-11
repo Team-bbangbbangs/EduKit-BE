@@ -98,6 +98,7 @@ public class SSEChannelManager {
         AITaskStatus aiTaskStatus = AITaskStatus.fromStatus(aiProgressMessage.status());
         String message = aiTaskStatus.getMessage();
         String status = aiTaskStatus.getStatus();
+        int version = aiProgressMessage.version();
 
         // Redis에 진행 상태 저장 (SSE 채널이 없어도 저장)
         redisStoreService.store(taskStatusKey(taskId), status, TASK_STATUS_TTL);
