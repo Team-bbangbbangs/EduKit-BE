@@ -11,7 +11,8 @@ import lombok.RequiredArgsConstructor;
 public enum AITaskStatus {
     PHASE1_STARTED("PHASE1_STARTED", "3가지 버전 생성 중"),
     PHASE2_STARTED("PHASE2_STARTED", "금칙어 필터링 진행"),
-    PHASE3_STARTED("PHASE3_STARTED", "바이트 수 최적화 진행");
+    PHASE3_STARTED("PHASE3_STARTED", "바이트 수 최적화 진행"),
+    COMPLETED("COMPLETED", "생성 완료");
 
     private final String status;
     private final String message;
