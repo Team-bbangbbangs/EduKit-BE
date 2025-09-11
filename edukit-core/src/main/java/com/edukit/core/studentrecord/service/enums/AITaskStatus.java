@@ -17,6 +17,13 @@ public enum AITaskStatus {
     private final String status;
     private final String message;
 
+    public static AITaskStatus fromStatus(final String status) {
+        return Arrays.stream(values())
+                .filter(aiTaskStatus -> aiTaskStatus.getStatus().equals(status))
+                .findFirst()
+                .orElseThrow(() -> new StudentRecordException(StudentRecordErrorCode.INVALID_AI_TASK_STATUS));
+    }
+
     public static String getMessageByStatus(final String status) {
         return Arrays.stream(values())
                 .filter(aiTaskStatus -> aiTaskStatus.getStatus().equals(status))
@@ -27,9 +34,5 @@ public enum AITaskStatus {
 
     public static boolean isInProgress(final String currentStatus) {
         return !COMPLETED.getStatus().equals(currentStatus);
-    }
-
-    public static boolean isComplete(final String status) {
-        return COMPLETED.getStatus().equals(status);
     }
 }

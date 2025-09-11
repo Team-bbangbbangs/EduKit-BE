@@ -1,6 +1,7 @@
 package com.edukit.core.studentrecord.service;
 
 import com.edukit.common.infra.ServerInstanceManager;
+import com.edukit.core.common.event.ai.dto.AIResponse;
 import com.edukit.core.common.event.ai.dto.AIResponseMessage;
 import com.edukit.core.common.service.RedisStreamService;
 import com.edukit.core.studentrecord.exception.StudentRecordErrorCode;
@@ -101,13 +102,16 @@ public class RedisStreamConsumer {
 
             log.info("Received message from Redis Stream: {}", messageJson);
 
-            AIResponseMessage responseMessage = objectMapper.readValue(messageJson, AIResponseMessage.class);
+            AIResponse responseMessage = objectMapper.readValue(messageJson, AIResponseMessage.class);
             String taskId = String.valueOf(responseMessage.taskId());
             String status = responseMessage.status();
 
-            if (sseChannelManager.hasActivateChannel(taskId) && AITaskStatus.isComplete(status)) { // 상태에 따라
-                sseChannelManager.sendCompleteMessage(taskId, responseMessage);
-                log.info("Message sent to active SSE channel for taskId: {}", taskId);
+            if (sseChannelManager.hasActivateChannel(taskId)) { // 상태에 따라
+                if (AITaskStatus.isInProgress(status)) {
+                    sseChannelManager.sendProgressMessage(taskId, responseMessage);
+                } else {
+                    sseChannelManager.sendCompleteMessage(taskId, responseMessage);
+                }
             } else {
                 String targetServerId = sseChannelManager.get(taskId);
                 if (targetServerId != null && targetServerId.equals(serverInstanceManager.getServerId())) {

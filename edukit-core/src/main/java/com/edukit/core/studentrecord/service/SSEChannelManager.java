@@ -95,8 +95,9 @@ public class SSEChannelManager {
     }
 
     public void sendProgressMessage(final String taskId, final AIProgressMessage aiProgressMessage) {
-        String message = aiProgressMessage.status().getMessage();
-        String status = aiProgressMessage.status().getStatus();
+        AITaskStatus aiTaskStatus = AITaskStatus.fromStatus(aiProgressMessage.status());
+        String message = aiTaskStatus.getMessage();
+        String status = aiTaskStatus.getStatus();
 
         // Redis에 진행 상태 저장 (SSE 채널이 없어도 저장)
         redisStoreService.store(taskStatusKey(taskId), status, TASK_STATUS_TTL);
@@ -109,7 +110,6 @@ public class SSEChannelManager {
                 emitter.send(SseEmitter.event()
                         .name(SSE_EVENT_NAME)
                         .data(sseMessage));
-                log.info("Sent progress message to SSE channel for taskId: {}, message: {}", taskId, message);
             } catch (IOException e) {
                 log.error("Failed to send progress message to SSE channel for taskId: {}", taskId, e);
                 removeChannel(taskId);

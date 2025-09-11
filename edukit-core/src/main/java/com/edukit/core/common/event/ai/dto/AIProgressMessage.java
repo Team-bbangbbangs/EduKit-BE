@@ -4,13 +4,13 @@ import com.edukit.core.studentrecord.service.enums.AITaskStatus;
 
 public record AIProgressMessage(
         String taskId,
-        AITaskStatus status
-) {
-    public static AIProgressMessage of(final String taskId, final AITaskStatus status) {
+        String status
+) implements AIResponse {
+    public static AIProgressMessage of(final String taskId, final String status) {
         return new AIProgressMessage(taskId, status);
     }
 
     public static AIProgressMessage generationStarted(final String taskId) {
-        return new AIProgressMessage(taskId, AITaskStatus.PHASE1_STARTED);
+        return AIProgressMessage.of(taskId, AITaskStatus.PHASE1_STARTED.getStatus());
     }
 }
