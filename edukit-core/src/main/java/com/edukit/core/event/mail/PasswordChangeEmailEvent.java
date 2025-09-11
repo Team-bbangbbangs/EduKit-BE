@@ -1,4 +1,4 @@
-package com.edukit.core.common.event.mail;
+package com.edukit.core.event.mail;
 
 public interface PasswordChangeEmailEvent {
     String email();

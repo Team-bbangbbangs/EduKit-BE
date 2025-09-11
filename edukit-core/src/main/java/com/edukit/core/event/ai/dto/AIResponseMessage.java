@@ -1,4 +1,4 @@
-package com.edukit.core.common.event.ai.dto;
+package com.edukit.core.event.ai.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 

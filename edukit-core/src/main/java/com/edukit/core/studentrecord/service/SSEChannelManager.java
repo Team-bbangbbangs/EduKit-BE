@@ -1,9 +1,9 @@
 package com.edukit.core.studentrecord.service;
 
 import com.edukit.common.infra.ServerInstanceManager;
-import com.edukit.core.common.event.ai.dto.AIProgressMessage;
-import com.edukit.core.common.event.ai.dto.AIResponseMessage;
-import com.edukit.core.common.event.ai.dto.SSEMessage;
+import com.edukit.core.event.ai.dto.AIProgressMessage;
+import com.edukit.core.event.ai.dto.AIResponseMessage;
+import com.edukit.core.event.ai.dto.SSEMessage;
 import com.edukit.core.common.service.RedisStoreService;
 import com.edukit.core.studentrecord.exception.StudentRecordErrorCode;
 import com.edukit.core.studentrecord.exception.StudentRecordException;

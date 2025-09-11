@@ -1,4 +1,4 @@
-package com.edukit.core.common.event.mail;
+package com.edukit.core.event.mail;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;

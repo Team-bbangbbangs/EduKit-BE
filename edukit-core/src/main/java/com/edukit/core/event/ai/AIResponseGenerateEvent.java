@@ -1,4 +1,4 @@
-package com.edukit.core.common.event.ai;
+package com.edukit.core.event.ai;
 
 import com.edukit.core.studentrecord.db.entity.StudentRecordAITask;
 

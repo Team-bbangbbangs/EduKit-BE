@@ -1,6 +1,6 @@
 package com.edukit.core.common.service;
 
-import com.edukit.core.common.event.mail.EmailTemplate;
+import com.edukit.core.event.mail.EmailTemplate;
 
 public interface EmailService {
 
