@@ -24,14 +24,6 @@ public enum AITaskStatus {
                 .orElseThrow(() -> new StudentRecordException(StudentRecordErrorCode.INVALID_AI_TASK_STATUS));
     }
 
-    public static String getMessageByStatus(final String status) {
-        return Arrays.stream(values())
-                .filter(aiTaskStatus -> aiTaskStatus.getStatus().equals(status))
-                .map(AITaskStatus::getMessage)
-                .findFirst()
-                .orElseThrow(() -> new StudentRecordException(StudentRecordErrorCode.INVALID_AI_TASK_STATUS));
-    }
-
     public static boolean isInProgress(final String currentStatus) {
         return !COMPLETED.getStatus().equals(currentStatus);
     }

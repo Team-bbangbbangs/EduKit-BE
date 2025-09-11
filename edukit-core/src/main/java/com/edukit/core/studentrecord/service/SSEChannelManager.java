@@ -44,20 +44,16 @@ public class SSEChannelManager {
         activeChannels.put(taskId, emitter);
         log.info("Registered SSE channel for taskId: {} on server: {}", taskId, serverId);
 
-        // SSE 채널 등록 시 현재 진행 상태가 있다면 전송
-        String currentStatus = redisStoreService.get(taskStatusKey(taskId));
-        if (currentStatus != null && AITaskStatus.isInProgress(currentStatus)) {
-            try {
-                String message = AITaskStatus.getMessageByStatus(currentStatus);
-                SSEMessage sseMessage = SSEMessage.progress(taskId, message);
-                emitter.send(SseEmitter.event()
-                        .name(SSE_EVENT_NAME)
-                        .data(sseMessage));
-                log.info("Sent stored progress message to SSE channel for taskId: {}, message: {}", taskId, message);
-            } catch (IOException e) {
-                log.error("Failed to send stored progress message to SSE channel for taskId: {}", taskId, e);
-                removeChannel(taskId);
-            }
+        try {
+            String message = AITaskStatus.PHASE1_STARTED.getMessage();
+            SSEMessage sseMessage = SSEMessage.progress(taskId, message);
+            emitter.send(SseEmitter.event()
+                    .name(SSE_EVENT_NAME)
+                    .data(sseMessage));
+            log.info("Sent stored progress message to SSE channel for taskId: {}, message: {}", taskId, message);
+        } catch (IOException e) {
+            log.error("Failed to send stored progress message to SSE channel for taskId: {}", taskId, e);
+            removeChannel(taskId);
         }
     }
 
@@ -100,9 +96,10 @@ public class SSEChannelManager {
         String status = aiTaskStatus.getStatus();
         int version = aiProgressMessage.version();
 
-        // Redis에 진행 상태 저장 (SSE 채널이 없어도 저장)
-        redisStoreService.store(taskStatusKey(taskId), status, TASK_STATUS_TTL);
-        log.info("Stored progress message in Redis for taskId: {}, message: {}", taskId, message);
+        // Redis에 진행 상태를 해시 형태로 저장
+        redisStoreService.storeHash(taskStatusKey(taskId), String.valueOf(version), status, TASK_STATUS_TTL);
+        log.info("Stored progress message in Redis hash for taskId: {}, version: {}, message: {}", taskId, version,
+                message);
 
         SseEmitter emitter = activeChannels.get(taskId);
         if (emitter != null) {
@@ -129,7 +126,6 @@ public class SSEChannelManager {
                 log.warn("SSE complete failed for taskId: {}", taskId, e);
             } finally {
                 redisStoreService.delete(sseChannelKey(taskId));
-                redisStoreService.delete(taskStatusKey(taskId));
                 log.info("Removed SSE channel for taskId: {}", taskId);
             }
         }

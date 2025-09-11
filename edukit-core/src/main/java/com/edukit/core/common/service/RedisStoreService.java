@@ -11,4 +11,10 @@ public interface RedisStoreService {
     void delete(String key);
 
     Long increment(String key, Duration ttl);
+
+    void storeHash(String key, String field, String value, Duration ttl);
+
+    String getHashValue(String key, String field);
+
+    void deleteHash(String key);
 }
