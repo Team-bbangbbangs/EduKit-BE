@@ -41,9 +41,6 @@ public class AIEventListener {
         log.info("AI 생기부 생성 시작 taskId: {}", taskId);
         aiTaskService.startTask(task);
 
-        // SSE로 3가지 버전 생성 시작 알림
-        sseChannelManager.sendProgressMessage(taskId, AIProgressMessage.generationStarted(taskId));
-
         Map<String, String> mdcContextMap = MDC.getCopyOfContextMap();
         Flux<OpenAIVersionResponse> response = aiService.getVersionedStreamingResponse(generateEvent.requestPrompt());
 
@@ -69,6 +66,8 @@ public class AIEventListener {
                                         version.content(),
                                         traceId
                                 );
+
+                                sseChannelManager.sendProgressMessage(taskId, AIProgressMessage.generationStarted(taskId, version.versionNumber()));
                                 log.info("Task ID: {} VERSION {} 생성 완료! SQS 전송 시작", taskId, version.versionNumber());
 
                                 String idempotencyKey = taskId + "-" + version.versionNumber();
