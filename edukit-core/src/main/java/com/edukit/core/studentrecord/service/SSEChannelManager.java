@@ -68,6 +68,8 @@ public class SSEChannelManager {
     public void sendCompleteMessage(final String taskId, final AIResponseMessage message) {
         SseEmitter emitter = activeChannels.get(taskId);
         if (emitter != null) {
+            redisStoreService.storeHash(taskStatusKey(taskId), String.valueOf(message.version()), message.status(),
+                    TASK_STATUS_TTL);
             try {
                 SSEMessage sseMessage = SSEMessage.response(message.taskId(), message.content(),
                         message.version());
@@ -98,13 +100,12 @@ public class SSEChannelManager {
 
         // Redis에 진행 상태를 해시 형태로 저장
         redisStoreService.storeHash(taskStatusKey(taskId), String.valueOf(version), status, TASK_STATUS_TTL);
-        log.info("Stored progress message in Redis hash for taskId: {}, version: {}, message: {}", taskId, version,
-                message);
+        log.info("Stored progress message in Redis hash for taskId: {}, version: {}, message: {}", taskId, version, message);
 
         SseEmitter emitter = activeChannels.get(taskId);
         if (emitter != null) {
             try {
-                SSEMessage sseMessage = SSEMessage.progress(aiProgressMessage.taskId(), message);
+                SSEMessage sseMessage = SSEMessage.progress(aiProgressMessage.taskId(), message, version);
                 emitter.send(SseEmitter.event()
                         .name(SSE_EVENT_NAME)
                         .data(sseMessage));
