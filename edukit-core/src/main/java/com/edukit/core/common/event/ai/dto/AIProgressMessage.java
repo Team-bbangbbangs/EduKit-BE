@@ -15,7 +15,7 @@ public record AIProgressMessage(
         return new AIProgressMessage(taskId, version, status);
     }
 
-    public static AIProgressMessage generationStarted(final String taskId, final int version) {
+    public static AIProgressMessage phaseOneFinished(final String taskId, final int version) {
         return AIProgressMessage.of(taskId, version, AITaskStatus.PHASE1_STARTED.getStatus());
     }
 }

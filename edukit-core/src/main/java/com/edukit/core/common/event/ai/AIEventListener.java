@@ -67,7 +67,7 @@ public class AIEventListener {
                                         traceId
                                 );
 
-                                sseChannelManager.sendProgressMessage(taskId, AIProgressMessage.generationStarted(taskId, version.versionNumber()));
+                                sseChannelManager.sendProgressMessage(taskId, AIProgressMessage.phaseOneFinished(taskId, version.versionNumber()));
                                 log.info("Task ID: {} VERSION {} 생성 완료! SQS 전송 시작", taskId, version.versionNumber());
 
                                 String idempotencyKey = taskId + "-" + version.versionNumber();
