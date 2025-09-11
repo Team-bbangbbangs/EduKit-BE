@@ -31,4 +31,17 @@ public class RedisStoreServiceImpl implements RedisStoreService {
         }
         return count;
     }
+
+    public void storeHash(final String key, final String field, final String value, final Duration ttl) {
+        redisTemplate.opsForHash().put(key, field, value);
+        redisTemplate.expire(key, ttl);
+    }
+
+    public String getHashValue(final String key, final String field) {
+        return (String) redisTemplate.opsForHash().get(key, field);
+    }
+
+    public void deleteHash(final String key) {
+        redisTemplate.delete(key);
+    }
 }

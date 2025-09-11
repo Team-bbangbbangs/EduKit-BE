@@ -6,8 +6,10 @@ public record AIResponseMessage(
         @JsonProperty("task_id")
         String taskId,
         @JsonProperty("final_content")
-        String reviewedContent,
+        String content,
         @JsonProperty("version")
-        Integer version
+        Integer version,
+        @JsonProperty("status")
+        String status
 ) {
 }

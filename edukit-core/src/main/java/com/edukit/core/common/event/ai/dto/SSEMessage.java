@@ -5,8 +5,8 @@ public record SSEMessage(
         String type,
         Object data
 ) {
-    public static SSEMessage progress(final String taskId, final String message) {
-        return new SSEMessage(taskId, "PROGRESS", new ProgressData(message));
+    public static SSEMessage progress(final String taskId, final String message, final int version) {
+        return new SSEMessage(taskId, "PROGRESS", new ProgressData(message, version));
     }
 
     public static SSEMessage response(final String taskId, final String finalContent, final Integer version) {
@@ -14,7 +14,8 @@ public record SSEMessage(
     }
 
     public record ProgressData(
-            String message
+            String message,
+            int version
     ) {
     }
 

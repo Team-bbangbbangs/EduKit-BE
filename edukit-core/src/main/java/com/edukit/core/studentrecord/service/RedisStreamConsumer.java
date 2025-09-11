@@ -1,10 +1,14 @@
 package com.edukit.core.studentrecord.service;
 
 import com.edukit.common.infra.ServerInstanceManager;
+import com.edukit.core.common.event.ai.dto.AIProgressMessage;
 import com.edukit.core.common.event.ai.dto.AIResponseMessage;
 import com.edukit.core.common.service.RedisStreamService;
 import com.edukit.core.studentrecord.exception.StudentRecordErrorCode;
 import com.edukit.core.studentrecord.exception.StudentRecordException;
+import com.edukit.core.studentrecord.service.enums.AITaskStatus;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
@@ -97,15 +101,19 @@ public class RedisStreamConsumer {
         try {
             Map<Object, Object> messageBody = message.getValue();
             String messageJson = (String) messageBody.get("data");
-
             log.info("Received message from Redis Stream: {}", messageJson);
 
-            AIResponseMessage responseMessage = objectMapper.readValue(messageJson, AIResponseMessage.class);
-            String taskId = String.valueOf(responseMessage.taskId());
+            String taskId = parseData(messageJson, "task_id");
+            String status = parseData(messageJson, "status");
 
             if (sseChannelManager.hasActivateChannel(taskId)) {
-                sseChannelManager.sendMessage(taskId, responseMessage);
-                log.info("Message sent to active SSE channel for taskId: {}", taskId);
+                if (AITaskStatus.isInProgress(status)) {
+                    AIProgressMessage responseMessage = objectMapper.readValue(messageJson, AIProgressMessage.class);
+                    sseChannelManager.sendProgressMessage(taskId, responseMessage);
+                } else {
+                    AIResponseMessage responseMessage = objectMapper.readValue(messageJson, AIResponseMessage.class);
+                    sseChannelManager.sendCompleteMessage(taskId, responseMessage);
+                }
             } else {
                 String targetServerId = sseChannelManager.get(taskId);
                 if (targetServerId != null && targetServerId.equals(serverInstanceManager.getServerId())) {
@@ -116,6 +124,16 @@ public class RedisStreamConsumer {
         } catch (Exception e) {
             log.error("Error processing Redis Stream message: {}", e.getMessage(), e);
             throw new StudentRecordException(StudentRecordErrorCode.MESSAGE_PROCESSING_FAILED);
+        }
+    }
+
+    private String parseData(final String messageJson, final String target) {
+        try {
+            JsonNode node = objectMapper.readTree(messageJson);
+            return node.get(target).asText();
+        } catch (JsonProcessingException e) {
+            log.error("JSON 파싱 오류: {}", e.getMessage(), e);
+            throw new StudentRecordException(StudentRecordErrorCode.MESSAGE_PROCESSING_FAILED, e);
         }
     }
 
