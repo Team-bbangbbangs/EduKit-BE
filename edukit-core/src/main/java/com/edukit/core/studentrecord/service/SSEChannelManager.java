@@ -43,18 +43,6 @@ public class SSEChannelManager {
         redisStoreService.store(sseChannelKey(taskId), serverId, Duration.ofHours(1));
         activeChannels.put(taskId, emitter);
         log.info("Registered SSE channel for taskId: {} on server: {}", taskId, serverId);
-
-        try {
-            String message = AITaskStatus.PHASE1_STARTED.getMessage();
-            SSEMessage sseMessage = SSEMessage.progress(taskId, message);
-            emitter.send(SseEmitter.event()
-                    .name(SSE_EVENT_NAME)
-                    .data(sseMessage));
-            log.info("Sent stored progress message to SSE channel for taskId: {}, message: {}", taskId, message);
-        } catch (IOException e) {
-            log.error("Failed to send stored progress message to SSE channel for taskId: {}", taskId, e);
-            removeChannel(taskId);
-        }
     }
 
     public String get(final String taskId) {
@@ -100,7 +88,8 @@ public class SSEChannelManager {
 
         // Redis에 진행 상태를 해시 형태로 저장
         redisStoreService.storeHash(taskStatusKey(taskId), String.valueOf(version), status, TASK_STATUS_TTL);
-        log.info("Stored progress message in Redis hash for taskId: {}, version: {}, message: {}", taskId, version, message);
+        log.info("Stored progress message in Redis hash for taskId: {}, version: {}, message: {}", taskId, version,
+                message);
 
         SseEmitter emitter = activeChannels.get(taskId);
         if (emitter != null) {
