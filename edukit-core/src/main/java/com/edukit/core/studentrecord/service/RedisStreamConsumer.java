@@ -106,7 +106,7 @@ public class RedisStreamConsumer {
             String taskId = parseDate("task_id");
             String status = parseDate("status");
 
-            if (sseChannelManager.hasActivateChannel(taskId)) { // 상태에 따라
+            if (sseChannelManager.hasActivateChannel(taskId)) {
                 if (AITaskStatus.isInProgress(status)) {
                     AIProgressMessage responseMessage = objectMapper.readValue(messageJson, AIProgressMessage.class);
                     sseChannelManager.sendProgressMessage(taskId, responseMessage);
