@@ -138,8 +138,10 @@ public interface StudentRecordAIApi {
 
     @Operation(
             summary = "AI 생활기록부 생성 결과 스트리밍",
-            description = "AI 생활기록부 생성 작업의 결과를 실시간으로 스트리밍합니다. " +
-                         "진행 상태 메시지와 생성된 결과를 포함하며, 응답이 3번 전송되면 자동으로 작업이 완료되고 연결이 종료됩니다."
+            description = """
+                         AI 생활기록부 생성 작업의 결과를 실시간으로 스트리밍합니다.
+                         각각의 버전마다 진행 상태 메시지와 생성된 결과를 포함하며, 응답이 3번 전송되면 자동으로 작업이 완료되고 연결이 종료됩니다.
+                         """
     )
     @ApiResponses({
             @ApiResponse(
@@ -152,8 +154,14 @@ public interface StudentRecordAIApi {
                                     description = "Server-Sent Events 스트림",
                                     example = """
                                             event: ai-message
-                                            data: {"taskId":"123","type":"PROGRESS","data":{"message":"3가지 버전 생성 중"}}
+                                            data: {"taskId":"123","type":"PROGRESS","data":{"message":"생기부 초안 생성 완료.. - 다음 단계로 이동","version":1}}
                                             
+                                            event: ai-message
+                                            data: {"taskId":"123","type":"PROGRESS","data":{"message":"금칙어 필터링 중..","version":2}}
+                                            
+                                            event: ai-message
+                                            data: {"taskId":"123","type":"PROGRESS","data":{"message":"바이트 수 최적화 중.. - 다음 단계로 이동","version":3}}
+
                                             event: ai-message
                                             data: {"taskId":"123","type":"RESPONSE","data":{"finalContent":"생성된 생활기록부 내용 1","version":1}}
                                             
@@ -164,7 +172,7 @@ public interface StudentRecordAIApi {
                                             data: {"taskId":"123","type":"RESPONSE","data":{"finalContent":"생성된 생활기록부 내용 3","version":3}}
                                             
                                             event: ai-message
-                                            data: {"taskId":"123","type":"PROGRESS","data":{"message":"3가지 버전 생성 완료"}}
+                                            data: {"taskId":"123","type":"PROGRESS","data":{"message":"3가지 버전 생성 완료","version":4}}
                                             """
                             )
                     )
