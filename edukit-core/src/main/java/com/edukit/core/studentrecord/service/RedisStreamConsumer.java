@@ -103,8 +103,8 @@ public class RedisStreamConsumer {
             String messageJson = (String) messageBody.get("data");
             log.info("Received message from Redis Stream: {}", messageJson);
 
-            String taskId = parseDate("task_id");
-            String status = parseDate("status");
+            String taskId = parseData(messageJson, "task_id");
+            String status = parseData(messageJson, "status");
 
             if (sseChannelManager.hasActivateChannel(taskId)) {
                 if (AITaskStatus.isInProgress(status)) {
@@ -127,9 +127,9 @@ public class RedisStreamConsumer {
         }
     }
 
-    private String parseDate(final String target) {
+    private String parseData(final String messageJson, final String target) {
         try {
-            JsonNode node = objectMapper.readTree(target);
+            JsonNode node = objectMapper.readTree(messageJson);
             return node.get(target).asText();
         } catch (JsonProcessingException e) {
             log.error("JSON 파싱 오류: {}", e.getMessage(), e);
