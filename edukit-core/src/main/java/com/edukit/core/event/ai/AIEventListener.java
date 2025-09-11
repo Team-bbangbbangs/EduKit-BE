@@ -1,14 +1,16 @@
 package com.edukit.core.event.ai;
 
 import com.edukit.common.exception.ExternalException;
-import com.edukit.core.event.ai.dto.AIProgressMessage;
-import com.edukit.core.event.ai.dto.DraftGenerationEvent;
 import com.edukit.core.common.service.AIService;
+import com.edukit.core.common.service.RedisStreamService;
 import com.edukit.core.common.service.SqsService;
 import com.edukit.core.common.service.response.OpenAIVersionResponse;
+import com.edukit.core.event.ai.dto.AIProgressMessage;
+import com.edukit.core.event.ai.dto.DraftGenerationEvent;
 import com.edukit.core.studentrecord.db.entity.StudentRecordAITask;
 import com.edukit.core.studentrecord.service.AITaskService;
-import com.edukit.core.studentrecord.service.SSEChannelManager;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.HashMap;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -30,7 +32,11 @@ public class AIEventListener {
     private final AIService aiService;
     private final AITaskService aiTaskService;
     private final SqsService messageQueueService;
-    private final SSEChannelManager sseChannelManager;
+    private final RedisStreamService redisStreamService;
+    private final ObjectMapper objectMapper;
+
+    private static final String MESSAGE_KEY = "data";
+    private static final String REDIS_STREAM_KEY = "ai-response";
 
     @Async("aiTaskExecutor")
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
@@ -67,9 +73,10 @@ public class AIEventListener {
                                         traceId
                                 );
 
-                                sseChannelManager.sendProgressMessage(taskId, AIProgressMessage.phaseOneFinished(taskId, version.versionNumber()));
-                                log.info("Task ID: {} VERSION {} 생성 완료! SQS 전송 시작", taskId, version.versionNumber());
+                                // Redis Stream에 메시지 전송
+                                sendMessageToRedisStream(taskId, version.versionNumber());
 
+                                // SQS에 메시지 전송
                                 String idempotencyKey = taskId + "-" + version.versionNumber();
                                 messageQueueService.sendMessage(event, idempotencyKey);
                             } catch (ExternalException e) {
@@ -89,5 +96,17 @@ public class AIEventListener {
                             }
                         }
                 );
+    }
+
+    private void sendMessageToRedisStream(final String taskId, final int versionNumber) {
+        try {
+            Map<String, Object> streamMessage = new HashMap<>();
+            streamMessage.put(MESSAGE_KEY, objectMapper.writeValueAsString(
+                    AIProgressMessage.phaseOneFinished(taskId, versionNumber))
+            );
+            redisStreamService.sendMessage(REDIS_STREAM_KEY, streamMessage);
+        } catch (Exception streamException) {
+            log.error("Redis Stream 메시지 전송 실패 - taskId: {}, error: {}", taskId, streamException.getMessage());
+        }
     }
 }
