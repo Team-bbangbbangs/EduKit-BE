@@ -73,7 +73,7 @@ public class SSEChannelManager {
         SseEmitter emitter = activeChannels.get(taskId);
         if (emitter != null) {
             try {
-                SSEMessage sseMessage = SSEMessage.response(message.taskId(), message.reviewedContent(),
+                SSEMessage sseMessage = SSEMessage.response(message.taskId(), message.content(),
                         message.version());
 
                 emitter.send(SseEmitter.event()

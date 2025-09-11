@@ -103,7 +103,7 @@ public class RedisStreamConsumer {
             AIResponseMessage responseMessage = objectMapper.readValue(messageJson, AIResponseMessage.class);
             String taskId = String.valueOf(responseMessage.taskId());
 
-            if (sseChannelManager.hasActivateChannel(taskId)) {
+            if (sseChannelManager.hasActivateChannel(taskId)) { // 상태에 따라
                 sseChannelManager.sendCompleteMessage(taskId, responseMessage);
                 log.info("Message sent to active SSE channel for taskId: {}", taskId);
             } else {
