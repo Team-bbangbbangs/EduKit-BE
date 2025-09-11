@@ -5,6 +5,7 @@ import com.edukit.core.common.event.ai.dto.AIResponseMessage;
 import com.edukit.core.common.service.RedisStreamService;
 import com.edukit.core.studentrecord.exception.StudentRecordErrorCode;
 import com.edukit.core.studentrecord.exception.StudentRecordException;
+import com.edukit.core.studentrecord.service.enums.AITaskStatus;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
@@ -102,8 +103,9 @@ public class RedisStreamConsumer {
 
             AIResponseMessage responseMessage = objectMapper.readValue(messageJson, AIResponseMessage.class);
             String taskId = String.valueOf(responseMessage.taskId());
+            String status = responseMessage.status();
 
-            if (sseChannelManager.hasActivateChannel(taskId)) { // 상태에 따라
+            if (sseChannelManager.hasActivateChannel(taskId) && AITaskStatus.isComplete(status)) { // 상태에 따라
                 sseChannelManager.sendCompleteMessage(taskId, responseMessage);
                 log.info("Message sent to active SSE channel for taskId: {}", taskId);
             } else {

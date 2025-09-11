@@ -28,4 +28,8 @@ public enum AITaskStatus {
     public static boolean isInProgress(final String currentStatus) {
         return !COMPLETED.getStatus().equals(currentStatus);
     }
+
+    public static boolean isComplete(final String status) {
+        return COMPLETED.getStatus().equals(status);
+    }
 }
