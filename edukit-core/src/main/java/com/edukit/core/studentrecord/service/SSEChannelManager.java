@@ -46,7 +46,7 @@ public class SSEChannelManager {
 
         // SSE 채널 등록 시 현재 진행 상태가 있다면 전송
         String currentStatus = redisStoreService.get(taskStatusKey(taskId));
-        if (currentStatus != null) {
+        if (currentStatus != null && AITaskStatus.isInProgress(currentStatus)) {
             try {
                 String message = AITaskStatus.getMessageByStatus(currentStatus);
                 SSEMessage sseMessage = SSEMessage.progress(taskId, message);

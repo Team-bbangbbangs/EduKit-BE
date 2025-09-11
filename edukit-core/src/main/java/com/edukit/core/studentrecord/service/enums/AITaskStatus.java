@@ -24,4 +24,8 @@ public enum AITaskStatus {
                 .findFirst()
                 .orElseThrow(() -> new StudentRecordException(StudentRecordErrorCode.INVALID_AI_TASK_STATUS));
     }
+
+    public static boolean isInProgress(final String currentStatus) {
+        return !COMPLETED.getStatus().equals(currentStatus);
+    }
 }
