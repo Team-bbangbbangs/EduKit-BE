@@ -1,0 +1,6 @@
+rootProject.name = 'edukit-be'
+
+include 'edukit-api'
+include 'edukit-core'
+include 'edukit-external'
+include 'edukit-common'

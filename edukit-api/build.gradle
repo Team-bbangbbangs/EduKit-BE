@@ -1,0 +1,49 @@
+// REST API 모듈 (실행 가능한 JAR)
+
+plugins {
+    id 'org.springframework.boot'
+}
+
+dependencies {
+    // 내부 모듈 의존성 - Core 계층만 참조
+    implementation project(':edukit-core')
+    implementation project(':edukit-common')
+    runtimeOnly project(':edukit-external')
+
+    // Spring Boot Web
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+
+    // Spring Boot Security
+    implementation 'org.springframework.boot:spring-boot-starter-security'
+    testImplementation 'org.springframework.security:spring-security-test'
+
+    // Database
+    implementation 'com.mysql:mysql-connector-j'
+    implementation 'org.flywaydb:flyway-core'
+    implementation 'org.flywaydb:flyway-mysql'
+
+    // Health Check
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+
+    // Prometheus Metrics
+    implementation 'io.micrometer:micrometer-registry-prometheus'
+
+    // Swagger
+    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.9'
+
+    // JSON 로깅 (안전한 JSON 직렬화)
+    implementation 'net.logstash.logback:logstash-logback-encoder:8.0'
+}
+
+// 실행 가능한 JAR 설정
+jar {
+    archiveBaseName = 'edukit-api'
+    archiveVersion = project.version
+    enabled = false
+}
+
+bootJar {
+    archiveFileName = 'edukit-api.jar'
+    archiveVersion = project.version
+} 

@@ -1,0 +1,78 @@
+package com.edukit.core.student.db.entity;
+
+import com.edukit.core.common.domain.BaseTimeEntity;
+import com.edukit.core.member.db.entity.Member;
+import com.edukit.core.student.utils.KoreanNormalizer;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import lombok.AccessLevel;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+
+@Entity
+@Getter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+public class Student extends BaseTimeEntity {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "student_id")
+    private Long id;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "member_id", nullable = false)
+    private Member member;
+
+    @Column(nullable = false)
+    private int grade;
+
+    @Column(nullable = false)
+    private int classNumber;
+
+    @Column(nullable = false)
+    private int studentNumber;
+
+    @Column(nullable = false)
+    private String studentName;
+
+    @Column(nullable = false)
+    private String studentNameNormalized;
+
+    @Builder(access = AccessLevel.PRIVATE)
+    public Student(final Member member, final int grade, final int classNumber, final int studentNumber,
+                   final String studentName, final String studentNameNormalized) {
+        this.member = member;
+        this.grade = grade;
+        this.classNumber = classNumber;
+        this.studentNumber = studentNumber;
+        this.studentName = studentName;
+        this.studentNameNormalized = studentNameNormalized;
+    }
+
+    public static Student create(final Member member, final int grade, final int classNumber,
+                                final int studentNumber, final String studentName) {
+        return Student.builder()
+                .member(member)
+                .grade(grade)
+                .classNumber(classNumber)
+                .studentNumber(studentNumber)
+                .studentName(studentName)
+                .studentNameNormalized(KoreanNormalizer.toNormalized(studentName))
+                .build();
+    }
+
+    public void update(final int grade, final int classNumber, final int studentNumber, final String studentName) {
+        this.grade = grade;
+        this.classNumber = classNumber;
+        this.studentNumber = studentNumber;
+        this.studentName = studentName;
+        this.studentNameNormalized = KoreanNormalizer.toNormalized(studentName);
+    }
+}

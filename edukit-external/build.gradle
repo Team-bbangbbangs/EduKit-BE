@@ -1,0 +1,49 @@
+repositories {
+    mavenCentral()
+    maven { url 'https://repo.spring.io/milestone' }
+}
+
+
+dependencies {
+    // 내부 모듈 의존성
+    implementation project(':edukit-common')
+    implementation project(':edukit-core')
+
+    // WebClient for reactive HTTP calls
+    implementation 'org.springframework:spring-webflux'
+
+    // Spring AI
+    implementation 'org.springframework.ai:spring-ai-starter-model-openai:1.0.0-M7'
+
+    // Reactor Netty
+    implementation platform('io.projectreactor:reactor-bom:2024.0.3')
+    implementation 'io.projectreactor.netty:reactor-netty-http'
+
+    // AWS
+    implementation platform('software.amazon.awssdk:bom:2.25.28')
+
+    // AWS - SES
+    implementation 'org.springframework.boot:spring-boot-starter-mail'
+    implementation 'software.amazon.awssdk:ses'
+
+    // AWS - S3
+    implementation 'software.amazon.awssdk:s3'
+    
+    // AWS - SQS
+    implementation 'software.amazon.awssdk:sqs'
+
+    // thymeleaf
+    implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
+
+    // Resilience4j
+    implementation 'io.github.resilience4j:resilience4j-spring-boot3:2.2.0'
+    implementation 'io.github.resilience4j:resilience4j-reactor:2.2.0'
+    implementation 'io.github.resilience4j:resilience4j-circuitbreaker:2.2.0'
+}
+
+// 라이브러리 JAR 생성
+jar {
+    archiveBaseName = 'edukit-external'
+    archiveVersion = project.version
+    enabled = true
+} 

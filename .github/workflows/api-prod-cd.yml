@@ -1,0 +1,185 @@
+name: api-prod-cd
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    environment: prod
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set timezone to Korea
+        uses: szenius/set-timezone@v2.0
+        with:
+          timezoneLinux: "Asia/Seoul"
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+
+      - name: Gradle 캐시 구성
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('gradle/wrapper/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+
+      - name: Setup application.yml
+        run: |
+          mkdir -p edukit-api/src/main/resources
+          echo "${{ secrets.API_APPLICATION_YML }}" > edukit-api/src/main/resources/application-prod.yml
+
+      - name: Build Spring Boot Jar
+        run: ./gradlew :edukit-api:bootJar
+
+      - name: Get current date and time
+        id: datetime
+        run: echo "datetime=$(date +'%Y%m%d%H%M%S')" >> "$GITHUB_OUTPUT"
+
+      - name: Configure AWS credentials for ECR
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ECR_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_ECR_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Login to AWS ECR
+        run: |
+          aws ecr get-login-password --region ${{ secrets.AWS_REGION }} | \
+            docker login --username AWS --password-stdin ${{ secrets.ECR_REGISTRY_URI }}
+
+      - name: Docker Build & Push to ECR
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Dockerfile-prod
+          push: true
+          tags: ${{ secrets.ECR_REGISTRY_URI }}/${{ secrets.ECR_REPOSITORY_NAME }}:prod-${{ steps.datetime.outputs.datetime }}
+          build-args: JAR_FILE=edukit-api/build/libs/edukit-api.jar
+
+      - name: Upload docker-compose and promtail config
+        uses: actions/upload-artifact@v4
+        with:
+          name: config-files
+          path: |
+            ${{ github.workspace }}/docker-compose.prod.yml
+            ${{ github.workspace }}/promtail-config.yml
+
+    outputs:
+      IMAGE_TAG: prod-${{ steps.datetime.outputs.datetime }}
+
+  deploy:
+    needs: build
+    strategy:
+      matrix:
+        runner: [ prod-1, prod-2 ]
+    runs-on: ${{ matrix.runner }}
+    environment: prod
+
+    steps:
+      - name: Download docker configs
+        uses: actions/download-artifact@v4
+        with:
+          name: config-files
+          path: ${{ github.workspace }}
+
+      - name: Generate .env file
+        run: |
+          cat <<EOF > .env
+          ECR_IMAGE_URI=${{ secrets.ECR_REGISTRY_URI }}/${{ secrets.ECR_REPOSITORY_NAME }}
+          IMAGE_TAG=${{ needs.build.outputs.IMAGE_TAG }}
+          MONITORING_INSTANCE=${{ secrets.MONITORING_INSTANCE }}
+          SERVER_ID=${{ matrix.runner }}
+          ENVIRONMENT=prod
+          HOSTNAME_BLUE=${{ matrix.runner }}-blue
+          HOSTNAME_GREEN=${{ matrix.runner }}-green
+          EOF
+
+      - name: Login to AWS ECR
+        run: |
+          aws ecr get-login-password --region ${{ secrets.AWS_REGION }} | \
+            docker login --username AWS --password-stdin ${{ secrets.ECR_REGISTRY_URI }}
+
+      - name: Determine current active app
+        id: current
+        run: |
+          if docker ps | grep -q app-blue; then
+            echo "CURRENT=blue" >> "$GITHUB_OUTPUT"
+          else
+            echo "CURRENT=green" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Deploy to inactive container
+        id: deploy
+        run: |
+          if [ "${{ steps.current.outputs.CURRENT }}" = "blue" ]; then
+            TARGET=green
+            PORT=8081
+          else
+            TARGET=blue
+            PORT=8080
+          fi
+
+          echo "TARGET=$TARGET" >> "$GITHUB_OUTPUT"
+          echo "PORT=$PORT" >> "$GITHUB_OUTPUT"
+
+          docker-compose -f docker-compose.prod.yml up -d app-$TARGET
+
+      - name: Health check on new container
+        run: |
+          for i in {1..10}; do
+            STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:${{ steps.deploy.outputs.PORT }}/actuator/health || true)
+            if [ "$STATUS" = "200" ]; then
+              exit 0
+            fi
+            sleep 5
+          done
+
+          docker-compose -f docker-compose.prod.yml stop app-${{ steps.deploy.outputs.TARGET }}
+          docker-compose -f docker-compose.prod.yml rm -f app-${{ steps.deploy.outputs.TARGET }}
+          exit 1
+
+      - name: Switch nginx upstream and reload
+        run: |
+          if [ "${{ steps.current.outputs.CURRENT }}" = "blue" ]; then
+            NEW_TARGET="app-green:8080"
+          else
+            NEW_TARGET="app-blue:8080"
+          fi
+
+          docker exec nginx bash -c \
+            "echo 'set \$service_url $NEW_TARGET;' > /etc/nginx/conf.d/service-url.inc && nginx -t && nginx -s reload"
+
+      - name: Stop and remove old container
+        run: |
+          if [ "${{ steps.current.outputs.CURRENT }}" = "blue" ]; then
+            OLD=blue
+          elif [ "${{ steps.current.outputs.CURRENT }}" = "green" ]; then
+            OLD=green
+          else
+            OLD=none
+          fi
+
+          if [ "$OLD" != "none" ]; then
+            docker-compose -f docker-compose.prod.yml stop app-$OLD
+            docker-compose -f docker-compose.prod.yml rm -f app-$OLD
+          fi
+
+      - name: Restart promtail
+        run: |
+          docker-compose -f docker-compose.prod.yml up -d --force-recreate promtail
+
+      - name: Remove unused Docker images
+        run: docker image prune -a -f
