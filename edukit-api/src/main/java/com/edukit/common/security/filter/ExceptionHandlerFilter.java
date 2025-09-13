@@ -45,6 +45,7 @@ public class ExceptionHandlerFilter extends OncePerRequestFilter {
 
     private void setResponse(final HttpServletResponse response, final String customCode, final String message)
             throws IOException {
+        response.setStatus(HttpServletResponse.SC_OK);
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
         response.setCharacterEncoding(StandardCharsets.UTF_8.name());
         PrintWriter writer = response.getWriter();
