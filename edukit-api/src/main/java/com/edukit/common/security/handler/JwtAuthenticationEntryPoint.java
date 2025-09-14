@@ -22,6 +22,7 @@ public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
 
     private static final String HEADER_ACCESS_CONTROL_ALLOW_ORIGIN = "Access-Control-Allow-Origin";
     private static final String HEADER_ACCESS_CONTROL_ALLOW_CREDENTIALS = "Access-Control-Allow-Credentials";
+    private static final String HEADER_VARY = "Vary";
 
     private static final ObjectMapper objectMapper = new ObjectMapper();
 
@@ -46,7 +47,10 @@ public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
         String allowed = allowedOriginValidator.resolveAllowedOriginHeader(request, origin);
         if (allowed != null) {
             response.setHeader(HEADER_ACCESS_CONTROL_ALLOW_ORIGIN, allowed);
-            response.setHeader(HEADER_ACCESS_CONTROL_ALLOW_CREDENTIALS, "true");
+            if (allowedOriginValidator.allowCredentials(request)) {
+                response.setHeader(HEADER_ACCESS_CONTROL_ALLOW_CREDENTIALS, "true");
+            }
+            response.addHeader(HEADER_VARY, "Origin");
         }
 
         response.getWriter().write(objectMapper.writeValueAsString(

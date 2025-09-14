@@ -26,6 +26,7 @@ public class ExceptionHandlerFilter extends OncePerRequestFilter {
 
     private static final String HEADER_ACCESS_CONTROL_ALLOW_ORIGIN = "Access-Control-Allow-Origin";
     private static final String HEADER_ACCESS_CONTROL_ALLOW_CREDENTIALS = "Access-Control-Allow-Credentials";
+    private static final String HEADER_VARY = "Vary";
     private static final String UNEXPECTED_CUSTOM_ERROR_CODE = "FAIL-500";
 
     @Override
@@ -63,7 +64,10 @@ public class ExceptionHandlerFilter extends OncePerRequestFilter {
         String allowed = allowedOriginValidator.resolveAllowedOriginHeader(request, origin);
         if (allowed != null) {
             response.setHeader(HEADER_ACCESS_CONTROL_ALLOW_ORIGIN, allowed);
-            response.setHeader(HEADER_ACCESS_CONTROL_ALLOW_CREDENTIALS, "true");
+            if (allowedOriginValidator.allowCredentials(request)) {
+                response.setHeader(HEADER_ACCESS_CONTROL_ALLOW_CREDENTIALS, "true");
+            }
+            response.addHeader(HEADER_VARY, "Origin");
         }
         
         PrintWriter writer = response.getWriter();
