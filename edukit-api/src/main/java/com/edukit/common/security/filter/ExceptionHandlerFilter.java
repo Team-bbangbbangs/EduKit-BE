@@ -3,7 +3,7 @@ package com.edukit.common.security.filter;
 import com.edukit.common.EdukitResponse;
 import com.edukit.common.exception.BusinessException;
 import com.edukit.common.exception.ErrorCode;
-import com.edukit.common.security.config.CorsConfig;
+import com.edukit.common.security.utils.AllowedOriginValidator;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.http.HttpServletRequest;
@@ -11,18 +11,16 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
-import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
-import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 @Component
 @RequiredArgsConstructor
 public class ExceptionHandlerFilter extends OncePerRequestFilter {
 
-    private final CorsConfig corsConfig;
+    private final AllowedOriginValidator allowedOriginValidator;
 
     private static final ObjectMapper objectMapper = new ObjectMapper();
 
@@ -62,8 +60,9 @@ public class ExceptionHandlerFilter extends OncePerRequestFilter {
         
         // CORS 헤더 설정 (허용된 origin만)
         String origin = request.getHeader("Origin");
-        if (isAllowedOrigin(origin)) {
-            response.setHeader(HEADER_ACCESS_CONTROL_ALLOW_ORIGIN, origin);
+        String allowed = allowedOriginValidator.resolveAllowedOriginHeader(request, origin);
+        if (allowed != null) {
+            response.setHeader(HEADER_ACCESS_CONTROL_ALLOW_ORIGIN, allowed);
             response.setHeader(HEADER_ACCESS_CONTROL_ALLOW_CREDENTIALS, "true");
         }
         
@@ -71,11 +70,5 @@ public class ExceptionHandlerFilter extends OncePerRequestFilter {
         writer.write(objectMapper.writeValueAsString(EdukitResponse.fail(customCode, message)));
     }
     
-    private boolean isAllowedOrigin(final String origin) {
-        if (origin == null) {
-            return false;
-        }
-        CorsConfiguration config = corsConfig.corsConfigurationSource().getCorsConfiguration(null);
-        return config != null && Objects.requireNonNull(config.getAllowedOriginPatterns()).contains(origin);
-    }
+    // no extra helpers
 }
