@@ -20,7 +20,7 @@ public class StudentRecordMetricsAspect {
     private final StudentRecordService studentRecordService;
 
     @Around("@annotation(com.edukit.common.annotation.StudentRecordMetrics)")
-    public Object collectMetrics(ProceedingJoinPoint joinPoint) throws Throwable {
+    public Object collectUpdateMetrics(final ProceedingJoinPoint joinPoint) throws Throwable {
         Object[] args = joinPoint.getArgs();
 
         if (args.length >= 3) {
@@ -40,7 +40,31 @@ public class StudentRecordMetricsAspect {
                 return result;
 
             } catch (Exception e) {
-                log.error("Error collecting student record metrics", e);
+                log.error("Error collecting student record update metrics", e);
+                return joinPoint.proceed();
+            }
+        }
+
+        return joinPoint.proceed();
+    }
+
+    @Around("@annotation(com.edukit.common.annotation.AIGenerationMetrics)")
+    public Object collectAIGenerationMetrics(final ProceedingJoinPoint joinPoint) throws Throwable {
+        Object[] args = joinPoint.getArgs();
+
+        if (args.length >= 2) {
+            long memberId = (long) args[0];
+            long recordId = (long) args[1];
+
+            try {
+                StudentRecord studentRecord = studentRecordService.getRecordDetail(memberId, recordId);
+
+                metricsService.recordAIGenerationRequest(studentRecord.getStudentRecordType());
+
+                return joinPoint.proceed();
+
+            } catch (Exception e) {
+                log.error("Error collecting AI generation metrics", e);
                 return joinPoint.proceed();
             }
         }

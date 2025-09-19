@@ -1,5 +1,6 @@
 package com.edukit.studentrecord.facade;
 
+import com.edukit.common.annotation.AIGenerationMetrics;
 import com.edukit.core.member.db.entity.Member;
 import com.edukit.core.member.service.MemberService;
 import com.edukit.core.studentrecord.db.entity.StudentRecord;
@@ -27,6 +28,7 @@ public class StudentRecordAIFacade {
     private final ApplicationEventPublisher eventPublisher;
 
     @Transactional
+    @AIGenerationMetrics
     public StudentRecordTaskResponse createTaskId(final long memberId, final long recordId, final int byteCount,
                                                   final String userPrompt) {
         Member member = memberService.getMemberById(memberId);
