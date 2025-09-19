@@ -41,7 +41,7 @@ public class StudentRecordMetricsAspect {
     public Object collectAIGenerationMetrics(final ProceedingJoinPoint joinPoint) throws Throwable {
         Object[] args = joinPoint.getArgs();
 
-        if (args.length == 3) {
+        if (args.length == 4) {
             long recordId = (Long) args[1];
             StudentRecordType recordType = (StudentRecordType) args[2];
 
