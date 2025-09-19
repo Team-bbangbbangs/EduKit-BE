@@ -1,9 +1,8 @@
 package com.edukit.core.studentrecord.aop;
 
-import com.edukit.core.studentrecord.db.entity.StudentRecord;
+import com.edukit.core.studentrecord.db.enums.StudentRecordType;
 import com.edukit.core.studentrecord.service.GenerationTrackingService;
 import com.edukit.core.studentrecord.service.StudentRecordMetricsService;
-import com.edukit.core.studentrecord.service.StudentRecordService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.JoinPoint;
@@ -22,29 +21,27 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 public class StudentRecordMetricsAspect {
 
     private final StudentRecordMetricsService metricsService;
-    private final StudentRecordService studentRecordService;
     private final GenerationTrackingService generationTrackingService;
 
     @AfterReturning("@annotation(com.edukit.common.annotation.StudentRecordMetrics)")
     public void collectCompletionMetrics(final JoinPoint joinPoint) {
         Object[] args = joinPoint.getArgs();
 
-        if (args.length >= 3) {
+        if (args.length >= 4) {
             long memberId = (Long) args[0];
             long recordId = (Long) args[1];
-            String description = (String) args[2];
+            StudentRecordType recordType = (StudentRecordType) args[2];
+            String description = (String) args[3];
 
             try {
-                StudentRecord studentRecord = studentRecordService.getRecordDetail(memberId, recordId);
-
                 // 트랜잭션 커밋 후에만 메트릭 수집 및 정리 작업 수행
                 if (TransactionSynchronizationManager.isSynchronizationActive()) {
                     TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
                         @Override
                         public void afterCommit() {
                             try {
-                                // 실제 커밋 성공 후에만 완료 메트릭 기록
-                                metricsService.recordCompletion(studentRecord.getStudentRecordType(), description);
+                                // 실제 커밋 성공 후에만 완료 메트릭 기록 (DB 조회 제거!)
+                                metricsService.recordCompletion(recordType, description);
 
                                 // 커밋 성공 후 생성 추적 정보 정리 (메모리 절약)
                                 generationTrackingService.clearRecord(recordId);
@@ -65,7 +62,7 @@ public class StudentRecordMetricsAspect {
                     });
                 } else {
                     // 트랜잭션이 없는 경우 즉시 실행 (테스트 환경 등)
-                    metricsService.recordCompletion(studentRecord.getStudentRecordType(), description);
+                    metricsService.recordCompletion(recordType, description);
                     generationTrackingService.clearRecord(recordId);
                     log.warn("No transaction synchronization - recording metrics immediately for recordId: {}", recordId);
                 }
@@ -80,26 +77,25 @@ public class StudentRecordMetricsAspect {
     public Object collectAIGenerationMetrics(final ProceedingJoinPoint joinPoint) throws Throwable {
         Object[] args = joinPoint.getArgs();
 
-        if (args.length >= 2) {
+        if (args.length >= 3) {
             long memberId = (Long) args[0];
             long recordId = (Long) args[1];
+            StudentRecordType recordType = (StudentRecordType) args[2];
 
-            // 전처리: 메트릭 수집 (예외 발생해도 비즈니스 로직은 1회만 실행)
+            // 전처리: 메트릭 수집 (DB 조회 제거로 성능 개선!)
             try {
-                StudentRecord studentRecord = studentRecordService.getRecordDetail(memberId, recordId);
-
                 // 첫 생성 여부 확인 (이 호출로 카운트도 증가됨)
                 boolean isFirstGeneration = generationTrackingService.isFirstGeneration(recordId);
 
                 // 전체 AI 생성 요청 카운트
-                metricsService.recordAIGenerationRequest(studentRecord.getStudentRecordType());
+                metricsService.recordAIGenerationRequest(recordType);
 
                 // 첫 생성 vs 재생성 구분 메트릭
                 if (isFirstGeneration) {
-                    metricsService.recordFirstGeneration(studentRecord.getStudentRecordType());
+                    metricsService.recordFirstGeneration(recordType);
                     log.debug("First generation request for recordId: {}", recordId);
                 } else {
-                    metricsService.recordRegeneration(studentRecord.getStudentRecordType());
+                    metricsService.recordRegeneration(recordType);
                     log.debug("Regeneration request for recordId: {}", recordId);
                 }
 

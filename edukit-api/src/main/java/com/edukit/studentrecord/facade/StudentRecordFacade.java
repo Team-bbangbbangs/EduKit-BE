@@ -43,7 +43,8 @@ public class StudentRecordFacade {
 
     @Transactional
     @StudentRecordMetrics
-    public void updateStudentRecord(final long memberId, final long recordId, final String description) {
+    public void updateStudentRecord(final long memberId, final long recordId,
+                                    final StudentRecordType recordType, final String description) {
         StudentRecord studentRecord = studentRecordService.getRecordDetail(memberId, recordId);
         studentRecordService.updateStudentRecord(studentRecord, description);
     }
