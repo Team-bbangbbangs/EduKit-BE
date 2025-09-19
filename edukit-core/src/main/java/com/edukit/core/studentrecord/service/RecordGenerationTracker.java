@@ -1,51 +1,42 @@
 package com.edukit.core.studentrecord.service;
 
-import java.time.LocalDateTime;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicInteger;
-import lombok.Getter;
+import java.time.Duration;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
 
 @Slf4j
 @Component
+@RequiredArgsConstructor
 public class RecordGenerationTracker {
 
-    private final ConcurrentHashMap<Long, GenerationInfo> generationCounts = new ConcurrentHashMap<>();
+    private static final String KEY_PREFIX = "sr:gen:";
+    private static final Duration DEFAULT_TTL = Duration.ofDays(1);
+
+    private final StringRedisTemplate redisTemplate;
 
     public boolean isFirstGeneration(long recordId) {
-        GenerationInfo info = generationCounts.compute(recordId, (key, existing) -> {
-            if (existing == null) {
-                return new GenerationInfo(1, LocalDateTime.now());
-            } else {
-                existing.incrementCount();
-                return existing;
-            }
-        });
+        String key = getCountKey(recordId);
+        Long newCount = redisTemplate.opsForValue().increment(key);
 
-        boolean isFirst = info.getCount() == 1;
-        log.debug("RecordId: {}, Generation count: {}, Is first: {}", recordId, info.getCount(), isFirst);
+        if (newCount == null) {
+            log.warn("Redis INCR returned null for key: {}", key);
+            return false;
+        }
 
-        return isFirst;
+        if (newCount == 1L) {
+            // 최초 생성 시에만 TTL 설정 (비정상 흐름 방치 대비)
+            redisTemplate.expire(key, DEFAULT_TTL);
+            log.debug("RecordId: {}, Generation count set to 1 (first)", recordId);
+            return true;
+        }
+
+        log.debug("RecordId: {}, Generation count: {} (regeneration)", recordId, newCount);
+        return false;
     }
 
-    private static class GenerationInfo {
-        private final AtomicInteger count;
-        @Getter
-        private final LocalDateTime firstGenerationTime;
-
-        public GenerationInfo(int initialCount, LocalDateTime firstGenerationTime) {
-            this.count = new AtomicInteger(initialCount);
-            this.firstGenerationTime = firstGenerationTime;
-        }
-
-        public void incrementCount() {
-            count.incrementAndGet();
-        }
-
-        public int getCount() {
-            return count.get();
-        }
-
+    private String getCountKey(long recordId) {
+        return KEY_PREFIX + recordId + ":count";
     }
 }
