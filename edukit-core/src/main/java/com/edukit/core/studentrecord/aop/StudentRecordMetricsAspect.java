@@ -28,10 +28,10 @@ public class StudentRecordMetricsAspect {
     public void collectCompletionMetrics(final JoinPoint joinPoint) {
         Object[] args = joinPoint.getArgs();
 
-        if (args.length == 6) {
+        if (args.length == 3) {
             long memberId = (Long) args[0];
             long recordId = (Long) args[1];
-            String description = (String) args[3];
+            String description = (String) args[2];
 
             StudentRecord studentRecord = studentRecordService.getRecordDetail(memberId, recordId);
             StudentRecordType recordType = studentRecord.getStudentRecordType();
