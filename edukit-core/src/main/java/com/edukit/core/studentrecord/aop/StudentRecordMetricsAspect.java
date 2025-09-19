@@ -12,6 +12,8 @@ import org.aspectj.lang.annotation.AfterReturning;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 @Slf4j
 @Aspect
@@ -35,13 +37,41 @@ public class StudentRecordMetricsAspect {
             try {
                 StudentRecord studentRecord = studentRecordService.getRecordDetail(memberId, recordId);
 
-                metricsService.recordCompletion(studentRecord.getStudentRecordType(), description);
+                // 트랜잭션 커밋 후에만 메트릭 수집 및 정리 작업 수행
+                if (TransactionSynchronizationManager.isSynchronizationActive()) {
+                    TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+                        @Override
+                        public void afterCommit() {
+                            try {
+                                // 실제 커밋 성공 후에만 완료 메트릭 기록
+                                metricsService.recordCompletion(studentRecord.getStudentRecordType(), description);
 
-                // 저장 완료 후 해당 recordId의 생성 추적 정보 정리 (메모리 절약)
-                generationTrackingService.clearRecord(recordId);
+                                // 커밋 성공 후 생성 추적 정보 정리 (메모리 절약)
+                                generationTrackingService.clearRecord(recordId);
+
+                                log.debug("Completion metrics recorded after transaction commit for recordId: {}", recordId);
+
+                            } catch (Exception e) {
+                                log.error("Error collecting completion metrics after commit for recordId: {}", recordId, e);
+                            }
+                        }
+
+                        @Override
+                        public void afterCompletion(int status) {
+                            if (status == STATUS_ROLLED_BACK) {
+                                log.debug("Transaction rolled back - completion metrics not recorded for recordId: {}", recordId);
+                            }
+                        }
+                    });
+                } else {
+                    // 트랜잭션이 없는 경우 즉시 실행 (테스트 환경 등)
+                    metricsService.recordCompletion(studentRecord.getStudentRecordType(), description);
+                    generationTrackingService.clearRecord(recordId);
+                    log.warn("No transaction synchronization - recording metrics immediately for recordId: {}", recordId);
+                }
 
             } catch (Exception e) {
-                log.error("Error collecting student record completion metrics", e);
+                log.error("Error setting up completion metrics collection", e);
             }
         }
     }
