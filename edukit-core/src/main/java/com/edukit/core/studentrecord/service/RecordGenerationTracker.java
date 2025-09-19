@@ -18,11 +18,12 @@ public class RecordGenerationTracker {
 
     private static final String KEY_PREFIX = "sr:gen:";
     private static final String LUA_SCRIPT =
+            "local ttl = tonumber(ARGV[1]) or 0 " +
             "local c = redis.call('INCR', KEYS[1]) " +
-                    "if c == 1 then " +
-                    "  redis.call('EXPIRE', KEYS[1], tonumber(ARGV[1])) " +
-                    "end " +
-                    "return c";
+            "if c == 1 and ttl > 0 then " +
+            "  redis.call('EXPIRE', KEYS[1], ttl) " +
+            "end " +
+            "return c";
 
     private static final DefaultRedisScript<Long> INCR_EXPIRE_SCRIPT;
 
