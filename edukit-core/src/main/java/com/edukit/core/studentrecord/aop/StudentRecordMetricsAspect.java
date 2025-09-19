@@ -20,7 +20,7 @@ public class StudentRecordMetricsAspect {
     private final StudentRecordService studentRecordService;
 
     @Around("@annotation(com.edukit.common.annotation.StudentRecordMetrics)")
-    public Object collectUpdateMetrics(final ProceedingJoinPoint joinPoint) throws Throwable {
+    public Object collectCompletionMetrics(final ProceedingJoinPoint joinPoint) throws Throwable {
         Object[] args = joinPoint.getArgs();
 
         if (args.length >= 3) {
@@ -31,8 +31,6 @@ public class StudentRecordMetricsAspect {
             try {
                 StudentRecord studentRecord = studentRecordService.getRecordDetail(memberId, recordId);
 
-                metricsService.recordApiCall(studentRecord.getStudentRecordType());
-
                 Object result = joinPoint.proceed();
 
                 metricsService.recordCompletion(studentRecord.getStudentRecordType(), description);
@@ -40,7 +38,7 @@ public class StudentRecordMetricsAspect {
                 return result;
 
             } catch (Exception e) {
-                log.error("Error collecting student record update metrics", e);
+                log.error("Error collecting student record completion metrics", e);
                 return joinPoint.proceed();
             }
         }

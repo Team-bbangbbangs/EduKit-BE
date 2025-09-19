@@ -15,17 +15,8 @@ public class StudentRecordMetricsService {
 
     private final MeterRegistry meterRegistry;
 
-    private static final String API_CALL_METRIC = "student_record_update_api_calls_total";
     private static final String COMPLETION_METRIC = "student_record_completion_total";
     private static final String AI_GENERATION_REQUEST_METRIC = "student_record_ai_generation_requests_total";
-
-    public void recordApiCall(final StudentRecordType type) {
-        Counter.builder(API_CALL_METRIC)
-                .description("Total number of student record update API calls")
-                .tags(Tags.of("type", type.name(), "action", "update"))
-                .register(meterRegistry)
-                .increment();
-    }
 
     public void recordCompletion(final StudentRecordType type, final String description) {
         if (isCompleted(type, description)) {
