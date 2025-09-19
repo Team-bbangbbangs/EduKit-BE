@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
-public class StudentRecordMetricsService {
+public class StudentRecordMetricsCounter {
 
     private final MeterRegistry meterRegistry;
 
