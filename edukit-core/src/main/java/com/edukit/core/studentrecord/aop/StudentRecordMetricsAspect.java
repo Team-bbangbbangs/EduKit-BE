@@ -1,8 +1,10 @@
 package com.edukit.core.studentrecord.aop;
 
+import com.edukit.core.studentrecord.db.entity.StudentRecord;
 import com.edukit.core.studentrecord.db.enums.StudentRecordType;
 import com.edukit.core.studentrecord.service.RecordGenerationTracker;
 import com.edukit.core.studentrecord.service.StudentRecordMetricsCounter;
+import com.edukit.core.studentrecord.service.StudentRecordService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.JoinPoint;
@@ -20,13 +22,19 @@ public class StudentRecordMetricsAspect {
 
     private final StudentRecordMetricsCounter metricsService;
     private final RecordGenerationTracker recordGenerationTracker;
+    private final StudentRecordService studentRecordService;
 
     @AfterReturning(pointcut = "@annotation(com.edukit.common.annotation.StudentRecordMetrics)")
     public void collectCompletionMetrics(final JoinPoint joinPoint) {
         Object[] args = joinPoint.getArgs();
+
         if (args.length == 6) {
-            StudentRecordType recordType = (StudentRecordType) args[2];
+            long memberId = (Long) args[0];
+            long recordId = (Long) args[1];
             String description = (String) args[3];
+
+            StudentRecord studentRecord = studentRecordService.getRecordDetail(memberId, recordId);
+            StudentRecordType recordType = studentRecord.getStudentRecordType();
 
             try {
                 metricsService.recordCompletion(recordType, description);
