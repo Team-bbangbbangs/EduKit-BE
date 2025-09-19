@@ -1,9 +1,9 @@
 package com.edukit.core.studentrecord.service;
 
-import java.time.Duration;
 import java.util.Collections;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.stereotype.Component;
@@ -13,16 +13,19 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class RecordGenerationTracker {
 
+    @Value("${record.generation.ttl}")
+    private long ttlSeconds;
+
     private static final String KEY_PREFIX = "sr:gen:";
-    private static final Duration DEFAULT_TTL = Duration.ofDays(1);
     private static final String LUA_SCRIPT =
             "local c = redis.call('INCR', KEYS[1]) " +
-            "if c == 1 then " +
-            "  redis.call('EXPIRE', KEYS[1], tonumber(ARGV[1])) " +
-            "end " +
-            "return c";
+                    "if c == 1 then " +
+                    "  redis.call('EXPIRE', KEYS[1], tonumber(ARGV[1])) " +
+                    "end " +
+                    "return c";
 
     private static final DefaultRedisScript<Long> INCR_EXPIRE_SCRIPT;
+
 
     static {
         DefaultRedisScript<Long> script = new DefaultRedisScript<>();
@@ -38,7 +41,7 @@ public class RecordGenerationTracker {
         Long newCount = redisTemplate.execute(
                 INCR_EXPIRE_SCRIPT,
                 Collections.singletonList(key),
-                String.valueOf(DEFAULT_TTL.getSeconds())
+                String.valueOf(ttlSeconds)
         );
 
         if (newCount == null) {
