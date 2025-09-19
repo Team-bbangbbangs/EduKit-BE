@@ -30,8 +30,8 @@ public class StudentRecordMetricsAspect {
         Object[] args = joinPoint.getArgs();
 
         if (args.length >= 3) {
-            long memberId = (long) args[0];
-            long recordId = (long) args[1];
+            long memberId = (Long) args[0];
+            long recordId = (Long) args[1];
             String description = (String) args[2];
 
             try {
@@ -81,8 +81,8 @@ public class StudentRecordMetricsAspect {
         Object[] args = joinPoint.getArgs();
 
         if (args.length >= 2) {
-            long memberId = (long) args[0];
-            long recordId = (long) args[1];
+            long memberId = (Long) args[0];
+            long recordId = (Long) args[1];
 
             // 전처리: 메트릭 수집 (예외 발생해도 비즈니스 로직은 1회만 실행)
             try {
