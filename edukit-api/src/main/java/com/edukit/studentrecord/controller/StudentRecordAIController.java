@@ -2,7 +2,6 @@ package com.edukit.studentrecord.controller;
 
 import com.edukit.common.EdukitResponse;
 import com.edukit.common.annotation.MemberId;
-import com.edukit.core.studentrecord.db.entity.StudentRecord;
 import com.edukit.core.studentrecord.exception.StudentRecordErrorCode;
 import com.edukit.core.studentrecord.exception.StudentRecordException;
 import com.edukit.core.studentrecord.service.StudentRecordService;
@@ -31,15 +30,12 @@ public class StudentRecordAIController implements StudentRecordAIApi {
 
     @PostMapping("/ai-generate/{recordId}")
     public ResponseEntity<EdukitResponse<StudentRecordTaskResponse>> aiGenerateStudentRecord(
-            @MemberId final long memberId,
-            @PathVariable final long recordId,
+            @MemberId final long memberId, @PathVariable final long recordId,
             @RequestBody @Valid final StudentRecordPromptRequest request) {
-        // 컨트롤러에서 직접 타입 조회 (1회 DB 조회)
-        StudentRecord studentRecord = studentRecordService.getRecordDetail(memberId, recordId);
 
-        // 타입과 함께 호출 (AOP에서 DB 조회 없음)
         StudentRecordTaskResponse response = studentRecordAIFacade.createTaskId(memberId, recordId,
-                studentRecord.getStudentRecordType(), request.byteCount(), request.prompt());
+                request.byteCount(), request.prompt()
+        );
         return ResponseEntity.ok(EdukitResponse.success(response));
     }
 
