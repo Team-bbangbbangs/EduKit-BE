@@ -44,6 +44,7 @@ public class StudentRecordController implements StudentRecordApi {
     public ResponseEntity<EdukitResponse<Void>> updateStudentRecord(@MemberId final long memberId,
                                                                     @PathVariable final long recordId,
                                                                     @RequestBody @Valid final StudentRecordUpdateRequest request) {
+        // 오버로드 메서드 사용 (내부에서 타입 조회)
         studentRecordFacade.updateStudentRecord(memberId, recordId, request.description());
         return ResponseEntity.ok().body(EdukitResponse.success());
     }

@@ -49,6 +49,14 @@ public class StudentRecordFacade {
         studentRecordService.updateStudentRecord(studentRecord, description);
     }
 
+    // 컨트롤러 호환성을 위한 오버로드 메서드
+    @Transactional
+    public void updateStudentRecord(final long memberId, final long recordId, final String description) {
+        StudentRecord studentRecord = studentRecordService.getRecordDetail(memberId, recordId);
+        // 타입을 조회한 후 메트릭 포함 메서드 호출
+        updateStudentRecord(memberId, recordId, studentRecord.getStudentRecordType(), description);
+    }
+
     @Transactional(readOnly = true)
     public StudentRecordDetailResponse getStudentRecord(final long memberId, final long recordId) {
         StudentRecord recordDetail = studentRecordService.getRecordDetail(memberId, recordId);
