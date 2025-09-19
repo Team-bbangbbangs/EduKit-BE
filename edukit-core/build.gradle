@@ -13,9 +13,6 @@ dependencies {
     // Jackson
     implementation 'com.fasterxml.jackson.core:jackson-databind'
 
-    // Spring Web for SSE support
-    implementation 'org.springframework.boot:spring-boot-starter-web'
-
     // JWT
     implementation 'io.jsonwebtoken:jjwt-api:0.11.5'
     implementation 'io.jsonwebtoken:jjwt-impl:0.11.5'
@@ -24,6 +21,9 @@ dependencies {
     // Apache POI for Excel file processing
     implementation 'org.apache.poi:poi:5.4.0'
     implementation 'org.apache.poi:poi-ooxml:5.4.0'
+
+    // Micrometer for metrics
+    implementation 'io.micrometer:micrometer-core'
 
     // QueryDSL
     implementation 'com.querydsl:querydsl-jpa:5.0.0:jakarta'

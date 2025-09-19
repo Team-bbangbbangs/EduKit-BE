@@ -10,8 +10,7 @@ dependencies {
     implementation project(':edukit-common')
     runtimeOnly project(':edukit-external')
 
-    // Spring Boot Web
-    implementation 'org.springframework.boot:spring-boot-starter-web'
+    // validation
     implementation 'org.springframework.boot:spring-boot-starter-validation'
 
     // Spring Boot Security
@@ -28,6 +27,9 @@ dependencies {
 
     // Prometheus Metrics
     implementation 'io.micrometer:micrometer-registry-prometheus'
+
+    // AOP Support for @Aspect
+    implementation 'org.springframework.boot:spring-boot-starter-aop'
 
     // Swagger
     implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.9'

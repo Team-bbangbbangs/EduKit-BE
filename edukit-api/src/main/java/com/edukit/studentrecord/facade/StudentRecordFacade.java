@@ -1,5 +1,6 @@
 package com.edukit.studentrecord.facade;
 
+import com.edukit.common.annotation.StudentRecordMetrics;
 import com.edukit.core.student.db.entity.Student;
 import com.edukit.core.student.service.ExcelService;
 import com.edukit.core.studentrecord.db.entity.StudentRecord;
@@ -41,10 +42,12 @@ public class StudentRecordFacade {
     }
 
     @Transactional
+    @StudentRecordMetrics
     public void updateStudentRecord(final long memberId, final long recordId, final String description) {
         StudentRecord studentRecord = studentRecordService.getRecordDetail(memberId, recordId);
         studentRecordService.updateStudentRecord(studentRecord, description);
     }
+
 
     @Transactional(readOnly = true)
     public StudentRecordDetailResponse getStudentRecord(final long memberId, final long recordId) {
