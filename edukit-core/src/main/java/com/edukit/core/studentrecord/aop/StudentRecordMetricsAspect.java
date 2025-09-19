@@ -28,7 +28,6 @@ public class StudentRecordMetricsAspect {
         Object[] args = joinPoint.getArgs();
 
         if (args.length >= 4) {
-            long memberId = (Long) args[0];
             long recordId = (Long) args[1];
             StudentRecordType recordType = (StudentRecordType) args[2];
             String description = (String) args[3];
@@ -40,7 +39,6 @@ public class StudentRecordMetricsAspect {
                         @Override
                         public void afterCommit() {
                             try {
-                                // 실제 커밋 성공 후에만 완료 메트릭 기록 (DB 조회 제거!)
                                 metricsService.recordCompletion(recordType, description);
 
                                 // 커밋 성공 후 생성 추적 정보 정리 (메모리 절약)
@@ -56,12 +54,13 @@ public class StudentRecordMetricsAspect {
                         @Override
                         public void afterCompletion(int status) {
                             if (status == STATUS_ROLLED_BACK) {
-                                log.debug("Transaction rolled back - completion metrics not recorded for recordId: {}", recordId);
+                                // 롤백 시에도 생성 추적 정보 정리 (메모리 누수 방지)
+                                generationTrackingService.clearRecord(recordId);
+                                log.debug("Transaction rolled back - cleared generation tracking for recordId: {}", recordId);
                             }
                         }
                     });
                 } else {
-                    // 트랜잭션이 없는 경우 즉시 실행 (테스트 환경 등)
                     metricsService.recordCompletion(recordType, description);
                     generationTrackingService.clearRecord(recordId);
                     log.warn("No transaction synchronization - recording metrics immediately for recordId: {}", recordId);
@@ -78,13 +77,10 @@ public class StudentRecordMetricsAspect {
         Object[] args = joinPoint.getArgs();
 
         if (args.length >= 3) {
-            long memberId = (Long) args[0];
             long recordId = (Long) args[1];
             StudentRecordType recordType = (StudentRecordType) args[2];
 
-            // 전처리: 메트릭 수집 (DB 조회 제거로 성능 개선!)
             try {
-                // 첫 생성 여부 확인 (이 호출로 카운트도 증가됨)
                 boolean isFirstGeneration = generationTrackingService.isFirstGeneration(recordId);
 
                 // 전체 AI 생성 요청 카운트

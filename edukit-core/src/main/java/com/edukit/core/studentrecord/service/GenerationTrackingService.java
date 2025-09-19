@@ -1,11 +1,11 @@
 package com.edukit.core.studentrecord.service;
 
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
-
 import java.time.LocalDateTime;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
+import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
 
 @Slf4j
 @Service
@@ -29,25 +29,14 @@ public class GenerationTrackingService {
         return isFirst;
     }
 
-    public int getGenerationCount(long recordId) {
-        GenerationInfo info = generationCounts.get(recordId);
-        return info != null ? info.getCount() : 0;
-    }
-
     public void clearRecord(long recordId) {
         generationCounts.remove(recordId);
         log.debug("Cleared generation tracking for recordId: {}", recordId);
     }
 
-    // 주기적으로 오래된 기록을 정리 (메모리 누수 방지)
-    public void cleanupOldRecords() {
-        LocalDateTime cutoff = LocalDateTime.now().minusDays(1);
-        generationCounts.entrySet().removeIf(entry ->
-            entry.getValue().getFirstGenerationTime().isBefore(cutoff));
-    }
-
     private static class GenerationInfo {
         private final AtomicInteger count;
+        @Getter
         private final LocalDateTime firstGenerationTime;
 
         public GenerationInfo(int initialCount, LocalDateTime firstGenerationTime) {
@@ -63,8 +52,5 @@ public class GenerationTrackingService {
             return count.get();
         }
 
-        public LocalDateTime getFirstGenerationTime() {
-            return firstGenerationTime;
-        }
     }
 }
