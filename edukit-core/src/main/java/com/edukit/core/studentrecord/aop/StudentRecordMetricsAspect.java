@@ -50,8 +50,11 @@ public class StudentRecordMetricsAspect {
         Object[] args = joinPoint.getArgs();
 
         if (args.length == 4) {
+            long memberId = (Long) args[0];
             long recordId = (Long) args[1];
-            StudentRecordType recordType = (StudentRecordType) args[2];
+
+            StudentRecord studentRecord = studentRecordService.getRecordDetail(memberId, recordId);
+            StudentRecordType recordType = studentRecord.getStudentRecordType();
 
             try {
                 boolean isFirstGeneration = recordGenerationTracker.isFirstGeneration(recordId);
