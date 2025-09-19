@@ -5,11 +5,11 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 
 @Slf4j
-@Service
-public class GenerationTrackingService {
+@Component
+public class RecordGenerationTracker {
 
     private final ConcurrentHashMap<Long, GenerationInfo> generationCounts = new ConcurrentHashMap<>();
 
@@ -27,11 +27,6 @@ public class GenerationTrackingService {
         log.debug("RecordId: {}, Generation count: {}, Is first: {}", recordId, info.getCount(), isFirst);
 
         return isFirst;
-    }
-
-    public void clearRecord(long recordId) {
-        generationCounts.remove(recordId);
-        log.debug("Cleared generation tracking for recordId: {}", recordId);
     }
 
     private static class GenerationInfo {

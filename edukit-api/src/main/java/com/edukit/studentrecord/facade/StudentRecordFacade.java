@@ -48,7 +48,6 @@ public class StudentRecordFacade {
         studentRecordService.updateStudentRecord(studentRecord, description);
     }
 
-
     @Transactional(readOnly = true)
     public StudentRecordDetailResponse getStudentRecord(final long memberId, final long recordId) {
         StudentRecord recordDetail = studentRecordService.getRecordDetail(memberId, recordId);
