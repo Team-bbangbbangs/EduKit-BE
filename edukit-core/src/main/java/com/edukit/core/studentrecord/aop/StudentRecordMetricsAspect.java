@@ -5,7 +5,9 @@ import com.edukit.core.studentrecord.service.StudentRecordMetricsService;
 import com.edukit.core.studentrecord.service.StudentRecordService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.ProceedingJoinPoint;
+import org.aspectj.lang.annotation.AfterReturning;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.springframework.stereotype.Component;
@@ -19,8 +21,8 @@ public class StudentRecordMetricsAspect {
     private final StudentRecordMetricsService metricsService;
     private final StudentRecordService studentRecordService;
 
-    @Around("@annotation(com.edukit.common.annotation.StudentRecordMetrics)")
-    public Object collectCompletionMetrics(final ProceedingJoinPoint joinPoint) throws Throwable {
+    @AfterReturning("@annotation(com.edukit.common.annotation.StudentRecordMetrics)")
+    public void collectCompletionMetrics(final JoinPoint joinPoint) {
         Object[] args = joinPoint.getArgs();
 
         if (args.length >= 3) {
@@ -31,19 +33,12 @@ public class StudentRecordMetricsAspect {
             try {
                 StudentRecord studentRecord = studentRecordService.getRecordDetail(memberId, recordId);
 
-                Object result = joinPoint.proceed();
-
                 metricsService.recordCompletion(studentRecord.getStudentRecordType(), description);
-
-                return result;
 
             } catch (Exception e) {
                 log.error("Error collecting student record completion metrics", e);
-                return joinPoint.proceed();
             }
         }
-
-        return joinPoint.proceed();
     }
 
     @Around("@annotation(com.edukit.common.annotation.AIGenerationMetrics)")
