@@ -1,13 +1,10 @@
 package com.edukit.core.studentrecord.service;
 
 import com.edukit.core.studentrecord.db.enums.StudentRecordType;
-import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
-import io.micrometer.core.instrument.Tags;
+import java.nio.charset.StandardCharsets;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
-
-import java.nio.charset.StandardCharsets;
 
 @Component
 @RequiredArgsConstructor
@@ -22,35 +19,27 @@ public class StudentRecordMetricsService {
 
     public void recordCompletion(final StudentRecordType type, final String description) {
         if (isCompleted(type, description)) {
-            Counter.builder(COMPLETION_METRIC)
-                    .description("Total number of completed student records")
-                    .tags(Tags.of("type", type.name(), "action", "completion"))
-                    .register(meterRegistry)
+            meterRegistry.counter(COMPLETION_METRIC,
+                    "type", type.name(), "action", "completion")
                     .increment();
         }
     }
 
     public void recordAIGenerationRequest(final StudentRecordType type) {
-        Counter.builder(AI_GENERATION_REQUEST_METRIC)
-                .description("Total number of AI generation requests for student records")
-                .tags(Tags.of("type", type.name(), "action", "ai_generation"))
-                .register(meterRegistry)
+        meterRegistry.counter(AI_GENERATION_REQUEST_METRIC,
+                "type", type.name(), "action", "ai_generation")
                 .increment();
     }
 
     public void recordFirstGeneration(final StudentRecordType type) {
-        Counter.builder(AI_FIRST_GENERATION_METRIC)
-                .description("Total number of first AI generation requests")
-                .tags(Tags.of("type", type.name(), "action", "first_generation"))
-                .register(meterRegistry)
+        meterRegistry.counter(AI_FIRST_GENERATION_METRIC,
+                "type", type.name(), "action", "first_generation")
                 .increment();
     }
 
     public void recordRegeneration(final StudentRecordType type) {
-        Counter.builder(AI_REGENERATION_METRIC)
-                .description("Total number of AI regeneration requests")
-                .tags(Tags.of("type", type.name(), "action", "regeneration"))
-                .register(meterRegistry)
+        meterRegistry.counter(AI_REGENERATION_METRIC,
+                "type", type.name(), "action", "regeneration")
                 .increment();
     }
 

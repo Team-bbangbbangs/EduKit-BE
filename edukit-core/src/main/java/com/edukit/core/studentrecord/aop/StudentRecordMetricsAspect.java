@@ -52,7 +52,7 @@ public class StudentRecordMetricsAspect {
                                 log.debug("Completion metrics recorded after transaction commit for recordId: {}", recordId);
 
                             } catch (Exception e) {
-                                log.error("Error collecting completion metrics after commit for recordId: {}", recordId, e);
+                                log.warn("Error collecting completion metrics after commit for recordId: {}", recordId, e);
                             }
                         }
 
@@ -71,7 +71,7 @@ public class StudentRecordMetricsAspect {
                 }
 
             } catch (Exception e) {
-                log.error("Error setting up completion metrics collection", e);
+                log.warn("Error setting up completion metrics collection", e);
             }
         }
     }
@@ -105,7 +105,7 @@ public class StudentRecordMetricsAspect {
 
             } catch (Exception e) {
                 // 메트릭 수집 실패는 로그만 남기고 비즈니스 로직은 계속 진행
-                log.error("Error collecting AI generation metrics for recordId: {}", recordId, e);
+                log.warn("Error collecting AI generation metrics for recordId: {}", recordId, e);
             }
         }
 
