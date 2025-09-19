@@ -17,6 +17,8 @@ public class StudentRecordMetricsService {
 
     private static final String COMPLETION_METRIC = "student_record_completion_total";
     private static final String AI_GENERATION_REQUEST_METRIC = "student_record_ai_generation_requests_total";
+    private static final String AI_FIRST_GENERATION_METRIC = "student_record_ai_first_generation_total";
+    private static final String AI_REGENERATION_METRIC = "student_record_ai_regeneration_total";
 
     public void recordCompletion(final StudentRecordType type, final String description) {
         if (isCompleted(type, description)) {
@@ -32,6 +34,22 @@ public class StudentRecordMetricsService {
         Counter.builder(AI_GENERATION_REQUEST_METRIC)
                 .description("Total number of AI generation requests for student records")
                 .tags(Tags.of("type", type.name(), "action", "ai_generation"))
+                .register(meterRegistry)
+                .increment();
+    }
+
+    public void recordFirstGeneration(final StudentRecordType type) {
+        Counter.builder(AI_FIRST_GENERATION_METRIC)
+                .description("Total number of first AI generation requests")
+                .tags(Tags.of("type", type.name(), "action", "first_generation"))
+                .register(meterRegistry)
+                .increment();
+    }
+
+    public void recordRegeneration(final StudentRecordType type) {
+        Counter.builder(AI_REGENERATION_METRIC)
+                .description("Total number of AI regeneration requests")
+                .tags(Tags.of("type", type.name(), "action", "regeneration"))
                 .register(meterRegistry)
                 .increment();
     }
