@@ -153,12 +153,20 @@ jobs:
 
       - name: Switch nginx upstream and reload
         run: |
+          # 1️⃣ nginx 컨테이너 체크 & 실행
+          if ! docker ps --format '{{.Names}}' | grep -q '^nginx$'; then
+            echo "nginx not running. starting with docker-compose..."
+            docker-compose -f docker-compose.dev.yml up -d nginx
+          fi
+
+          # 2️⃣ 신규 target 결정
           if [ "${{ steps.current.outputs.CURRENT }}" = "blue" ]; then
             NEW_TARGET="app-green:8080"
           else
             NEW_TARGET="app-blue:8080"
           fi
 
+          # 3️⃣ nginx 설정 변경 & reload
           docker exec nginx bash -c \
             "echo 'set \$service_url $NEW_TARGET;' > /etc/nginx/conf.d/service-url.inc && nginx -t && nginx -s reload"
 
