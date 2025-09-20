@@ -48,6 +48,10 @@ This agent should be used when:
 --     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 --     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 -- );
+
+-- Manual Rollback Guide (Flyway Community Edition):
+-- To rollback this migration, manually execute:
+-- DROP TABLE example_table;
 ```
 
 ## Expected Output
@@ -55,4 +59,4 @@ This agent should be used when:
 - MySQL-compatible SQL syntax
 - Appropriate indexes and constraints
 - Timezone-aware timestamp handling
-- Rollback scripts when applicable
+- Manual rollback guidance (Flyway Community Edition)
