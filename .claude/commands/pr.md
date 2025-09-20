@@ -17,23 +17,20 @@ Automatically creates pull requests with comprehensive summaries, test plans, an
 
 ## PR Template Format
 ```markdown
-## Summary
-- 🎯 **목적**: {Purpose of the changes}
-- 🔧 **변경사항**: {Key changes made}
-- 📋 **Jira 티켓**: [EDMT-XXX](jira-ticket-url)
+## 📣 Jira Ticket
+<!-- 지라 티켓 번호를 작성해주세요 -->
+[EDMT-]
 
-## Changes
-### 🆕 New Features
-- {List of new features}
 
-### 🐛 Bug Fixes
-- {List of bug fixes}
+## 👩‍💻 작업 내용
 
-### 🔄 Refactoring
-- {List of refactoring changes}
+<!-- 작업 내용을 적어주세요 -->
 
-### 📚 Documentation
-- {Documentation updates}
+## 📝 리뷰 요청 & 논의하고 싶은 내용
+
+<!-- PR과정에서 든 생각이나 개선할 내용이 있다면 적어주세요. -->
+
+## 📸 스크린 샷 (선택)
 
 ## Test Plan
 ### ✅ Manual Testing Checklist
