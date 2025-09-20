@@ -47,7 +47,7 @@ class UserServiceTest {
 
 // Controller Integration Tests
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@TestPropertySource(properties = "spring.profiles.active=test")
+@ActiveProfiles("test")  // REQUIRED: Always use test profile
 class UserControllerIntegrationTest {
     // JWT authentication tests
     // CORS tests
@@ -59,7 +59,7 @@ class UserControllerIntegrationTest {
 ```java
 // JPA Repository Tests
 @DataJpaTest
-@TestPropertySource(properties = "spring.jpa.hibernate.ddl-auto=create-drop")
+@ActiveProfiles("test")  // REQUIRED: Always use test profile
 class UserRepositoryTest {
     // Transaction isolation tests
     // Deadlock prevention tests
@@ -126,19 +126,11 @@ void shouldSanitizeUserInput(String maliciousInput) {
 ## Test Configuration Templates
 
 ### 🔧 Test Properties
-```yaml
-# application-test.yml
-spring:
-  datasource:
-    url: jdbc:h2:mem:testdb
-    driver-class-name: org.h2.Driver
-  redis:
-    host: localhost
-    port: 6370  # Different from prod
-  security:
-    jwt:
-      secret: test-secret-key-for-testing-only
-```
+**Use existing `edukit-api/src/test/resources/application-test.yml`**
+- MySQL on port 3307 (container-based)
+- Redis on port 6370 (container-based)
+- Mock AWS services
+- Test JWT configuration
 
 ### 📦 Test Dependencies
 ```gradle
@@ -166,6 +158,11 @@ This agent should be used when:
 4. **Generate Test Matrix**: Cover all scenarios systematically
 5. **Create Test Data**: Realistic test datasets
 6. **Validate Coverage**: Ensure high code coverage
+
+## ⚠️ MANDATORY TEST REQUIREMENTS
+- **ALL test classes MUST use `@ActiveProfiles("test")`**
+- **NO test should run without test profile**
+- **Always verify test uses application-test.yml configuration**
 
 ## Expected Output
 - Complete test classes with proper annotations
