@@ -12,7 +12,7 @@ Automatically analyzes staged changes and generates appropriate commit messages 
 - Generates commit messages in EduKit format: `[prefix] descriptive message`
 - Follows conventional commit patterns
 - Includes Korean descriptions when appropriate for Korean team members
-- Automatically stages relevant files if needed
+- **SAFETY**: Only commits already staged files (no auto-staging by default)
 
 ## Commit Message Patterns
 - `[feat] 새로운 기능: {feature description}` - for new features
@@ -48,9 +48,27 @@ Co-Authored-By: Claude <noreply@anthropic.com>
 ```
 
 ## Expected Behavior
-1. Analyze current git status and staged changes
-2. Determine the primary type of changes
-3. Extract or prompt for Jira ticket number if not found
-4. Generate descriptive commit message
-5. Execute git commit with generated message
-6. Include Claude Code attribution
+1. **Check for staged changes** - abort if nothing staged
+2. Analyze current git status and staged changes only
+3. Determine the primary type of changes
+4. Extract or prompt for Jira ticket number if not found
+5. Generate descriptive commit message
+6. Execute git commit with generated message
+7. Include Claude Code attribution
+
+## Safety Options
+- Default: Only commit staged files
+- `--stage`: Interactive staging with `git add -p`
+- `--stage-all`: Stage all modified files (use with caution)
+
+## Usage Examples
+```bash
+# Safe default - only staged files
+/commit
+
+# Interactive staging first
+/commit --stage
+
+# Stage all (dangerous - requires confirmation)
+/commit --stage-all
+```
