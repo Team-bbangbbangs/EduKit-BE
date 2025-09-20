@@ -12,7 +12,7 @@ Automatically creates pull requests with comprehensive summaries, test plans, an
 - Creates comprehensive test plan based on changes
 - Includes Jira ticket references
 - Follows EduKit's PR template format
-- Automatically pushes branch if needed
+- **SAFETY**: Requires user confirmation before pushing to remote
 - Uses Korean descriptions when appropriate
 
 ## PR Template Format
@@ -84,6 +84,23 @@ Automatically creates pull requests with comprehensive summaries, test plans, an
 3. Analyze changed files and commit messages
 4. Extract Jira ticket numbers
 5. Generate comprehensive PR title and description
-6. Push branch to remote if needed
-7. Create PR using GitHub CLI
+6. **Check if branch needs pushing** - ask user for confirmation
+7. Create PR using GitHub CLI (only if remote branch exists)
 8. Return PR URL for easy access
+
+## Safety Options
+- Default: No automatic pushing - user confirmation required
+- `--push`: Auto-push without confirmation (use with caution)
+- `--no-push`: Create PR draft only (local analysis)
+
+## Usage Examples
+```bash
+# Safe default - asks before pushing
+/pr
+
+# Auto-push (use carefully)
+/pr --push
+
+# Analysis only, no remote operations
+/pr --no-push
+```
