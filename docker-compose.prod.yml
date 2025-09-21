@@ -6,10 +6,10 @@ services:
       PROFILE: prod
       TZ: Asia/Seoul
       HOSTNAME: ${HOSTNAME_BLUE:-prod-1-blue}
-      JAVA_OPTS: "-javaagent:/app/jmx_prometheus_javaagent.jar=8081:/app/jmx-config.yml"
+      JAVA_OPTS: "-javaagent:/app/jmx_prometheus_javaagent.jar=9081:/app/jmx-config.yml"
     ports:
       - "8080:8080"
-      - "8081:8081"
+      - "9081:9081"
     env_file:
       - .env
     restart: always
@@ -27,10 +27,10 @@ services:
       PROFILE: prod
       TZ: Asia/Seoul
       HOSTNAME: ${HOSTNAME_GREEN:-prod-1-green}
-      JAVA_OPTS: "-javaagent:/app/jmx_prometheus_javaagent.jar=8082:/app/jmx-config.yml"
+      JAVA_OPTS: "-javaagent:/app/jmx_prometheus_javaagent.jar=9082:/app/jmx-config.yml"
     ports:
       - "8081:8080"
-      - "8082:8082"
+      - "9082:9082"
     env_file:
       - .env
     restart: always
