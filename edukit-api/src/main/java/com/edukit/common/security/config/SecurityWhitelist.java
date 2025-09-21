@@ -15,7 +15,9 @@ public class SecurityWhitelist {
             "/api/v2/auth/find-password",
             "/api/v1/auth/nickname",
             "/actuator/health",
-            "/actuator/prometheus"
+            "/actuator/prometheus",
+            "/actuator/metrics",
+            "/metrics"
     };
 
     static final String[] BUSINESS_WHITE_LIST = {
