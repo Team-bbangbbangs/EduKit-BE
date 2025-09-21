@@ -1,4 +1,4 @@
-package com.edukit.core.studentrecord.service;
+package com.edukit.core.studentrecord.metric;
 
 import java.util.Collections;
 import lombok.RequiredArgsConstructor;
