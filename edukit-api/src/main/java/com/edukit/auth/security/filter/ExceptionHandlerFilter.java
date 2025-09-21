@@ -1,9 +1,9 @@
-package com.edukit.common.security.filter;
+package com.edukit.auth.security.filter;
 
 import com.edukit.common.EdukitResponse;
 import com.edukit.common.exception.BusinessException;
 import com.edukit.common.exception.ErrorCode;
-import com.edukit.common.security.utils.AllowedOriginValidator;
+import com.edukit.auth.security.utils.AllowedOriginValidator;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.http.HttpServletRequest;

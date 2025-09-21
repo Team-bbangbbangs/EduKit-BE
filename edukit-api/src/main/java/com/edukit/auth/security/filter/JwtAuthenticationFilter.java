@@ -1,8 +1,8 @@
-package com.edukit.common.security.filter;
+package com.edukit.auth.security.filter;
 
-import com.edukit.common.security.authentication.MemberAuthentication;
-import com.edukit.common.security.authentication.MemberDetailReader;
-import com.edukit.common.security.config.SecurityWhitelist;
+import com.edukit.auth.security.authentication.MemberAuthentication;
+import com.edukit.auth.security.authentication.MemberDetailReader;
+import com.edukit.auth.security.config.SecurityWhitelist;
 import com.edukit.core.auth.service.JwtTokenService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;

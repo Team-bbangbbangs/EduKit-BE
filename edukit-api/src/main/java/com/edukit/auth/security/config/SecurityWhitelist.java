@@ -1,4 +1,4 @@
-package com.edukit.common.security.config;
+package com.edukit.auth.security.config;
 
 import java.util.ArrayList;
 import java.util.Arrays;
