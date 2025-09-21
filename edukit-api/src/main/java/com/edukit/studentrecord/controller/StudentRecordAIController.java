@@ -4,6 +4,7 @@ import com.edukit.common.EdukitResponse;
 import com.edukit.common.annotation.MemberId;
 import com.edukit.core.studentrecord.exception.StudentRecordErrorCode;
 import com.edukit.core.studentrecord.exception.StudentRecordException;
+import com.edukit.core.studentrecord.service.StudentRecordService;
 import com.edukit.studentrecord.controller.request.StudentRecordPromptRequest;
 import com.edukit.studentrecord.facade.StudentRecordAIFacade;
 import com.edukit.studentrecord.facade.response.StudentRecordTaskResponse;
@@ -25,14 +26,16 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 public class StudentRecordAIController implements StudentRecordAIApi {
 
     private final StudentRecordAIFacade studentRecordAIFacade;
+    private final StudentRecordService studentRecordService;
 
     @PostMapping("/ai-generate/{recordId}")
     public ResponseEntity<EdukitResponse<StudentRecordTaskResponse>> aiGenerateStudentRecord(
-            @MemberId final long memberId,
-            @PathVariable final long recordId,
+            @MemberId final long memberId, @PathVariable final long recordId,
             @RequestBody @Valid final StudentRecordPromptRequest request) {
+
         StudentRecordTaskResponse response = studentRecordAIFacade.createTaskId(memberId, recordId,
-                request.byteCount(), request.prompt());
+                request.byteCount(), request.prompt()
+        );
         return ResponseEntity.ok(EdukitResponse.success(response));
     }
 
