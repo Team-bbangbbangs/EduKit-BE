@@ -1,14 +1,22 @@
 rules:
-  # Tomcat Thread Pool metrics
-  - pattern: 'Catalina<type=ThreadPool, name="(\w+)"><>(currentThreadCount|currentThreadsBusy|maxThreads|connectionCount): (\d+)'
+  # Tomcat Thread Pool GAUGE metrics (current state)
+  - pattern: 'Catalina<type=ThreadPool, name="([^"]+)"><>(currentThreadCount|currentThreadsBusy|maxThreads): (\d+)'
+    name: tomcat_threads_$2
+    labels:
+      port: "$1"
+    help: Tomcat thread pool current state metrics
+    type: GAUGE
+
+  # Tomcat Thread Pool COUNTER metrics (cumulative)
+  - pattern: 'Catalina<type=ThreadPool, name="([^"]+)"><>(connectionCount): (\d+)'
     name: tomcat_threads_$2_total
     labels:
       port: "$1"
-    help: Tomcat thread pool metrics
-    type: GAUGE
+    help: Tomcat thread pool cumulative metrics
+    type: COUNTER
 
   # Tomcat Connector metrics
-  - pattern: 'Catalina<type=GlobalRequestProcessor, name="(\w+)"><>(requestCount|bytesReceived|bytesSent): (\d+)'
+  - pattern: 'Catalina<type=GlobalRequestProcessor, name="([^"]+)"><>(requestCount|bytesReceived|bytesSent): (\d+)'
     name: tomcat_connector_$2_total
     labels:
       port: "$1"
