@@ -1,0 +1,64 @@
+rules:
+  # Tomcat Thread Pool metrics
+  - pattern: 'Catalina<type=ThreadPool, name="(\w+)"><>(currentThreadCount|currentThreadsBusy|maxThreads|connectionCount): (\d+)'
+    name: tomcat_threads_$2_total
+    labels:
+      port: "$1"
+    help: Tomcat thread pool metrics
+    type: GAUGE
+
+  # Tomcat Connector metrics
+  - pattern: 'Catalina<type=GlobalRequestProcessor, name="(\w+)"><>(requestCount|bytesReceived|bytesSent): (\d+)'
+    name: tomcat_connector_$2_total
+    labels:
+      port: "$1"
+    help: Tomcat connector metrics
+    type: COUNTER
+
+  # JVM Memory metrics
+  - pattern: 'java.lang<type=Memory><>HeapMemoryUsage.(\w+): (\d+)'
+    name: jvm_memory_heap_$1_bytes
+    help: JVM heap memory usage
+    type: GAUGE
+
+  - pattern: 'java.lang<type=Memory><>NonHeapMemoryUsage.(\w+): (\d+)'
+    name: jvm_memory_nonheap_$1_bytes
+    help: JVM non-heap memory usage
+    type: GAUGE
+
+  # GC metrics
+  - pattern: 'java.lang<type=GarbageCollector, name=(.+)><>CollectionCount: (\d+)'
+    name: jvm_gc_collections_total
+    labels:
+      gc: "$1"
+    help: JVM garbage collection count
+    type: COUNTER
+
+  - pattern: 'java.lang<type=GarbageCollector, name=(.+)><>CollectionTime: (\d+)'
+    name: jvm_gc_collection_time_milliseconds_total
+    labels:
+      gc: "$1"
+    help: JVM garbage collection time
+    type: COUNTER
+
+  # CPU metrics
+  - pattern: 'java.lang<type=OperatingSystem><>ProcessCpuLoad: (.+)'
+    name: jvm_process_cpu_load_ratio
+    help: JVM process CPU load
+    type: GAUGE
+
+  - pattern: 'java.lang<type=OperatingSystem><>SystemCpuLoad: (.+)'
+    name: jvm_system_cpu_load_ratio
+    help: System CPU load
+    type: GAUGE
+
+  # Thread metrics
+  - pattern: 'java.lang<type=Threading><>ThreadCount: (\d+)'
+    name: jvm_threads_current
+    help: Current thread count
+    type: GAUGE
+
+  - pattern: 'java.lang<type=Threading><>DaemonThreadCount: (\d+)'
+    name: jvm_threads_daemon
+    help: Daemon thread count
+    type: GAUGE
