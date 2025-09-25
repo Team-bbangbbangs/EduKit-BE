@@ -1,4 +1,4 @@
-package com.edukit.auth.security.authentication;
+package com.edukit.common.security.authentication;
 
 import com.edukit.core.member.db.entity.Member;
 import com.edukit.core.member.db.enums.MemberRole;

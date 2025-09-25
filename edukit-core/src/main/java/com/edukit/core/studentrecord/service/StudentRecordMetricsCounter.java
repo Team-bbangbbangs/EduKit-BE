@@ -1,4 +1,4 @@
-package com.edukit.core.studentrecord.metric;
+package com.edukit.core.studentrecord.service;
 
 import com.edukit.core.studentrecord.db.enums.StudentRecordType;
 import io.micrometer.core.instrument.MeterRegistry;

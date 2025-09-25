@@ -1,4 +1,4 @@
-package com.edukit.auth.security.handler;
+package com.edukit.common.security.handler;
 
 import com.edukit.core.auth.service.jwt.setting.JwtProperties;
 import java.time.Duration;

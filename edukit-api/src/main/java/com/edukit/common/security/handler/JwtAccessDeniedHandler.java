@@ -1,7 +1,7 @@
-package com.edukit.auth.security.handler;
+package com.edukit.common.security.handler;
 
 import com.edukit.common.EdukitResponse;
-import com.edukit.auth.security.utils.AllowedOriginValidator;
+import com.edukit.common.security.utils.AllowedOriginValidator;
 import com.edukit.core.auth.exception.AuthErrorCode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
@@ -10,13 +10,13 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
-import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.web.AuthenticationEntryPoint;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
-public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
+public class JwtAccessDeniedHandler implements AccessDeniedHandler {
 
     private final AllowedOriginValidator allowedOriginValidator;
 
@@ -27,8 +27,8 @@ public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
     private static final ObjectMapper objectMapper = new ObjectMapper();
 
     @Override
-    public void commence(final HttpServletRequest request, final HttpServletResponse response,
-                         final AuthenticationException authException) throws IOException {
+    public void handle(final HttpServletRequest request, final HttpServletResponse response,
+                       final AccessDeniedException accessDeniedException) throws IOException {
         handleException(request, response);
     }
 
@@ -54,8 +54,8 @@ public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
         }
 
         response.getWriter().write(objectMapper.writeValueAsString(
-                EdukitResponse.fail(AuthErrorCode.UNAUTHORIZED_MEMBER.getCode(),
-                        AuthErrorCode.UNAUTHORIZED_MEMBER.getMessage()))
+                EdukitResponse.fail(AuthErrorCode.FORBIDDEN_MEMBER.getCode(),
+                        AuthErrorCode.FORBIDDEN_MEMBER.getMessage()))
         );
     }
 

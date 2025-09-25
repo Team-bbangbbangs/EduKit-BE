@@ -163,6 +163,3 @@ Temporary Items
 
 ### log file ###
 *.log
-
-### JMX Prometheus Agent ###
-jmx_prometheus_javaagent*.jar

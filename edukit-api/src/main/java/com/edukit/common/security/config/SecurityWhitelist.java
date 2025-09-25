@@ -1,4 +1,4 @@
-package com.edukit.auth.security.config;
+package com.edukit.common.security.config;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -15,9 +15,7 @@ public class SecurityWhitelist {
             "/api/v2/auth/find-password",
             "/api/v1/auth/nickname",
             "/actuator/health",
-            "/actuator/prometheus",
-            "/actuator/metrics",
-            "/metrics"
+            "/actuator/prometheus"
     };
 
     static final String[] BUSINESS_WHITE_LIST = {

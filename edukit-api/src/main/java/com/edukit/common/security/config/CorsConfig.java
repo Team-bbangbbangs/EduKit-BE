@@ -1,4 +1,4 @@
-package com.edukit.auth.security.config;
+package com.edukit.common.security.config;
 
 import java.util.List;
 import org.springframework.beans.factory.annotation.Value;

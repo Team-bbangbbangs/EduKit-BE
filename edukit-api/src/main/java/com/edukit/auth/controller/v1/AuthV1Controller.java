@@ -1,6 +1,6 @@
 package com.edukit.auth.controller.v1;
 
-import static com.edukit.auth.security.handler.RefreshTokenCookieHandler.REFRESH_TOKEN_COOKIE_NAME;
+import static com.edukit.common.security.handler.RefreshTokenCookieHandler.REFRESH_TOKEN_COOKIE_NAME;
 
 import com.edukit.auth.controller.request.MemberLoginRequest;
 import com.edukit.auth.controller.request.MemberSignUpRequest;
@@ -10,7 +10,7 @@ import com.edukit.auth.facade.response.MemberReissueResponse;
 import com.edukit.auth.facade.response.MemberSignUpResponse;
 import com.edukit.common.EdukitResponse;
 import com.edukit.common.annotation.MemberId;
-import com.edukit.auth.security.handler.RefreshTokenCookieHandler;
+import com.edukit.common.security.handler.RefreshTokenCookieHandler;
 import com.edukit.core.member.db.enums.School;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

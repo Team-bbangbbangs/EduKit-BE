@@ -1,9 +1,9 @@
-package com.edukit.auth.security.config;
+package com.edukit.common.security.config;
 
-import com.edukit.auth.security.filter.ExceptionHandlerFilter;
-import com.edukit.auth.security.filter.JwtAuthenticationFilter;
-import com.edukit.auth.security.handler.JwtAccessDeniedHandler;
-import com.edukit.auth.security.handler.JwtAuthenticationEntryPoint;
+import com.edukit.common.security.filter.ExceptionHandlerFilter;
+import com.edukit.common.security.filter.JwtAuthenticationFilter;
+import com.edukit.common.security.handler.JwtAccessDeniedHandler;
+import com.edukit.common.security.handler.JwtAuthenticationEntryPoint;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
