@@ -6,19 +6,16 @@ services:
       PROFILE: prod
       TZ: Asia/Seoul
       HOSTNAME: ${HOSTNAME_BLUE:-prod-1-blue}
-      JAVA_OPTS: "-javaagent:/app/jmx_prometheus_javaagent.jar=9081:/app/jmx-config.yml"
     ports:
       - "8080:8080"
-      - "9081:9081"
     env_file:
       - .env
     restart: always
     volumes:
       - ./log/blue:/log
-      - /opt/jmx_prometheus_javaagent.jar:/app/jmx_prometheus_javaagent.jar
-      - ./jmx-config.yml:/app/jmx-config.yml
     networks:
       - app-network
+    entrypoint: ["sh", "-c", "java $$JAVA_OPTS -Duser.timezone=Asia/Seoul -Dspring.profiles.active=prod -jar /app.jar"]
 
   app-green:
     container_name: app-green
@@ -27,19 +24,16 @@ services:
       PROFILE: prod
       TZ: Asia/Seoul
       HOSTNAME: ${HOSTNAME_GREEN:-prod-1-green}
-      JAVA_OPTS: "-javaagent:/app/jmx_prometheus_javaagent.jar=9082:/app/jmx-config.yml"
     ports:
       - "8081:8080"
-      - "9082:9082"
     env_file:
       - .env
     restart: always
     volumes:
       - ./log/green:/log
-      - /opt/jmx_prometheus_javaagent.jar:/app/jmx_prometheus_javaagent.jar
-      - ./jmx-config.yml:/app/jmx-config.yml
     networks:
       - app-network
+    entrypoint: ["sh", "-c", "java $$JAVA_OPTS -Duser.timezone=Asia/Seoul -Dspring.profiles.active=prod -jar /app.jar"]
 
   nginx:
     container_name: nginx
