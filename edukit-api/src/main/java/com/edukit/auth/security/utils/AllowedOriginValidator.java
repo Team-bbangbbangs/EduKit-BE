@@ -1,4 +1,4 @@
-package com.edukit.common.security.utils;
+package com.edukit.auth.security.utils;
 
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.stereotype.Component;

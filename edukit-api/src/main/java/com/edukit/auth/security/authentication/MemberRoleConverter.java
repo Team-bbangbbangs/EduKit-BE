@@ -1,4 +1,4 @@
-package com.edukit.common.security.authentication;
+package com.edukit.auth.security.authentication;
 
 import com.edukit.core.member.db.enums.MemberRole;
 import java.util.Collection;
