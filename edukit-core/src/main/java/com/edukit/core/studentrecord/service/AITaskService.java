@@ -18,6 +18,7 @@ public class AITaskService {
     @Transactional
     public StudentRecordAITask createAITask(final Member member, final String prompt) {
         StudentRecordAITask aiTask = StudentRecordAITask.create(member, prompt);
+        aiTask.start();
         aiTaskRepository.save(aiTask);
         return aiTask;
     }
