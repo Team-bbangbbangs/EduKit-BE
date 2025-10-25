@@ -147,7 +147,11 @@ public class Member extends BaseTimeEntity {
         this.role = MemberRole.PENDING_TEACHER;
     }
 
-    public void deductPoints(final int pointsToDeduct) {
-        this.point -= pointsToDeduct;
+    public void deductPoints(final int point) {
+        this.point -= point;
+    }
+
+    public void addPoints(final int point) {
+        this.point += point;
     }
 }
