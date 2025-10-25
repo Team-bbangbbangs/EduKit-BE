@@ -1,5 +1,6 @@
 package com.edukit.core.studentrecord.db.enums;
 
+import java.util.Arrays;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
@@ -11,4 +12,11 @@ public enum AIErrorType {
     UNKNOWN_ERROR("알 수 없는 오류");
 
     private final String description;
+
+    public static AIErrorType fromString(final String value) {
+        return Arrays.stream(AIErrorType.values())
+                .filter(type -> type.name().equalsIgnoreCase(value))
+                .findFirst()
+                .orElse(UNKNOWN_ERROR);
+    }
 }
