@@ -139,21 +139,21 @@ public class RedisStreamConsumer {
     }
 
     private void handleAITaskFailure(final String taskId, final AIErrorMessage errorMessage) {
+        log.warn("AI task failed - taskId: {}, errorType: {}, message: {}",
+                taskId, errorMessage.errorType(), errorMessage.errorMessage());
+
+        // 보상 트랜잭션 이벤트 발행 (실패 시 예외를 상위로 전파하여 재처리)
+        applicationEventPublisher.publishEvent(
+                AITaskFailedEvent.fromErrorMessage(errorMessage)
+        );
+
+        // SSE로 실패 알림 전송 (실패해도 보상 로직에 영향 없음)
         try {
-            log.warn("AI task failed - taskId: {}, errorType: {}, message: {}",
-                    taskId, errorMessage.errorType(), errorMessage.errorMessage());
-
-            // 보상 트랜잭션 이벤트 발행
-            applicationEventPublisher.publishEvent(
-                    AITaskFailedEvent.fromErrorMessage(errorMessage)
-            );
-
-            // SSE로 실패 알림 전송
             if (sseChannelManager.hasActivateChannel(taskId)) {
                 sseChannelManager.sendErrorMessage(taskId, errorMessage);
             }
         } catch (Exception e) {
-            log.error("Failed to handle AI task failure for taskId: {}", taskId, e);
+            log.error("Failed to send SSE error message for taskId: {}, continuing with compensation", taskId, e);
         }
     }
 
