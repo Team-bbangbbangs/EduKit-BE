@@ -8,7 +8,8 @@ create table point_history
     task_id          bigint                                                                 null,
     created_at       datetime(6)                                                            not null,
     modified_at      datetime(6)                                                            null,
-    constraint FK_point_history_member foreign key (member_id) references member (member_id)
+    constraint FK_point_history_member foreign key (member_id) references member (member_id),
+    constraint CHK_point_history_amount_positive check (amount > 0)
 );
 
 -- Composite index for member's recent history queries (most common use case)
