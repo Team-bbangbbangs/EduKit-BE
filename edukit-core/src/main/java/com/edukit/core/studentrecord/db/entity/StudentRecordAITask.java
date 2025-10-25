@@ -3,8 +3,11 @@ package com.edukit.core.studentrecord.db.entity;
 import static jakarta.persistence.FetchType.LAZY;
 
 import com.edukit.core.member.db.entity.Member;
+import com.edukit.core.studentrecord.db.enums.AIErrorType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -39,6 +42,12 @@ public class StudentRecordAITask {
 
     private LocalDateTime completedAt;
 
+    private LocalDateTime failedAt;
+
+    @Enumerated(EnumType.STRING)
+    @Column(length = 50)
+    private AIErrorType errorType;
+
     @Builder(access = AccessLevel.PRIVATE)
     private StudentRecordAITask(final Member member, final String prompt, final LocalDateTime startedAt) {
         this.member = member;
@@ -59,5 +68,10 @@ public class StudentRecordAITask {
 
     public void complete() {
         this.completedAt = LocalDateTime.now();
+    }
+
+    public void markAsFailed(final AIErrorType errorType) {
+        this.failedAt = LocalDateTime.now();
+        this.errorType = errorType;
     }
 }
