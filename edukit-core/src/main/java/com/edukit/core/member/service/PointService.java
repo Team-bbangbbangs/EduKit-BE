@@ -1,6 +1,7 @@
 package com.edukit.core.member.service;
 
 import com.edukit.core.member.db.entity.Member;
+import com.edukit.core.member.db.repository.MemberRepository;
 import com.edukit.core.member.exception.MemberErrorCode;
 import com.edukit.core.member.exception.MemberException;
 import lombok.RequiredArgsConstructor;
@@ -11,13 +12,16 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class PointService {
 
-    private static final int MINIMUM_REQUIRED_POINTS = 100;
+    private final MemberRepository memberRepository;
 
-    @Transactional(readOnly = true)
-    public void deductPoints(final Member member, final int pointsToDeduct) {
-        int point = member.getPoint();
+    @Transactional
+    public void deductPoints(final Long memberId, final int pointsToDeduct) {
+        Member member = memberRepository.findByIdWithLock(memberId)
+                .orElseThrow(() -> new MemberException(MemberErrorCode.MEMBER_NOT_FOUND));
 
-        if (point < MINIMUM_REQUIRED_POINTS) {
+        int currentPoint = member.getPoint();
+
+        if (currentPoint < pointsToDeduct) {
             throw new MemberException(MemberErrorCode.INSUFFICIENT_POINTS);
         }
 
