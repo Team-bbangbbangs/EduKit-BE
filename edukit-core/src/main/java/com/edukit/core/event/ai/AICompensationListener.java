@@ -9,10 +9,9 @@ import java.time.Duration;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
+import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.event.TransactionPhase;
-import org.springframework.transaction.event.TransactionalEventListener;
 
 @Slf4j
 @Component
@@ -29,7 +28,7 @@ public class AICompensationListener {
     private static final Duration COMPENSATION_RECORD_TTL = Duration.ofDays(7);
 
     @Async("aiTaskExecutor")
-    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+    @EventListener
     public void handleAITaskFailure(final AITaskFailedEvent event) {
         String taskId = event.taskId();
 
