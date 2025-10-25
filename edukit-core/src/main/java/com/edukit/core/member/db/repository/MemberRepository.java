@@ -1,8 +1,10 @@
 package com.edukit.core.member.db.repository;
 
 import com.edukit.core.member.db.entity.Member;
+import jakarta.persistence.LockModeType;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -20,4 +22,8 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
 
     @Query("SELECT m FROM Member m JOIN FETCH m.subject WHERE m.id = :id AND m.isDeleted = :isDeleted")
     Optional<Member> findByIdAndIsDeletedFetchJoinSubject(@Param("id") long id, @Param("isDeleted") boolean isDeleted);
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("SELECT m FROM Member m WHERE m.id = :id AND m.isDeleted = false")
+    Optional<Member> findByIdWithLock(@Param("id") Long id);
 }
