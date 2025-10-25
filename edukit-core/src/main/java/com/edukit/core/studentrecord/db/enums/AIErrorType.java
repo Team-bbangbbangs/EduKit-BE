@@ -14,6 +14,10 @@ public enum AIErrorType {
     private final String description;
 
     public static AIErrorType fromString(final String value) {
+        if (value == null || value.isBlank()) {
+            return UNKNOWN_ERROR;
+        }
+
         return Arrays.stream(AIErrorType.values())
                 .filter(type -> type.name().equalsIgnoreCase(value))
                 .findFirst()
