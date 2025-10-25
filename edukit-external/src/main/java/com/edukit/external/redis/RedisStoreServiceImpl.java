@@ -20,6 +20,10 @@ public class RedisStoreServiceImpl implements RedisStoreService {
         return redisTemplate.opsForValue().get(key);
     }
 
+    public Boolean setIfAbsent(final String key, final String value, final Duration ttl) {
+        return redisTemplate.opsForValue().setIfAbsent(key, value, ttl);
+    }
+
     public void delete(final String key) {
         redisTemplate.delete(key);
     }

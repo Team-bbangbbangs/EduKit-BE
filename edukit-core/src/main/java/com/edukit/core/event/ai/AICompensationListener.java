@@ -31,11 +31,11 @@ public class AICompensationListener {
     @EventListener
     public void handleAITaskFailure(final AITaskFailedEvent event) {
         String taskId = event.taskId();
-
-        // 멱등성 보장 - 이미 보상된 경우 스킵
         String compensationKey = COMPENSATION_KEY_PREFIX + taskId;
-        if (isAlreadyCompensated(compensationKey)) {
-            log.warn("Task {} already compensated, skipping", taskId);
+
+        // 원자적 선점 - Redis SET NX로 중복 보상 방지
+        if (!tryClaimCompensation(compensationKey)) {
+            log.warn("Task {} already compensated by another instance, skipping", taskId);
             return;
         }
 
@@ -53,23 +53,23 @@ public class AICompensationListener {
                     task.getId()
             );
 
-            // 보상 완료 마킹 (멱등성 보장)
-            markAsCompensated(compensationKey);
-
             log.info("Successfully compensated {} points for taskId: {} (errorType: {})",
                     DEDUCTED_POINTS, taskId, event.errorType());
 
         } catch (Exception e) {
             log.error("Failed to compensate points for taskId: {}", taskId, e);
+            // 보상 실패 시 Redis 키 삭제하여 재시도 가능하게 함
+            redisStoreService.delete(compensationKey);
+            throw e;
         }
     }
 
-    private boolean isAlreadyCompensated(final String compensationKey) {
-        return redisStoreService.get(compensationKey) != null;
-    }
-
-    private void markAsCompensated(final String compensationKey) {
-        // 7일간 보관 (감사 목적)
-        redisStoreService.store(compensationKey, "COMPENSATED", COMPENSATION_RECORD_TTL);
+    /**
+     * 원자적 선점 시도
+     * @return true: 선점 성공 (보상 실행), false: 이미 다른 인스턴스가 선점 (스킵)
+     */
+    private boolean tryClaimCompensation(final String compensationKey) {
+        Boolean claimed = redisStoreService.setIfAbsent(compensationKey, "COMPENSATED", COMPENSATION_RECORD_TTL);
+        return Boolean.TRUE.equals(claimed);
     }
 }
