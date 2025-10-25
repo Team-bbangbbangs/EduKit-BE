@@ -11,11 +11,12 @@ create table point_history
     constraint FK_point_history_member foreign key (member_id) references member (member_id)
 );
 
--- Add index on member_id for faster query performance
-create index IDX_point_history_member_id on point_history (member_id);
+-- Composite index for member's recent history queries (most common use case)
+create index IDX_point_history_member_created on point_history (member_id, created_at desc);
 
--- Add index on task_id for tracking AI task-related transactions
+-- Unique index for idempotency: prevent duplicate transactions for same task
+-- Note: MySQL allows multiple NULL values in UNIQUE index, so CHARGE/REFUND with NULL task_id can have duplicates
+create unique index UQ_point_history_task_transaction on point_history (task_id, transaction_type);
+
+-- Index for task-based queries (finding all transactions for a specific task)
 create index IDX_point_history_task_id on point_history (task_id);
-
--- Add index on created_at for time-based queries
-create index IDX_point_history_created_at on point_history (created_at);
