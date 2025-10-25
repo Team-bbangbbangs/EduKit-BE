@@ -35,9 +35,8 @@ public class StudentRecordAIFacade {
     @AIGenerationMetrics
     public StudentRecordTaskResponse createTaskId(final long memberId, final long recordId, final int byteCount,
                                                   final String userPrompt) {
-        pointService.deductPoints(memberId, DEDUCTED_POINTS);
+        Member member = pointService.deductPoints(memberId, DEDUCTED_POINTS);
 
-        Member member = memberService.getMemberById(memberId);
         StudentRecord studentRecord = studentRecordService.getRecordDetail(memberId, recordId);
 
         String requestPrompt = AIPromptGenerator.createStreamingPrompt(studentRecord.getStudentRecordType(), byteCount, userPrompt);

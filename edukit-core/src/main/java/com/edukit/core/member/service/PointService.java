@@ -15,7 +15,7 @@ public class PointService {
     private final MemberRepository memberRepository;
 
     @Transactional
-    public void deductPoints(final Long memberId, final int pointsToDeduct) {
+    public Member deductPoints(final Long memberId, final int pointsToDeduct) {
         Member member = memberRepository.findByIdWithLock(memberId)
                 .orElseThrow(() -> new MemberException(MemberErrorCode.MEMBER_NOT_FOUND));
 
@@ -26,5 +26,6 @@ public class PointService {
         }
 
         member.deductPoints(pointsToDeduct);
+        return member;
     }
 }
