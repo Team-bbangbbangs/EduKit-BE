@@ -4,6 +4,8 @@ import com.edukit.core.member.db.entity.Member;
 import com.edukit.core.member.db.repository.MemberRepository;
 import com.edukit.core.member.exception.MemberErrorCode;
 import com.edukit.core.member.exception.MemberException;
+import com.edukit.core.point.exception.PointErrorCode;
+import com.edukit.core.point.exception.PointException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,7 +24,7 @@ public class PointService {
         int currentPoint = member.getPoint();
 
         if (currentPoint < pointsToDeduct) {
-            throw new MemberException(MemberErrorCode.INSUFFICIENT_POINTS);
+            throw new PointException(PointErrorCode.INSUFFICIENT_POINTS);
         }
 
         member.deductPoints(pointsToDeduct);
