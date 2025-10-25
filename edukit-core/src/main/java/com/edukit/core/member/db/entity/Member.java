@@ -58,6 +58,9 @@ public class Member extends BaseTimeEntity {
     @Enumerated(EnumType.STRING)
     private MemberRole role;
 
+    @Column(nullable = false)
+    private int point;
+
     @Column
     private LocalDateTime verifiedAt;
 
@@ -66,16 +69,19 @@ public class Member extends BaseTimeEntity {
 
     private LocalDateTime deletedAt;
 
+    private static final int INITIAL_POINT = 1000;
+
     @Builder(access = AccessLevel.PRIVATE)
     private Member(final Subject subject, final String email, final String password, final String nickname,
                    final School school, final MemberRole role, final LocalDateTime verifiedAt, final boolean isDeleted,
-                   final LocalDateTime deletedAt, final String memberUuid) {
+                   final LocalDateTime deletedAt, final String memberUuid, final int point) {
         this.subject = subject;
         this.email = email;
         this.password = password;
         this.nickname = nickname;
         this.school = school;
         this.role = role;
+        this.point = point;
         this.verifiedAt = verifiedAt;
         this.isDeleted = isDeleted;
         this.deletedAt = deletedAt;
@@ -92,6 +98,7 @@ public class Member extends BaseTimeEntity {
                 .school(school)
                 .role(memberRole)
                 .isDeleted(false)
+                .point(INITIAL_POINT)
                 .memberUuid(UUID.randomUUID().toString())
                 .build();
     }
