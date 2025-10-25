@@ -5,6 +5,7 @@ import com.edukit.core.event.ai.dto.AIErrorMessage;
 import com.edukit.core.event.ai.dto.AIProgressMessage;
 import com.edukit.core.event.ai.dto.AIResponseMessage;
 import com.edukit.core.common.service.RedisStreamService;
+import com.edukit.core.event.ai.dto.AITaskFailedEvent;
 import com.edukit.core.studentrecord.exception.StudentRecordErrorCode;
 import com.edukit.core.studentrecord.exception.StudentRecordException;
 import com.edukit.core.studentrecord.service.enums.AITaskStatus;
@@ -144,7 +145,7 @@ public class RedisStreamConsumer {
 
             // 보상 트랜잭션 이벤트 발행
             applicationEventPublisher.publishEvent(
-                    com.edukit.studentrecord.event.AITaskFailedEvent.fromErrorMessage(errorMessage)
+                    AITaskFailedEvent.fromErrorMessage(errorMessage)
             );
 
             // SSE로 실패 알림 전송

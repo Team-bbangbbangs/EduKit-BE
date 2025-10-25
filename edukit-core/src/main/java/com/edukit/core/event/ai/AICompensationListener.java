@@ -1,10 +1,10 @@
 package com.edukit.core.event.ai;
 
 import com.edukit.core.common.service.RedisStoreService;
+import com.edukit.core.event.ai.dto.AITaskFailedEvent;
 import com.edukit.core.point.service.PointService;
 import com.edukit.core.studentrecord.db.entity.StudentRecordAITask;
 import com.edukit.core.studentrecord.service.AITaskService;
-import com.edukit.studentrecord.event.AITaskFailedEvent;
 import java.time.Duration;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
