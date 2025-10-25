@@ -2,6 +2,7 @@ package com.edukit.core.studentrecord.service;
 
 import com.edukit.core.member.db.entity.Member;
 import com.edukit.core.studentrecord.db.entity.StudentRecordAITask;
+import com.edukit.core.studentrecord.db.enums.AIErrorType;
 import com.edukit.core.studentrecord.db.repository.StudentRecordAITaskRepository;
 import com.edukit.core.studentrecord.exception.StudentRecordErrorCode;
 import com.edukit.core.studentrecord.exception.StudentRecordException;
@@ -35,6 +36,20 @@ public class AITaskService {
         if (!exists) {
             throw new StudentRecordException(StudentRecordErrorCode.AI_TASK_NOT_FOUND);
         }
+    }
+
+    @Transactional(readOnly = true)
+    public StudentRecordAITask getTaskById(final Long taskId) {
+        return aiTaskRepository.findById(taskId)
+                .orElseThrow(() -> new StudentRecordException(StudentRecordErrorCode.AI_TASK_NOT_FOUND));
+    }
+
+    @Transactional
+    public void markTaskAsFailed(final Long taskId, final String errorType) {
+        StudentRecordAITask task = aiTaskRepository.findById(taskId)
+                .orElseThrow(() -> new StudentRecordException(StudentRecordErrorCode.AI_TASK_NOT_FOUND));
+        AIErrorType aiErrorType = AIErrorType.fromString(errorType);
+        task.markAsFailed(aiErrorType);
     }
 
     private long parseTaskId(final String taskId) {
