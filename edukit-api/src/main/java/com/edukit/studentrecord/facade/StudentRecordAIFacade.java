@@ -29,12 +29,14 @@ public class StudentRecordAIFacade {
     private final SSEChannelManager sseChannelManager;
     private final ApplicationEventPublisher eventPublisher;
 
+    private static final int DEDUCTED_POINTS = 100;
+
     @Transactional
     @AIGenerationMetrics
     public StudentRecordTaskResponse createTaskId(final long memberId, final long recordId, final int byteCount,
                                                   final String userPrompt) {
         Member member = memberService.getMemberById(memberId);
-        pointService.checkSufficientPoints(member);
+        pointService.deductPoints(member, DEDUCTED_POINTS);
 
         StudentRecord studentRecord = studentRecordService.getRecordDetail(memberId, recordId);
 

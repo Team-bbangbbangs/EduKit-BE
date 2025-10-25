@@ -146,4 +146,8 @@ public class Member extends BaseTimeEntity {
         this.email = email;
         this.role = MemberRole.PENDING_TEACHER;
     }
+
+    public void deductPoints(final int pointsToDeduct) {
+        this.point -= pointsToDeduct;
+    }
 }
