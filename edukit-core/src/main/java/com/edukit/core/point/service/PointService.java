@@ -1,4 +1,4 @@
-package com.edukit.core.member.service;
+package com.edukit.core.point.service;
 
 import com.edukit.core.member.db.entity.Member;
 import com.edukit.core.member.db.repository.MemberRepository;

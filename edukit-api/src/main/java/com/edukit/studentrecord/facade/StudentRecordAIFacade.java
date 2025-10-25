@@ -3,7 +3,7 @@ package com.edukit.studentrecord.facade;
 import com.edukit.common.annotation.AIGenerationMetrics;
 import com.edukit.core.member.db.entity.Member;
 import com.edukit.core.member.service.MemberService;
-import com.edukit.core.member.service.PointService;
+import com.edukit.core.point.service.PointService;
 import com.edukit.core.studentrecord.db.entity.StudentRecord;
 import com.edukit.core.studentrecord.db.entity.StudentRecordAITask;
 import com.edukit.core.studentrecord.service.AITaskService;
