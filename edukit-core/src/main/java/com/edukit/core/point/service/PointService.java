@@ -4,6 +4,9 @@ import com.edukit.core.member.db.entity.Member;
 import com.edukit.core.member.db.repository.MemberRepository;
 import com.edukit.core.member.exception.MemberErrorCode;
 import com.edukit.core.member.exception.MemberException;
+import com.edukit.core.point.db.entity.PointHistory;
+import com.edukit.core.point.db.enums.PointTransactionType;
+import com.edukit.core.point.db.repository.PointHistoryRepository;
 import com.edukit.core.point.exception.PointErrorCode;
 import com.edukit.core.point.exception.PointException;
 import lombok.RequiredArgsConstructor;
@@ -15,9 +18,10 @@ import org.springframework.transaction.annotation.Transactional;
 public class PointService {
 
     private final MemberRepository memberRepository;
+    private final PointHistoryRepository pointHistoryRepository;
 
     @Transactional
-    public Member deductPoints(final Long memberId, final int pointsToDeduct) {
+    public void deductPoints(final Long memberId, final int pointsToDeduct, final Long taskId) {
         Member member = memberRepository.findByIdWithLock(memberId)
                 .orElseThrow(() -> new MemberException(MemberErrorCode.MEMBER_NOT_FOUND));
 
@@ -28,6 +32,22 @@ public class PointService {
         }
 
         member.deductPoints(pointsToDeduct);
+
+        PointHistory history = PointHistory.create(member, PointTransactionType.DEDUCT, pointsToDeduct, taskId);
+        pointHistoryRepository.save(history);
+    }
+
+    @Transactional
+    public Member compensatePoints(final Long memberId, final int pointsToCompensate, final Long taskId) {
+        Member member = memberRepository.findByIdWithLock(memberId)
+                .orElseThrow(() -> new MemberException(MemberErrorCode.MEMBER_NOT_FOUND));
+
+        member.deductPoints(-pointsToCompensate); // 음수 차감으로 복구
+
+        // 포인트 히스토리 기록
+        PointHistory history = PointHistory.create(member, PointTransactionType.COMPENSATION, pointsToCompensate, taskId);
+        pointHistoryRepository.save(history);
+
         return member;
     }
 }
