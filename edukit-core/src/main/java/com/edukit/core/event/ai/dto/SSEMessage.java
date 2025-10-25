@@ -13,6 +13,10 @@ public record SSEMessage(
         return new SSEMessage(taskId, "RESPONSE", new ResponseData(finalContent, version));
     }
 
+    public static SSEMessage error(final String taskId, final String errorType, final String errorMessage) {
+        return new SSEMessage(taskId, "ERROR", new ErrorData(errorType, errorMessage));
+    }
+
     public record ProgressData(
             String message,
             int version
@@ -22,6 +26,12 @@ public record SSEMessage(
     public record ResponseData(
             String finalContent,
             Integer version
+    ) {
+    }
+
+    public record ErrorData(
+            String errorType,
+            String errorMessage
     ) {
     }
 }
