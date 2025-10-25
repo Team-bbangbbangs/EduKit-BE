@@ -1,6 +1,7 @@
 package com.edukit.core.studentrecord.service;
 
 import com.edukit.common.infra.ServerInstanceManager;
+import com.edukit.core.event.ai.dto.AIErrorMessage;
 import com.edukit.core.event.ai.dto.AIProgressMessage;
 import com.edukit.core.event.ai.dto.AIResponseMessage;
 import com.edukit.core.event.ai.dto.SSEMessage;
@@ -104,6 +105,26 @@ public class SSEChannelManager {
             }
         } else {
             log.info("No active SSE channel for taskId: {}, message stored in Redis", taskId);
+        }
+    }
+
+    public void sendErrorMessage(final String taskId, final AIErrorMessage errorMessage) {
+        SseEmitter emitter = activeChannels.get(taskId);
+        if (emitter != null) {
+            try {
+                SSEMessage sseMessage = SSEMessage.error(taskId, errorMessage.errorType(), errorMessage.errorMessage());
+                emitter.send(SseEmitter.event()
+                        .name(SSE_EVENT_NAME)
+                        .data(sseMessage));
+                log.info("Sent error message to SSE channel for taskId: {}", taskId);
+            } catch (IOException e) {
+                log.error("Failed to send error message to SSE channel for taskId: {}", taskId, e);
+            } finally {
+                // 에러 발생 시 채널 제거
+                removeChannel(taskId);
+            }
+        } else {
+            log.warn("No active SSE channel for taskId: {}, error message not sent", taskId);
         }
     }
 

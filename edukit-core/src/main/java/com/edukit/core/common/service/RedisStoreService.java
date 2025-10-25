@@ -8,6 +8,8 @@ public interface RedisStoreService {
 
     String get(String key);
 
+    Boolean setIfAbsent(String key, String value, Duration ttl);
+
     void delete(String key);
 
     Long increment(String key, Duration ttl);

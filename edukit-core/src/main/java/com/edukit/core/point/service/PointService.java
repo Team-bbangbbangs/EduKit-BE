@@ -38,16 +38,14 @@ public class PointService {
     }
 
     @Transactional
-    public Member compensatePoints(final Long memberId, final int pointsToCompensate, final Long taskId) {
+    public void compensatePoints(final Long memberId, final int pointsToCompensate, final Long taskId) {
         Member member = memberRepository.findByIdWithLock(memberId)
                 .orElseThrow(() -> new MemberException(MemberErrorCode.MEMBER_NOT_FOUND));
 
-        member.deductPoints(-pointsToCompensate); // 음수 차감으로 복구
+        member.addPoints(pointsToCompensate); // 음수 차감으로 복구
 
         // 포인트 히스토리 기록
         PointHistory history = PointHistory.create(member, PointTransactionType.COMPENSATION, pointsToCompensate, taskId);
         pointHistoryRepository.save(history);
-
-        return member;
     }
 }

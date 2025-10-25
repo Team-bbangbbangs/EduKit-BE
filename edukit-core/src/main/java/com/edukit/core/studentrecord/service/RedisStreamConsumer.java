@@ -1,9 +1,11 @@
 package com.edukit.core.studentrecord.service;
 
 import com.edukit.common.infra.ServerInstanceManager;
+import com.edukit.core.event.ai.dto.AIErrorMessage;
 import com.edukit.core.event.ai.dto.AIProgressMessage;
 import com.edukit.core.event.ai.dto.AIResponseMessage;
 import com.edukit.core.common.service.RedisStreamService;
+import com.edukit.core.event.ai.dto.AITaskFailedEvent;
 import com.edukit.core.studentrecord.exception.StudentRecordErrorCode;
 import com.edukit.core.studentrecord.exception.StudentRecordException;
 import com.edukit.core.studentrecord.service.enums.AITaskStatus;
@@ -20,6 +22,7 @@ import java.util.concurrent.TimeUnit;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.redis.connection.stream.Consumer;
 import org.springframework.data.redis.connection.stream.MapRecord;
 import org.springframework.data.redis.connection.stream.ReadOffset;
@@ -36,6 +39,7 @@ public class RedisStreamConsumer {
     private final ServerInstanceManager serverInstanceManager;
     private final SSEChannelManager sseChannelManager;
     private final ObjectMapper objectMapper;
+    private final ApplicationEventPublisher applicationEventPublisher;
 
     private static final String STREAM_KEY = "ai-response";
     private static final String CONSUMER_GROUP_PREFIX = "edukit-server-";
@@ -106,6 +110,13 @@ public class RedisStreamConsumer {
             String taskId = parseData(messageJson, "task_id");
             String status = parseData(messageJson, "status");
 
+            // 실패 상태 처리
+            if (AITaskStatus.isFailure(status)) {
+                AIErrorMessage errorMessage = objectMapper.readValue(messageJson, AIErrorMessage.class);
+                handleAITaskFailure(taskId, errorMessage);
+                return;
+            }
+
             if (sseChannelManager.hasActivateChannel(taskId)) {
                 if (AITaskStatus.isInProgress(status)) {
                     AIProgressMessage responseMessage = objectMapper.readValue(messageJson, AIProgressMessage.class);
@@ -124,6 +135,25 @@ public class RedisStreamConsumer {
         } catch (Exception e) {
             log.error("Error processing Redis Stream message: {}", e.getMessage(), e);
             throw new StudentRecordException(StudentRecordErrorCode.MESSAGE_PROCESSING_FAILED);
+        }
+    }
+
+    private void handleAITaskFailure(final String taskId, final AIErrorMessage errorMessage) {
+        log.warn("AI task failed - taskId: {}, errorType: {}, message: {}",
+                taskId, errorMessage.errorType(), errorMessage.errorMessage());
+
+        // 보상 트랜잭션 이벤트 발행 (실패 시 예외를 상위로 전파하여 재처리)
+        applicationEventPublisher.publishEvent(
+                AITaskFailedEvent.fromErrorMessage(errorMessage)
+        );
+
+        // SSE로 실패 알림 전송 (실패해도 보상 로직에 영향 없음)
+        try {
+            if (sseChannelManager.hasActivateChannel(taskId)) {
+                sseChannelManager.sendErrorMessage(taskId, errorMessage);
+            }
+        } catch (Exception e) {
+            log.error("Failed to send SSE error message for taskId: {}, continuing with compensation", taskId, e);
         }
     }
 

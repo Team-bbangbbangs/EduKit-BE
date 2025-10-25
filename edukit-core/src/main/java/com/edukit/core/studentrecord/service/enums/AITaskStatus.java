@@ -12,7 +12,8 @@ public enum AITaskStatus {
     PHASE1_COMPLETED("PHASE1_COMPLETED", "생기부 초안 생성 완료.. - 다음 단계로 이동"),
     PHASE2_STARTED("PHASE2_STARTED", "금칙어 필터링 중.."),
     PHASE3_STARTED("PHASE3_STARTED", "바이트 수 최적화 중.."),
-    COMPLETED("COMPLETED", "생성 완료");
+    COMPLETED("COMPLETED", "생성 완료"),
+    FAILED("FAILED", "생성 실패 - 포인트가 복구됩니다");
 
     private final String status;
     private final String message;
@@ -25,6 +26,10 @@ public enum AITaskStatus {
     }
 
     public static boolean isInProgress(final String currentStatus) {
-        return !COMPLETED.getStatus().equals(currentStatus);
+        return !COMPLETED.getStatus().equals(currentStatus) && !FAILED.getStatus().equals(currentStatus);
+    }
+
+    public static boolean isFailure(final String currentStatus) {
+        return FAILED.getStatus().equals(currentStatus);
     }
 }
