@@ -1,6 +1,6 @@
 # Edukit 🎓
 
-> 교사들을 위한 AI 기반 생활기록부 작성 및 관리 서비스
+> 중/고등학교 교사들을 위한 AI 기반 생활기록부 작성 및 관리 서비스
 
 <img width="1920" height="1080" alt="1111" src="https://github.com/user-attachments/assets/7e911bc5-27b8-4cad-b026-e4a42ed8e66e" />
 
